@@ -86,10 +86,14 @@ const Navbar = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-3 border-t border-border">
-                <Button variant="ghost">Login</Button>
-                <Button className="gradient-saffron border-0 text-primary-foreground font-semibold">
-                  Start Free / मुफ्त शुरू करें
-                </Button>
+                <Link to="/auth" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" className="w-full">Login</Button>
+                </Link>
+                <Link to="/auth" onClick={() => setIsOpen(false)}>
+                  <Button className="w-full gradient-saffron border-0 text-primary-foreground font-semibold">
+                    Start Free / मुफ्त शुरू करें
+                  </Button>
+                </Link>
               </div>
             </div>
           </motion.div>
