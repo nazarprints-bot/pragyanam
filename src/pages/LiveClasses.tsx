@@ -107,7 +107,7 @@ const LiveClasses = () => {
   const handleEndClass = async (classItem: any) => {
     const { error } = await supabase
       .from("live_classes")
-      .update({ status: "ended" })
+      .delete()
       .eq("id", classItem.id)
       .eq("teacher_id", user?.id || "");
 
@@ -118,7 +118,7 @@ const LiveClasses = () => {
 
     setActiveRoom(null);
     await fetchClasses();
-    toast.success("Class ended");
+    toast.success("Class ended & removed");
   };
 
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
