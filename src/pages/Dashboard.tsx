@@ -116,15 +116,18 @@ const Dashboard = () => {
   );
 };
 
-const QuickAction = ({ icon, label, labelHi, to }: { icon: string; label: string; labelHi: string; to: string }) => (
-  <a
-    href={to}
-    className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-soft transition-all text-center"
-  >
-    <span className="text-2xl">{icon}</span>
-    <span className="text-sm font-medium text-foreground">{label}</span>
-    <span className="text-xs text-muted-foreground">{labelHi}</span>
-  </a>
-);
+const QuickAction = ({ icon, label, labelHi, to }: { icon: string; label: string; labelHi: string; to: string }) => {
+  const navigate = useNavigate();
+  return (
+    <button
+      onClick={() => navigate(to)}
+      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-soft transition-all text-center w-full"
+    >
+      <span className="text-2xl">{icon}</span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      <span className="text-xs text-muted-foreground">{labelHi}</span>
+    </button>
+  );
+};
 
 export default Dashboard;
