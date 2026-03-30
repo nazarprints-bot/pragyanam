@@ -459,6 +459,48 @@ const CourseDetail = () => {
             </div>
           )}
         </div>
+
+        {/* Enrolled Students - Teacher Only */}
+        {canManage && (
+          <div className="bg-card rounded-2xl p-6 border border-border">
+            <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Enrolled Students / नामांकित छात्र ({enrolledStudents.length})
+            </h2>
+            {enrolledStudents.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                No students enrolled yet / अभी कोई छात्र नामांकित नहीं
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {enrolledStudents.map((s) => (
+                  <div key={s.user_id} className="flex items-center gap-3 p-3 rounded-xl border border-border">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                      {s.profile.avatar_url ? (
+                        <img src={s.profile.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        s.profile.full_name?.charAt(0)?.toUpperCase() || "S"
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm truncate">{s.profile.full_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Enrolled {new Date(s.enrolled_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 min-w-[140px]">
+                      <Progress value={s.percentage} className="h-2 flex-1" />
+                      <span className="text-xs font-semibold text-foreground w-10 text-right">
+                        {s.percentage}%
+                      </span>
+                      {s.percentage === 100 && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
