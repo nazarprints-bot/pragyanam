@@ -24,6 +24,7 @@ const CourseDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  const [enrolledStudents, setEnrolledStudents] = useState<any[]>([]);
 
   // Teacher lesson form
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
