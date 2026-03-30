@@ -31,11 +31,11 @@ const AdminAnalytics = () => {
   }, []);
 
   const cards = [
-    { icon: Users, label: "Total Users / कुल उपयोगकर्ता", value: stats.users, color: "bg-accent text-accent-foreground" },
-    { icon: BookOpen, label: "Total Courses / कुल कोर्स", value: stats.courses, color: "bg-secondary/10 text-secondary" },
+    { icon: Users, label: "Total Users / कुल उपयोगकर्ता", value: stats.users, color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
+    { icon: BookOpen, label: "Total Courses / कुल कोर्स", value: stats.courses, color: "bg-gold/10 text-gold-warm" },
     { icon: Brain, label: "Total Tests / कुल टेस्ट", value: stats.tests, color: "bg-emerald/10 text-emerald" },
-    { icon: TrendingUp, label: "Enrollments / नामांकन", value: stats.enrollments, color: "bg-gold/10 text-saffron-dark" },
-    { icon: BarChart3, label: "Doubts / डाउट", value: stats.doubts, color: "bg-primary/10 text-primary" },
+    { icon: TrendingUp, label: "Enrollments / नामांकन", value: stats.enrollments, color: "bg-saffron/10 text-saffron-dark" },
+    { icon: BarChart3, label: "Doubts / डाउट", value: stats.doubts, color: "bg-navy/10 text-navy dark:bg-navy-light/20 dark:text-gold-light" },
     { icon: DollarSign, label: "Revenue / राजस्व", value: "₹0", color: "bg-destructive/10 text-destructive" },
   ];
 
@@ -51,12 +51,12 @@ const AdminAnalytics = () => {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {cards.map((card) => (
-              <div key={card.label} className="bg-card rounded-2xl p-6 border border-border hover:shadow-card transition-shadow">
+              <div key={card.label} className="bg-card rounded-2xl p-6 border border-border hover:shadow-card hover:border-gold/20 transition-all">
                 <div className={`w-12 h-12 rounded-xl ${card.color} flex items-center justify-center mb-4`}>
                   <card.icon className="w-6 h-6" />
                 </div>

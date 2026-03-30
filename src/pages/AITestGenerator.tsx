@@ -126,7 +126,7 @@ const AITestGenerator = () => {
       <div className="space-y-6 max-w-3xl">
         <div>
           <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-primary" />
+            <Sparkles className="w-6 h-6 text-gold" />
             AI Test Generator / AI टेस्ट जनरेटर
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -141,8 +141,8 @@ const AITestGenerator = () => {
               onClick={() => setMode("topic")}
               className={`flex-1 p-4 rounded-xl border text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                 mode === "topic"
-                  ? "border-primary bg-accent text-accent-foreground"
-                  : "border-border text-muted-foreground hover:border-primary/50"
+                  ? "border-gold bg-gold/10 text-gold-warm"
+                  : "border-border text-muted-foreground hover:border-gold/30"
               }`}
             >
               <Brain className="w-4 h-4" />
@@ -152,8 +152,8 @@ const AITestGenerator = () => {
               onClick={() => setMode("notes")}
               className={`flex-1 p-4 rounded-xl border text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                 mode === "notes"
-                  ? "border-primary bg-accent text-accent-foreground"
-                  : "border-border text-muted-foreground hover:border-primary/50"
+                  ? "border-gold bg-gold/10 text-gold-warm"
+                  : "border-border text-muted-foreground hover:border-gold/30"
               }`}
             >
               <FileText className="w-4 h-4" />
@@ -198,7 +198,7 @@ const AITestGenerator = () => {
           <Button
             onClick={handleGenerate}
             disabled={generating}
-            className="gradient-saffron border-0 text-primary-foreground font-bold"
+            className="gradient-navy text-white border-0 hover:opacity-90 font-bold"
           >
             {generating ? (
               <>
@@ -218,7 +218,7 @@ const AITestGenerator = () => {
         {questions.length > 0 && (
           <div className="bg-card rounded-2xl p-6 border border-border space-y-4">
             <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
-              <Brain className="w-5 h-5 text-primary" />
+              <Brain className="w-5 h-5 text-gold" />
               Generated Questions ({questions.length}) / बने हुए प्रश्न
             </h2>
 
@@ -247,7 +247,7 @@ const AITestGenerator = () => {
               <Button
                 onClick={handleSaveTest}
                 disabled={saving || !testTitle.trim()}
-                className="bg-secondary text-secondary-foreground font-bold"
+                className="gradient-gold text-navy-dark font-bold hover:opacity-90"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -266,7 +266,7 @@ const AITestGenerator = () => {
                     Q{i + 1}. {q.question}
                   </p>
                   {q.question_hi && (
-                    <p className="text-xs text-primary mb-2">{q.question_hi}</p>
+                    <p className="text-xs text-gold-warm mb-2">{q.question_hi}</p>
                   )}
                   <div className="grid grid-cols-2 gap-2">
                     {["A", "B", "C", "D"].map((opt) => {

@@ -103,7 +103,7 @@ const Profile = () => {
         <div className="bg-card border border-border rounded-xl p-6 mb-6">
           <div className="flex items-center gap-5">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full bg-muted border-2 border-border overflow-hidden flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-muted border-2 border-gold/30 overflow-hidden flex items-center justify-center">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -116,9 +116,9 @@ const Profile = () => {
                 className="absolute inset-0 rounded-full bg-foreground/0 group-hover:bg-foreground/40 flex items-center justify-center transition-colors cursor-pointer"
               >
                 {uploading ? (
-                  <Loader2 className="w-5 h-5 text-primary-foreground animate-spin opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Loader2 className="w-5 h-5 text-white animate-spin opacity-0 group-hover:opacity-100 transition-opacity" />
                 ) : (
-                  <Camera className="w-5 h-5 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Camera className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                 )}
               </button>
               <input
@@ -132,7 +132,7 @@ const Profile = () => {
             <div>
               <p className="text-[15px] font-semibold text-foreground">{profile?.full_name || "User"}</p>
               <p className="text-[13px] text-muted-foreground">{user?.email}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-medium bg-accent/15 text-accent rounded-full">
+              <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-medium bg-gold/15 text-gold-warm rounded-full">
                 {roleLabel}
               </span>
             </div>
@@ -202,7 +202,7 @@ const Profile = () => {
             />
           </div>
 
-          <Button onClick={handleSave} disabled={loading} className="h-9 px-5 text-[13px] font-semibold">
+          <Button onClick={handleSave} disabled={loading} className="h-9 px-5 text-[13px] font-semibold gradient-navy text-white hover:opacity-90">
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
             Save Changes
           </Button>

@@ -40,7 +40,6 @@ const LiveClasses = () => {
   useEffect(() => {
     fetchClasses();
 
-    // Realtime subscription
     const channel = supabase
       .channel("live_classes_changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "live_classes" }, () => {
@@ -85,7 +84,6 @@ const LiveClasses = () => {
   };
 
   const handleStartClass = async (classItem: any) => {
-    // Update status to 'live'
     const { error } = await supabase
       .from("live_classes")
       .update({ status: "live" })
@@ -160,7 +158,7 @@ const LiveClasses = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
-              <Video className="w-6 h-6 text-primary" />
+              <Video className="w-6 h-6 text-navy dark:text-gold" />
               Live Classes / लाइव क्लास
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -170,9 +168,9 @@ const LiveClasses = () => {
             </p>
           </div>
           {isTeacherOrAdmin && (
-            <Button onClick={() => setShowForm(!showForm)} className="gradient-saffron border-0 text-primary-foreground font-bold">
+            <Button onClick={() => setShowForm(!showForm)} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
               <Plus className="w-4 h-4 mr-1" />
-              Schedule Class / शेड्यूल करें
+              Schedule Class
             </Button>
           )}
         </div>
@@ -209,7 +207,7 @@ const LiveClasses = () => {
                 </div>
               </div>
               <div className="flex gap-3">
-                <Button type="submit" disabled={creating} className="gradient-saffron border-0 text-primary-foreground font-bold">
+                <Button type="submit" disabled={creating} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
                   {creating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Calendar className="w-4 h-4 mr-1" />}
                   Schedule / शेड्यूल करें
                 </Button>
@@ -221,7 +219,7 @@ const LiveClasses = () => {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
           </div>
         ) : (
           <>
@@ -240,13 +238,13 @@ const LiveClasses = () => {
                         <span className="text-xs font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">LIVE</span>
                       </div>
                       <h3 className="font-bold text-foreground">{c.title}</h3>
-                      {c.title_hi && <p className="text-xs text-primary">{c.title_hi}</p>}
+                      {c.title_hi && <p className="text-xs text-gold-warm">{c.title_hi}</p>}
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 mb-4">
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{c.duration_minutes} min</span>
                       </div>
                       {isTeacherOrAdmin && c.teacher_id === user?.id ? (
                         <div className="flex gap-2">
-                          <Button onClick={() => handleJoinClass(c)} className="flex-1 gradient-saffron border-0 text-primary-foreground">
+                          <Button onClick={() => handleJoinClass(c)} className="flex-1 gradient-navy text-white border-0 hover:opacity-90">
                             <Play className="w-4 h-4 mr-1" /> Join / जुड़ें
                           </Button>
                           <Button variant="destructive" onClick={() => handleEndClass(c)} size="sm">
@@ -254,7 +252,7 @@ const LiveClasses = () => {
                           </Button>
                         </div>
                       ) : (
-                        <Button onClick={() => handleJoinClass(c)} className="w-full gradient-saffron border-0 text-primary-foreground">
+                        <Button onClick={() => handleJoinClass(c)} className="w-full gradient-navy text-white border-0 hover:opacity-90">
                           <Play className="w-4 h-4 mr-1" /> Join Live / लाइव जुड़ें
                         </Button>
                       )}
@@ -275,9 +273,9 @@ const LiveClasses = () => {
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {upcomingClasses.map((c) => (
-                    <div key={c.id} className="bg-card rounded-2xl p-5 border border-border hover:shadow-card transition-shadow">
+                    <div key={c.id} className="bg-card rounded-2xl p-5 border border-border hover:shadow-card hover:border-gold/20 transition-all">
                       <h3 className="font-bold text-foreground mb-0.5">{c.title}</h3>
-                      {c.title_hi && <p className="text-xs text-primary mb-2">{c.title_hi}</p>}
+                      {c.title_hi && <p className="text-xs text-gold-warm mb-2">{c.title_hi}</p>}
                       {c.description && <p className="text-xs text-muted-foreground mb-3">{c.description}</p>}
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
                         <span className="flex items-center gap-1">
@@ -291,7 +289,7 @@ const LiveClasses = () => {
                         <span>{c.duration_minutes} min</span>
                       </div>
                       {isTeacherOrAdmin && c.teacher_id === user?.id && (
-                        <Button onClick={() => handleStartClass(c)} className="w-full gradient-saffron border-0 text-primary-foreground" size="sm">
+                        <Button onClick={() => handleStartClass(c)} className="w-full gradient-navy text-white border-0 hover:opacity-90" size="sm">
                           <Play className="w-3 h-3 mr-1" /> Start Class / क्लास शुरू करें
                         </Button>
                       )}

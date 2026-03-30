@@ -74,14 +74,14 @@ const AdminUsers = () => {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
           </div>
         ) : (
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-border bg-muted/50">
+                  <tr className="border-b border-border bg-navy/5 dark:bg-gold/5">
                     <th className="text-left p-4 text-sm font-semibold text-foreground">Name</th>
                     <th className="text-left p-4 text-sm font-semibold text-foreground">Role</th>
                     <th className="text-left p-4 text-sm font-semibold text-foreground">Phone</th>
@@ -94,7 +94,7 @@ const AdminUsers = () => {
                     <tr key={profile.id} className="border-b border-border hover:bg-muted/30">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                          <div className="w-8 h-8 rounded-full bg-navy/10 dark:bg-gold/10 flex items-center justify-center text-xs font-bold text-navy dark:text-gold">
                             {profile.full_name?.charAt(0)?.toUpperCase() || "U"}
                           </div>
                           <span className="text-sm font-medium text-foreground">{profile.full_name || "—"}</span>
@@ -103,8 +103,8 @@ const AdminUsers = () => {
                       <td className="p-4">
                         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
                           getRole(profile.user_id) === "admin" ? "bg-destructive/10 text-destructive" :
-                          getRole(profile.user_id) === "teacher" ? "bg-secondary/20 text-secondary" :
-                          "bg-accent text-accent-foreground"
+                          getRole(profile.user_id) === "teacher" ? "bg-gold/10 text-gold-warm" :
+                          "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold"
                         }`}>
                           {getRole(profile.user_id)}
                         </span>

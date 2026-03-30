@@ -7,6 +7,7 @@ import {
   Upload, Bell, Video, Sparkles, UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { role, profile, signOut } = useAuth();
@@ -58,20 +59,20 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
+      {/* Sidebar - Navy themed */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[220px] bg-card border-r border-border transform transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-[220px] gradient-navy transform transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="px-4 py-4 border-b border-border">
+          <div className="px-4 py-4 border-b border-white/10">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md gradient-hero flex items-center justify-center">
-                <GraduationCap className="w-4 h-4 text-primary-foreground" />
+              <div className="w-7 h-7 rounded-md bg-gold flex items-center justify-center">
+                <GraduationCap className="w-4 h-4 text-navy-dark" />
               </div>
-              <span className="text-[14px] font-semibold text-foreground tracking-tight">Pragyanam</span>
+              <span className="text-[14px] font-semibold text-white tracking-tight">Pragyanam</span>
             </Link>
           </div>
 
@@ -86,8 +87,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                     isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-gold/20 text-gold"
+                      : "text-white/60 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <link.icon className="w-4 h-4 shrink-0" />
@@ -98,9 +99,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </nav>
 
           {/* User */}
-          <div className="p-3 border-t border-border">
+          <div className="p-3 border-t border-white/10">
             <div className="flex items-center gap-2.5 mb-2.5 px-1">
-              <div className="w-8 h-8 rounded-full bg-accent overflow-hidden flex items-center justify-center text-[12px] font-semibold text-accent-foreground">
+              <div className="w-8 h-8 rounded-full bg-gold/20 overflow-hidden flex items-center justify-center text-[12px] font-semibold text-gold">
                 {profile?.avatar_url ? (
                   <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${profile.avatar_url}`} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -108,15 +109,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-foreground truncate">{profile?.full_name || "User"}</p>
-                <p className="text-[11px] text-muted-foreground">{roleLabel}</p>
+                <p className="text-[13px] font-medium text-white truncate">{profile?.full_name || "User"}</p>
+                <p className="text-[11px] text-white/50">{roleLabel}</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
-              className="w-full justify-start text-[12px] text-muted-foreground hover:text-destructive h-8"
+              className="w-full justify-start text-[12px] text-white/50 hover:text-red-400 hover:bg-white/5 h-8"
             >
               <LogOut className="w-3.5 h-3.5 mr-2" />
               Log out
@@ -136,15 +137,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Main */}
       <div className="flex-1 lg:ml-[220px]">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-xl border-b border-border">
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
           <div className="flex items-center justify-between h-12 px-4">
             <button className="lg:hidden p-1.5 text-foreground" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex-1" />
-            <Button variant="ghost" size="icon" className="relative h-8 w-8">
-              <Bell className="w-4 h-4 text-muted-foreground" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              <Button variant="ghost" size="icon" className="relative h-8 w-8">
+                <Bell className="w-4 h-4 text-muted-foreground" />
+              </Button>
+            </div>
           </div>
         </header>
 

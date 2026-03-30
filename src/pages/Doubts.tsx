@@ -77,7 +77,7 @@ const Doubts = () => {
             <p className="text-sm text-muted-foreground">Ask and solve doubts / डाउट पूछें और हल करें</p>
           </div>
           {role === "student" && (
-            <Button onClick={() => setShowForm(!showForm)} className="gradient-saffron border-0 text-primary-foreground">
+            <Button onClick={() => setShowForm(!showForm)} className="gradient-navy text-white border-0 hover:opacity-90">
               <Plus className="w-4 h-4 mr-1" /> Ask Doubt
             </Button>
           )}
@@ -98,7 +98,7 @@ const Doubts = () => {
               onChange={(e) => setNewDoubt({ ...newDoubt, description: e.target.value })}
             />
             <div className="flex gap-2">
-              <Button type="submit" className="gradient-saffron border-0 text-primary-foreground">Post Doubt</Button>
+              <Button type="submit" className="gradient-navy text-white border-0 hover:opacity-90">Post Doubt</Button>
               <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
             </div>
           </form>
@@ -106,7 +106,7 @@ const Doubts = () => {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
           </div>
         ) : doubts.length === 0 ? (
           <div className="text-center py-16 bg-card rounded-2xl border border-border">
@@ -117,11 +117,11 @@ const Doubts = () => {
         ) : (
           <div className="space-y-4">
             {doubts.map((doubt) => (
-              <div key={doubt.id} className="bg-card rounded-2xl p-5 border border-border">
+              <div key={doubt.id} className="bg-card rounded-2xl p-5 border border-border hover:border-gold/20 transition-colors">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold text-foreground">{doubt.title}</h3>
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                    doubt.status === "open" ? "bg-gold/10 text-saffron-dark" : "bg-emerald/10 text-emerald"
+                    doubt.status === "open" ? "bg-gold/10 text-gold-warm" : "bg-emerald/10 text-emerald"
                   }`}>
                     {doubt.status}
                   </span>
@@ -133,13 +133,13 @@ const Doubts = () => {
 
                 <button
                   onClick={() => fetchReplies(doubt.id)}
-                  className="text-sm text-primary hover:underline mb-3"
+                  className="text-sm text-gold-warm hover:underline mb-3"
                 >
                   View Replies / उत्तर देखें
                 </button>
 
                 {replies[doubt.id] && (
-                  <div className="space-y-2 mt-3 pl-4 border-l-2 border-border">
+                  <div className="space-y-2 mt-3 pl-4 border-l-2 border-gold/20">
                     {replies[doubt.id].map((reply) => (
                       <div key={reply.id} className="bg-muted rounded-xl p-3">
                         <p className="text-sm text-foreground">{reply.content}</p>
@@ -161,7 +161,7 @@ const Doubts = () => {
                   <Button
                     size="icon"
                     onClick={() => handleReply(doubt.id)}
-                    className="gradient-saffron border-0 text-primary-foreground"
+                    className="gradient-navy text-white border-0 hover:opacity-90"
                   >
                     <Send className="w-4 h-4" />
                   </Button>

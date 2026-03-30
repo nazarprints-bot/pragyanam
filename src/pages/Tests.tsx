@@ -71,7 +71,7 @@ const Tests = () => {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
           </div>
         ) : tests.length === 0 ? (
           <div className="text-center py-16 bg-card rounded-2xl border border-border">
@@ -84,15 +84,15 @@ const Tests = () => {
             {tests.map((test) => {
               const attempt = getAttempt(test.id);
               return (
-                <div key={test.id} className="bg-card rounded-2xl p-5 border border-border hover:shadow-card transition-shadow">
+                <div key={test.id} className="bg-card rounded-2xl p-5 border border-border hover:shadow-card hover:border-gold/20 transition-all">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
-                      <Brain className="w-5 h-5 text-secondary" />
+                    <div className="w-10 h-10 rounded-xl bg-navy/10 dark:bg-gold/10 flex items-center justify-center">
+                      <Brain className="w-5 h-5 text-navy dark:text-gold" />
                     </div>
                     <div className="flex items-center gap-2">
                       {isTeacherOrAdmin && (
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          test.is_published ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"
+                          test.is_published ? "bg-emerald/10 text-emerald" : "bg-muted text-muted-foreground"
                         }`}>
                           {test.is_published ? "Published" : "Draft"}
                         </span>
@@ -103,7 +103,7 @@ const Tests = () => {
                     </div>
                   </div>
                   <h3 className="font-bold text-foreground mb-0.5">{test.title}</h3>
-                  <p className="text-xs text-primary mb-3">{test.title_hi}</p>
+                  <p className="text-xs text-gold-warm mb-3">{test.title_hi}</p>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {test.duration_minutes} min
@@ -133,13 +133,13 @@ const Tests = () => {
                     </div>
                   ) : attempt ? (
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-emerald-600 text-sm font-medium">
+                      <div className="flex items-center gap-1 text-emerald text-sm font-medium">
                         <CheckCircle className="w-4 h-4" /> Completed
                       </div>
                       <span className="font-bold text-foreground">{attempt.percentage?.toFixed(0)}%</span>
                     </div>
                   ) : (
-                    <Button className="w-full gradient-saffron border-0 text-primary-foreground" size="sm">
+                    <Button className="w-full gradient-navy text-white border-0 hover:opacity-90" size="sm">
                       Start Test <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                   )}

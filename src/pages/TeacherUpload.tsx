@@ -29,7 +29,6 @@ const TeacherUpload = () => {
 
     let thumbnailUrl: string | null = null;
 
-    // Upload thumbnail if provided
     if (thumbnailFile) {
       const ext = thumbnailFile.name.split(".").pop();
       const path = `${user.id}/${Date.now()}.${ext}`;
@@ -102,7 +101,7 @@ const TeacherUpload = () => {
         {/* Create Course Form */}
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
-            <Plus className="w-5 h-5 text-primary" /> Create New Course / नया कोर्स बनाएं
+            <Plus className="w-5 h-5 text-gold" /> Create New Course / नया कोर्स बनाएं
           </h2>
           <form onSubmit={handleCreateCourse} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -149,7 +148,7 @@ const TeacherUpload = () => {
                 <Input value={courseForm.class_level} onChange={(e) => setCourseForm({ ...courseForm, class_level: e.target.value })} placeholder="e.g. 10" className="mt-1" />
               </div>
             </div>
-            <Button type="submit" disabled={loading} className="gradient-saffron border-0 text-primary-foreground font-bold">
+            <Button type="submit" disabled={loading} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
               {loading ? "Creating..." : "Create Course / कोर्स बनाएं"}
             </Button>
           </form>
@@ -158,29 +157,28 @@ const TeacherUpload = () => {
         {/* My Courses */}
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-primary" /> My Courses / मेरे कोर्स
+            <BookOpen className="w-5 h-5 text-gold" /> My Courses / मेरे कोर्स
           </h2>
           {loadingCourses ? (
             <div className="flex justify-center py-10">
-              <div className="animate-spin w-7 h-7 border-4 border-primary border-t-transparent rounded-full" />
+              <div className="animate-spin w-7 h-7 border-4 border-gold border-t-transparent rounded-full" />
             </div>
           ) : courses.length === 0 ? (
             <p className="text-sm text-muted-foreground">No courses yet / अभी कोई कोर्स नहीं</p>
           ) : (
             <div className="space-y-3">
               {courses.map((course) => (
-                <div key={course.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                  {/* Thumbnail */}
+                <div key={course.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-gold/20 transition-colors">
                   <div className="w-20 h-14 rounded-lg overflow-hidden bg-muted shrink-0">
                     {course.thumbnail_url ? (
                       <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-5 h-5 text-muted-foreground" /></div>
+                      <div className="w-full h-full gradient-navy flex items-center justify-center"><BookOpen className="w-5 h-5 text-white/30" /></div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground truncate">{course.title}</p>
-                    <p className="text-xs text-primary">{course.title_hi}</p>
+                    <p className="text-xs text-gold-warm">{course.title_hi}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {course.is_published ? "Published / प्रकाशित" : "Draft / ड्राफ्ट"}
                     </p>
