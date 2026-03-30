@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   BookOpen, Play, Plus, Trash2, Video, FileText, Link as LinkIcon,
-  Upload, Clock, Calendar, ArrowLeft, Users, Loader2, GripVertical,
+  Upload, Clock, Calendar, ArrowLeft, Users, Loader2, GripVertical, CheckCircle,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const CourseDetail = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -23,6 +24,7 @@ const CourseDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  const [enrolledStudents, setEnrolledStudents] = useState<any[]>([]);
 
   // Teacher lesson form
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
@@ -90,10 +92,56 @@ const CourseDetail = () => {
     setLiveClasses(data || []);
   };
 
+  const fetchEnrolledStudents = async () => {
+    if (!courseId) return;
+    // Get enrollments for this course
+    const { data: enrollments } = await supabase
+      .from("enrollments").select("user_id, enrolled_at, progress").eq("course_id", courseId);
+    if (!enrollments || enrollments.length === 0) { setEnrolledStudents([]); return; }
+
+    const userIds = enrollments.map(e => e.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", userIds);
+
+    // Get lesson IDs for this course
+    const { data: subs } = await supabase.from("subjects").select("id").eq("course_id", courseId);
+    let lessonIds: string[] = [];
+    if (subs && subs.length > 0) {
+      const { data: chaps } = await supabase.from("chapters").select("id").in("subject_id", subs.map(s => s.id));
+      if (chaps && chaps.length > 0) {
+        const { data: lsns } = await supabase.from("lessons").select("id").in("chapter_id", chaps.map(c => c.id));
+        lessonIds = (lsns || []).map(l => l.id);
+      }
+    }
+    const totalLessons = lessonIds.length;
+
+    // Get lesson progress for each student
+    let progressMap: Record<string, number> = {};
+    if (totalLessons > 0 && userIds.length > 0) {
+      const { data: lp } = await supabase
+        .from("lesson_progress").select("user_id, lesson_id, is_completed")
+        .in("user_id", userIds).in("lesson_id", lessonIds).eq("is_completed", true);
+      (lp || []).forEach(p => {
+        progressMap[p.user_id] = (progressMap[p.user_id] || 0) + 1;
+      });
+    }
+
+    const profileMap: Record<string, any> = {};
+    (profiles || []).forEach(p => { profileMap[p.user_id] = p; });
+
+    const students = enrollments.map(e => ({
+      ...e,
+      profile: profileMap[e.user_id] || { full_name: "Student", avatar_url: null },
+      completedLessons: progressMap[e.user_id] || 0,
+      totalLessons,
+      percentage: totalLessons > 0 ? Math.round(((progressMap[e.user_id] || 0) / totalLessons) * 100) : 0,
+    }));
+    setEnrolledStudents(students);
+  };
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      await Promise.all([fetchCourse(), fetchLessons(), fetchLiveClasses()]);
+      await Promise.all([fetchCourse(), fetchLessons(), fetchLiveClasses(), fetchEnrolledStudents()]);
       setLoading(false);
     };
     load();
@@ -411,6 +459,48 @@ const CourseDetail = () => {
             </div>
           )}
         </div>
+
+        {/* Enrolled Students - Teacher Only */}
+        {canManage && (
+          <div className="bg-card rounded-2xl p-6 border border-border">
+            <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Enrolled Students / नामांकित छात्र ({enrolledStudents.length})
+            </h2>
+            {enrolledStudents.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                No students enrolled yet / अभी कोई छात्र नामांकित नहीं
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {enrolledStudents.map((s) => (
+                  <div key={s.user_id} className="flex items-center gap-3 p-3 rounded-xl border border-border">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                      {s.profile.avatar_url ? (
+                        <img src={s.profile.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        s.profile.full_name?.charAt(0)?.toUpperCase() || "S"
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm truncate">{s.profile.full_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Enrolled {new Date(s.enrolled_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 min-w-[140px]">
+                      <Progress value={s.percentage} className="h-2 flex-1" />
+                      <span className="text-xs font-semibold text-foreground w-10 text-right">
+                        {s.percentage}%
+                      </span>
+                      {s.percentage === 100 && <CheckCircle className="w-4 h-4 text-primary" />}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
