@@ -38,15 +38,6 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="text-base text-accent font-semibold mb-2"
-          >
-            हर छात्र के लिए गुणवत्तापूर्ण शिक्षा
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
             className="text-[15px] text-muted-foreground leading-relaxed mb-10 max-w-xl mx-auto"
           >
             Class 6–12, competitive exams, scholarships — live classes, smart tests, 

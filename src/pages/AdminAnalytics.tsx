@@ -31,12 +31,12 @@ const AdminAnalytics = () => {
   }, []);
 
   const cards = [
-    { icon: Users, label: "Total Users / कुल उपयोगकर्ता", value: stats.users, color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
-    { icon: BookOpen, label: "Total Courses / कुल कोर्स", value: stats.courses, color: "bg-gold/10 text-gold-warm" },
-    { icon: Brain, label: "Total Tests / कुल टेस्ट", value: stats.tests, color: "bg-emerald/10 text-emerald" },
-    { icon: TrendingUp, label: "Enrollments / नामांकन", value: stats.enrollments, color: "bg-saffron/10 text-saffron-dark" },
-    { icon: BarChart3, label: "Doubts / डाउट", value: stats.doubts, color: "bg-navy/10 text-navy dark:bg-navy-light/20 dark:text-gold-light" },
-    { icon: DollarSign, label: "Revenue / राजस्व", value: "₹0", color: "bg-destructive/10 text-destructive" },
+    { icon: Users, label: "Total Users", value: stats.users, color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
+    { icon: BookOpen, label: "Total Courses", value: stats.courses, color: "bg-gold/10 text-gold-warm" },
+    { icon: Brain, label: "Total Tests", value: stats.tests, color: "bg-emerald/10 text-emerald" },
+    { icon: TrendingUp, label: "Enrollments", value: stats.enrollments, color: "bg-saffron/10 text-saffron-dark" },
+    { icon: BarChart3, label: "Doubts", value: stats.doubts, color: "bg-navy/10 text-navy dark:bg-navy-light/20 dark:text-gold-light" },
+    { icon: DollarSign, label: "Revenue", value: "₹0", color: "bg-destructive/10 text-destructive" },
   ];
 
   return (
@@ -44,7 +44,7 @@ const AdminAnalytics = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-extrabold font-heading text-foreground">
-            Analytics / एनालिटिक्स
+            Analytics
           </h1>
           <p className="text-sm text-muted-foreground">Platform-wide analytics and insights</p>
         </div>

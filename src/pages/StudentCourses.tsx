@@ -42,12 +42,12 @@ const StudentCourses = () => {
   const handleEnroll = async (courseId: string) => {
     if (!user) return;
     const { error } = await supabase.from("enrollments").insert({ user_id: user.id, course_id: courseId });
-    if (error) toast.error("Failed to enroll / नामांकन विफल");
-    else { setEnrollments([...enrollments, courseId]); toast.success("Enrolled! / नामांकित!"); }
+    if (error) toast.error("Failed to enroll");
+    else { setEnrollments([...enrollments, courseId]); toast.success("Enrolled successfully!"); }
   };
 
   const filtered = courses.filter(
-    (c) => c.title.toLowerCase().includes(search.toLowerCase()) || c.title_hi.includes(search)
+    (c) => c.title.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -55,8 +55,8 @@ const StudentCourses = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold font-heading text-foreground">Courses / कोर्स</h1>
-            <p className="text-sm text-muted-foreground">Browse and enroll in courses / कोर्स ब्राउज़ करें</p>
+            <h1 className="text-2xl font-extrabold font-heading text-foreground">Courses</h1>
+            <p className="text-sm text-muted-foreground">Browse and enroll in courses</p>
           </div>
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -72,7 +72,7 @@ const StudentCourses = () => {
           <div className="text-center py-16 bg-card rounded-2xl border border-border">
             <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-bold text-foreground mb-1">No Courses Yet</h3>
-            <p className="text-sm text-muted-foreground">अभी कोई कोर्स उपलब्ध नहीं है। जल्द आ रहे हैं!</p>
+            <p className="text-sm text-muted-foreground">No courses available at the moment. Coming soon!</p>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -100,7 +100,6 @@ const StudentCourses = () => {
                       {course.class_level && <span className="text-xs text-muted-foreground">Class {course.class_level}</span>}
                     </div>
                     <h3 className="text-lg font-bold text-foreground">{course.title}</h3>
-                    <p className="text-sm text-gold-warm mb-1">{course.title_hi}</p>
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{course.description}</p>
 
                     {t && (
