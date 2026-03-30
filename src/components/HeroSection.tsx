@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-students.jpg";
 
 const stats = [
-  { icon: Users, value: "10,000+", label: "Students / छात्र" },
-  { icon: BookOpen, value: "500+", label: "Courses / कोर्स" },
+  { icon: Users, value: "5000+", label: "Students / छात्र READY TO USE" },
+  { icon: BookOpen, value: "20+", label: "Courses / कोर्स" },
   { icon: Trophy, value: "95%", label: "Results / परिणाम" },
 ];
 
