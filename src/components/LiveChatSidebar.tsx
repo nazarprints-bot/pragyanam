@@ -5,7 +5,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
 interface ChatMessage {
@@ -48,12 +47,12 @@ const LiveChatSidebar = ({ classId, isTeacher }: LiveChatSidebarProps) => {
   // Fetch existing messages
   useEffect(() => {
     const fetchMessages = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("live_chat_messages")
         .select("*")
         .eq("class_id", classId)
         .order("created_at", { ascending: true });
-      if (data) setMessages(data);
+      if (data) setMessages(data as ChatMessage[]);
     };
     fetchMessages();
   }, [classId]);
@@ -93,7 +92,7 @@ const LiveChatSidebar = ({ classId, isTeacher }: LiveChatSidebarProps) => {
     if (!newMessage.trim() || !user) return;
     setSending(true);
 
-    const { error } = await supabase.from("live_chat_messages").insert({
+    const { error } = await (supabase as any).from("live_chat_messages").insert({
       class_id: classId,
       user_id: user.id,
       user_name: userName || "User",
