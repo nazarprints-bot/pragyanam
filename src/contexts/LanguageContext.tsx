@@ -187,6 +187,7 @@ const translations: Record<string, Record<Language, string>> = {
   "sidebar.student": { en: "Student", hi: "छात्र" },
 
   "sidebar.classes": { en: "Classes", hi: "कक्षाएँ" },
+  "sidebar.recorded": { en: "Recorded", hi: "रिकॉर्डेड" },
   "sidebar.teachers": { en: "Teachers", hi: "शिक्षक" },
 
   // Bottom Nav
