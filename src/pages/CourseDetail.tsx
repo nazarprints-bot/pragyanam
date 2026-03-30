@@ -493,7 +493,7 @@ const CourseDetail = () => {
                       <span className="text-xs font-semibold text-foreground w-10 text-right">
                         {s.percentage}%
                       </span>
-                      {s.percentage === 100 && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                      {s.percentage === 100 && <CheckCircle className="w-4 h-4 text-primary" />}
                     </div>
                   </div>
                 ))}
