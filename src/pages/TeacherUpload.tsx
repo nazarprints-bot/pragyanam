@@ -50,8 +50,6 @@ const TeacherUpload = () => {
       description_hi: courseForm.description_hi,
       category: courseForm.category,
       class_level: courseForm.class_level || null,
-      price: Number(courseForm.price),
-      is_free: courseForm.is_free,
       is_published: false,
       created_by: user.id,
       thumbnail_url: thumbnailUrl,
