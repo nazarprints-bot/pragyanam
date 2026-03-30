@@ -45,12 +45,14 @@ const Navbar = () => {
 
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" className="text-muted-foreground">
-              Login
-            </Button>
-            <Button className="gradient-saffron border-0 text-primary-foreground font-semibold shadow-glow">
-              Start Free / मुफ्त शुरू करें
-            </Button>
+            <Link to="/auth">
+              <Button variant="ghost" className="text-muted-foreground">Login</Button>
+            </Link>
+            <Link to="/auth">
+              <Button className="gradient-saffron border-0 text-primary-foreground font-semibold shadow-glow">
+                Start Free / मुफ्त शुरू करें
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Toggle */}
