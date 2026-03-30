@@ -118,10 +118,7 @@ const StudentCourses = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-foreground">
-                        {course.is_free ? "Free / मुफ्त" : `₹${course.price}`}
-                      </span>
+                    <div className="flex items-center justify-end">
                       {isEnrolled ? (
                         <Button size="sm" variant="outline" className="text-emerald border-emerald" onClick={(e) => e.stopPropagation()}>
                           Enrolled ✓

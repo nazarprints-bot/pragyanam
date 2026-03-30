@@ -239,9 +239,6 @@ const CourseDetail = () => {
               {course.class_level && (
                 <span className="text-xs text-muted-foreground">Class {course.class_level}</span>
               )}
-              <span className="font-bold text-foreground ml-auto">
-                {course.is_free ? "Free / मुफ्त" : `₹${course.price}`}
-              </span>
             </div>
             <h1 className="text-2xl font-extrabold font-heading text-foreground">{course.title}</h1>
             <p className="text-primary font-medium">{course.title_hi}</p>

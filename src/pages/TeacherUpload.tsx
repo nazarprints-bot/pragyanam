@@ -135,7 +135,7 @@ const TeacherUpload = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Category</Label>
                 <select value={courseForm.category} onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
@@ -148,15 +148,7 @@ const TeacherUpload = () => {
                 <Label>Class Level</Label>
                 <Input value={courseForm.class_level} onChange={(e) => setCourseForm({ ...courseForm, class_level: e.target.value })} placeholder="e.g. 10" className="mt-1" />
               </div>
-              <div>
-                <Label>Price (₹)</Label>
-                <Input type="number" value={courseForm.price} onChange={(e) => setCourseForm({ ...courseForm, price: e.target.value })} className="mt-1" />
-              </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={courseForm.is_free} onChange={(e) => setCourseForm({ ...courseForm, is_free: e.target.checked })} className="rounded" />
-              <span className="text-sm text-foreground">This course is free / यह कोर्स मुफ्त है</span>
-            </label>
             <Button type="submit" disabled={loading} className="gradient-saffron border-0 text-primary-foreground font-bold">
               {loading ? "Creating..." : "Create Course / कोर्स बनाएं"}
             </Button>
