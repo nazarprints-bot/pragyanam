@@ -38,6 +38,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", labelHi: "डैशबोर्ड" },
     { to: "/dashboard/users", icon: Users, label: "Users", labelHi: "उपयोगकर्ता" },
     { to: "/dashboard/all-courses", icon: BookOpen, label: "All Courses", labelHi: "सभी कोर्स" },
+    { to: "/dashboard/live-classes", icon: Video, label: "Live Classes", labelHi: "लाइव क्लास" },
+    { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test Generator", labelHi: "AI टेस्ट जनरेटर" },
     { to: "/dashboard/tests", icon: Brain, label: "Tests", labelHi: "टेस्ट" },
     { to: "/dashboard/analytics", icon: BarChart3, label: "Analytics", labelHi: "एनालिटिक्स" },
     { to: "/dashboard/settings", icon: Settings, label: "Settings", labelHi: "सेटिंग्स" },
