@@ -26,7 +26,7 @@ const Tests = () => {
       setLoading(false);
     };
     fetch();
-  }, [user]);
+  }, [user, role]);
 
   const getAttempt = (testId: string) => attempts.find((a) => a.test_id === testId);
 
