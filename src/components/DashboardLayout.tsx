@@ -21,6 +21,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const studentLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: t("sidebar.dashboard") },
     { to: "/dashboard/classes", icon: GraduationCap, label: t("sidebar.classes") },
+    { to: "/dashboard/recorded", icon: BookOpen, label: t("sidebar.recorded") },
     { to: "/dashboard/courses", icon: BookOpen, label: t("sidebar.courses") },
     { to: "/dashboard/live-classes", icon: Video, label: t("sidebar.liveClasses") },
     { to: "/dashboard/teachers", icon: Users, label: t("sidebar.teachers") },
