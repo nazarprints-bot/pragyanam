@@ -17,6 +17,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AITestGenerator from "./pages/AITestGenerator";
 import LiveClasses from "./pages/LiveClasses";
+import CourseDetail from "./pages/CourseDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
