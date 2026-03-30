@@ -23,7 +23,7 @@ const StudentHome = () => {
       const [liveRes, upcomingRes, coursesRes, enrollRes] = await Promise.all([
         supabase.from("live_classes").select("*").eq("status", "live").order("scheduled_at"),
         supabase.from("live_classes").select("*").eq("status", "scheduled").order("scheduled_at").limit(4),
-        supabase.from("courses").select("*").eq("is_published", true).limit(6),
+        supabase.from("courses").select("*, enrollments(count)").eq("is_published", true).limit(20),
         user ? supabase.from("enrollments").select("course_id, courses(*)").eq("user_id", user.id).limit(4) : Promise.resolve({ data: [] }),
       ]);
 
