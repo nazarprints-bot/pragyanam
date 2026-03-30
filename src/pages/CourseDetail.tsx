@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   BookOpen, Play, Plus, Trash2, Video, FileText, Link as LinkIcon,
-  Upload, Clock, Calendar, ArrowLeft, Users, Loader2, GripVertical,
+  Upload, Clock, Calendar, ArrowLeft, Users, Loader2, GripVertical, CheckCircle,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const CourseDetail = () => {
   const { courseId } = useParams<{ courseId: string }>();
