@@ -46,7 +46,8 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Account created! Check your email. / अकाउंट बन गया! ईमेल चेक करें।");
+        toast.success("Account created! / अकाउंट बन गया!");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast.error(error.message);
