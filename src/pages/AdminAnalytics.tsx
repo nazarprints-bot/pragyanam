@@ -1,0 +1,74 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Users, BookOpen, Brain, TrendingUp, BarChart3, DollarSign } from "lucide-react";
+
+const AdminAnalytics = () => {
+  const [stats, setStats] = useState({
+    users: 0, courses: 0, tests: 0, enrollments: 0, doubts: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const [u, c, t, e, d] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("courses").select("id", { count: "exact", head: true }),
+        supabase.from("tests").select("id", { count: "exact", head: true }),
+        supabase.from("enrollments").select("id", { count: "exact", head: true }),
+        supabase.from("doubts").select("id", { count: "exact", head: true }),
+      ]);
+      setStats({
+        users: u.count || 0,
+        courses: c.count || 0,
+        tests: t.count || 0,
+        enrollments: e.count || 0,
+        doubts: d.count || 0,
+      });
+      setLoading(false);
+    };
+    fetch();
+  }, []);
+
+  const cards = [
+    { icon: Users, label: "Total Users / कुल उपयोगकर्ता", value: stats.users, color: "bg-accent text-accent-foreground" },
+    { icon: BookOpen, label: "Total Courses / कुल कोर्स", value: stats.courses, color: "bg-secondary/10 text-secondary" },
+    { icon: Brain, label: "Total Tests / कुल टेस्ट", value: stats.tests, color: "bg-emerald/10 text-emerald" },
+    { icon: TrendingUp, label: "Enrollments / नामांकन", value: stats.enrollments, color: "bg-gold/10 text-saffron-dark" },
+    { icon: BarChart3, label: "Doubts / डाउट", value: stats.doubts, color: "bg-primary/10 text-primary" },
+    { icon: DollarSign, label: "Revenue / राजस्व", value: "₹0", color: "bg-destructive/10 text-destructive" },
+  ];
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-extrabold font-heading text-foreground">
+            Analytics / एनालिटिक्स
+          </h1>
+          <p className="text-sm text-muted-foreground">Platform-wide analytics and insights</p>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {cards.map((card) => (
+              <div key={card.label} className="bg-card rounded-2xl p-6 border border-border hover:shadow-card transition-shadow">
+                <div className={`w-12 h-12 rounded-xl ${card.color} flex items-center justify-center mb-4`}>
+                  <card.icon className="w-6 h-6" />
+                </div>
+                <p className="text-3xl font-extrabold font-heading text-foreground">{card.value}</p>
+                <p className="text-sm text-muted-foreground mt-1">{card.label}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default AdminAnalytics;
