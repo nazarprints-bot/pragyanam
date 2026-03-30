@@ -13,7 +13,11 @@ const Tests = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const testsRes = await supabase.from("tests").select("*").eq("is_published", true);
+      let testsQuery = supabase.from("tests").select("*");
+      if (role === "student") {
+        testsQuery = testsQuery.eq("is_published", true);
+      }
+      const testsRes = await testsQuery;
       setTests(testsRes.data || []);
       if (user) {
         const attRes = await supabase.from("test_attempts").select("*").eq("user_id", user.id);
