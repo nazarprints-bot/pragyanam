@@ -28,7 +28,12 @@ const LiveClasses = () => {
       .from("live_classes")
       .select("*")
       .order("scheduled_at", { ascending: true });
-    if (!error) setClasses(data || []);
+
+    if (error) {
+      toast.error("Failed to load classes: " + error.message);
+    } else {
+      setClasses(data || []);
+    }
     setLoading(false);
   };
 
@@ -51,12 +56,19 @@ const LiveClasses = () => {
     if (!user) return;
     setCreating(true);
 
+    const scheduledAtIso = new Date(form.scheduled_at).toISOString();
+    if (!form.scheduled_at || Number.isNaN(new Date(form.scheduled_at).getTime())) {
+      toast.error("Please select valid date & time / सही तारीख और समय चुनें");
+      setCreating(false);
+      return;
+    }
+
     const { error } = await supabase.from("live_classes").insert({
       title: form.title,
       title_hi: form.title_hi,
       description: form.description || null,
       teacher_id: user.id,
-      scheduled_at: new Date(form.scheduled_at).toISOString(),
+      scheduled_at: scheduledAtIso,
       duration_minutes: form.duration_minutes,
       status: "scheduled",
     });
@@ -67,13 +79,26 @@ const LiveClasses = () => {
       toast.success("Live class scheduled! / लाइव क्लास शेड्यूल हो गई!");
       setShowForm(false);
       setForm({ title: "", title_hi: "", description: "", scheduled_at: "", duration_minutes: 60 });
+      await fetchClasses();
     }
     setCreating(false);
   };
 
   const handleStartClass = async (classItem: any) => {
     // Update status to 'live'
-    await supabase.from("live_classes").update({ status: "live" }).eq("id", classItem.id);
+    const { error } = await supabase
+      .from("live_classes")
+      .update({ status: "live" })
+      .eq("id", classItem.id)
+      .eq("teacher_id", user?.id || "");
+
+    if (error) {
+      toast.error("Failed to start class: " + error.message);
+      return;
+    }
+
+    toast.success("Class started / क्लास शुरू हो गई");
+    await fetchClasses();
     setActiveRoom(classItem.room_id);
   };
 
@@ -82,15 +107,24 @@ const LiveClasses = () => {
   };
 
   const handleEndClass = async (classItem: any) => {
-    await supabase.from("live_classes").update({ status: "ended" }).eq("id", classItem.id);
+    const { error } = await supabase
+      .from("live_classes")
+      .update({ status: "ended" })
+      .eq("id", classItem.id)
+      .eq("teacher_id", user?.id || "");
+
+    if (error) {
+      toast.error("Failed to end class: " + error.message);
+      return;
+    }
+
     setActiveRoom(null);
+    await fetchClasses();
     toast.success("Class ended / क्लास खत्म हो गई");
   };
 
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
-  const now = new Date();
-
-  const upcomingClasses = classes.filter((c) => c.status === "scheduled" && new Date(c.scheduled_at) >= now);
+  const upcomingClasses = classes.filter((c) => c.status === "scheduled");
   const liveClasses = classes.filter((c) => c.status === "live");
   const pastClasses = classes.filter((c) => c.status === "ended");
 
