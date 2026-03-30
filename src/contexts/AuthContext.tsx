@@ -11,6 +11,7 @@ interface AuthContextType {
   profile: any;
   loading: boolean;
   signOut: () => Promise<void>;
+  refetchProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
