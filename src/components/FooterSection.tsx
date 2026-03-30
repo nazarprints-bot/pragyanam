@@ -1,6 +1,9 @@
 import { GraduationCap } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FooterSection = () => {
+  const { t } = useLanguage();
+
   return (
     <footer id="about" className="gradient-navy">
       <div className="max-w-6xl mx-auto px-5 py-14">
@@ -10,42 +13,30 @@ const FooterSection = () => {
               <div className="w-8 h-8 rounded-lg gradient-gold flex items-center justify-center">
                 <GraduationCap className="w-4.5 h-4.5 text-foreground" />
               </div>
-              <div>
-                <span className="text-[15px] font-bold text-primary-foreground">Pragyanam Academy</span>
-              </div>
+              <span className="text-[15px] font-bold text-primary-foreground">Pragyanam Academy</span>
             </div>
-            <p className="text-[13px] text-primary-foreground/60 max-w-sm leading-relaxed">
-              India's most affordable education platform. Quality learning for every student, 
-              regardless of their background.
-            </p>
+            <p className="text-[13px] text-primary-foreground/60 max-w-sm leading-relaxed">{t("footer.desc")}</p>
           </div>
-
           <div>
-            <h4 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-4">Platform</h4>
+            <h4 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-4">{t("footer.platform")}</h4>
             <ul className="space-y-2.5 text-[13px] text-primary-foreground/60">
-              <li><a href="#courses" className="hover:text-primary-foreground transition-colors">Courses</a></li>
-              <li><a href="#features" className="hover:text-primary-foreground transition-colors">Features</a></li>
-              <li><a href="#pricing" className="hover:text-primary-foreground transition-colors">Pricing</a></li>
+              <li><a href="#courses" className="hover:text-primary-foreground transition-colors">{t("nav.courses")}</a></li>
+              <li><a href="#features" className="hover:text-primary-foreground transition-colors">{t("nav.features")}</a></li>
+              <li><a href="#pricing" className="hover:text-primary-foreground transition-colors">{t("nav.pricing")}</a></li>
             </ul>
           </div>
-
           <div>
-            <h4 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-4">Support</h4>
+            <h4 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-4">{t("footer.support")}</h4>
             <ul className="space-y-2.5 text-[13px] text-primary-foreground/60">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Privacy</a></li>
+              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t("footer.helpCenter")}</a></li>
+              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t("footer.contact")}</a></li>
+              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t("footer.privacy")}</a></li>
             </ul>
           </div>
         </div>
-
         <div className="border-t border-primary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[12px] text-primary-foreground/40">
-            © 2026 Pragyanam Academy. All rights reserved.
-          </p>
-          <p className="text-[12px] text-primary-foreground/40">
-            Made for India's students 🇮🇳
-          </p>
+          <p className="text-[12px] text-primary-foreground/40">{t("footer.rights")}</p>
+          <p className="text-[12px] text-primary-foreground/40">{t("footer.madeFor")}</p>
         </div>
       </div>
     </footer>
