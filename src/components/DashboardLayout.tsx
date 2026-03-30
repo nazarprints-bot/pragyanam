@@ -17,6 +17,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const studentLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", labelHi: "डैशबोर्ड" },
     { to: "/dashboard/courses", icon: BookOpen, label: "My Courses", labelHi: "मेरे कोर्स" },
+    { to: "/dashboard/live-classes", icon: Video, label: "Live Classes", labelHi: "लाइव क्लास" },
     { to: "/dashboard/tests", icon: Brain, label: "Tests", labelHi: "टेस्ट" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: "Doubts", labelHi: "डाउट" },
     { to: "/dashboard/progress", icon: BarChart3, label: "Progress", labelHi: "प्रगति" },
