@@ -248,6 +248,35 @@ const translations: Record<string, Record<Language, string>> = {
   "teachers.coursesRecorded": { en: "Courses & Recorded Lectures", hi: "कोर्सेज़ और रिकॉर्डेड लेक्चर" },
   "teachers.noCourses": { en: "No courses available yet", hi: "अभी कोई कोर्स उपलब्ध नहीं" },
 
+  // Recorded Lectures
+  "recorded.title": { en: "Recorded Lectures", hi: "रिकॉर्डेड लेक्चर" },
+  "recorded.subtitle": { en: "Learn at your own pace, anytime", hi: "अपनी गति से, कभी भी सीखें" },
+  "recorded.selectSubject": { en: "Select a subject", hi: "विषय चुनें" },
+  "recorded.selectChapter": { en: "Select a chapter", hi: "अध्याय चुनें" },
+  "recorded.chapterContent": { en: "Video lectures, notes & tests", hi: "वीडियो लेक्चर, नोट्स और टेस्ट" },
+  "recorded.noLessons": { en: "No lessons yet", hi: "अभी कोई पाठ नहीं" },
+  "recorded.noChapters": { en: "No chapters yet", hi: "अभी कोई अध्याय नहीं" },
+  "recorded.videoLecture": { en: "Video Lecture", hi: "वीडियो लेक्चर" },
+  "recorded.notes": { en: "Notes / PDF", hi: "नोट्स / PDF" },
+  "recorded.reading": { en: "Reading", hi: "पठन" },
+  "recorded.free": { en: "Free", hi: "मुफ़्त" },
+  "recorded.watch": { en: "Watch", hi: "देखें" },
+  "recorded.download": { en: "Download", hi: "डाउनलोड" },
+
+  // Profile
+  "profile.editProfile": { en: "Edit Profile", hi: "प्रोफ़ाइल संपादित करें" },
+  "profile.certificates": { en: "Certificates & Progress", hi: "प्रमाणपत्र और प्रगति" },
+  "profile.enrolled": { en: "Enrolled", hi: "नामांकित" },
+  "profile.testsPassed": { en: "Tests Passed", hi: "पास टेस्ट" },
+  "profile.avgScore": { en: "Avg Score", hi: "औसत स्कोर" },
+  "profile.enrolledCourses": { en: "Enrolled Courses", hi: "नामांकित कोर्सेज़" },
+  "profile.noCourses": { en: "No courses enrolled yet", hi: "अभी कोई कोर्स नामांकित नहीं" },
+  "profile.testAchievements": { en: "Test Achievements", hi: "टेस्ट उपलब्धियाँ" },
+  "profile.noTests": { en: "No tests taken yet", hi: "अभी कोई टेस्ट नहीं दिया" },
+  "profile.score": { en: "Score", hi: "स्कोर" },
+  "profile.passed": { en: "Passed", hi: "पास" },
+  "profile.progress": { en: "Progress", hi: "प्रगति" },
+
   // Common
   "common.user": { en: "User", hi: "उपयोगकर्ता" },
 };
