@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu,
-  Upload, Bell, Video, Sparkles
+  Upload, Bell, Video, Sparkles, UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
