@@ -82,8 +82,41 @@ const TestResponses = () => {
           <div className="space-y-4">
             {questions.map((q, i) => {
               const selected = studentAnswers[q.id];
+              const qType = q.question_type || "mcq";
+
+              if (qType === "short" || qType === "long") {
+                return (
+                  <div key={q.id} className="bg-card rounded-2xl p-5 border border-border">
+                    <div className="flex items-start justify-between mb-3">
+                      <p className="font-bold text-foreground text-sm">Q{i + 1}. {q.question}</p>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
+                        qType === "short" ? "bg-emerald/10 text-emerald" : "bg-accent text-accent-foreground"
+                      }`}>
+                        {qType === "short" ? "Short" : "Long"}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Student's Answer:</p>
+                        <div className="bg-muted/50 rounded-xl p-3 text-sm text-foreground whitespace-pre-wrap">
+                          {selected || <span className="italic text-muted-foreground">Not answered</span>}
+                        </div>
+                      </div>
+                      {q.answer_text && (
+                        <div>
+                          <p className="text-xs font-medium text-emerald mb-1">Expected Answer:</p>
+                          <div className="bg-emerald/5 border border-emerald/20 rounded-xl p-3 text-sm text-foreground whitespace-pre-wrap">
+                            {q.answer_text}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              // MCQ
               const isCorrect = selected === q.correct_option;
-              if (isCorrect) correctCount++; else wrongCount++;
               const options = [
                 { key: "A", value: q.option_a },
                 { key: "B", value: q.option_b },

@@ -524,6 +524,7 @@ export type Database = {
       }
       test_questions: {
         Row: {
+          answer_text: string | null
           correct_option: string
           id: string
           marks: number | null
@@ -533,10 +534,12 @@ export type Database = {
           option_d: string
           question: string
           question_hi: string | null
+          question_type: string
           sort_order: number | null
           test_id: string
         }
         Insert: {
+          answer_text?: string | null
           correct_option: string
           id?: string
           marks?: number | null
@@ -546,10 +549,12 @@ export type Database = {
           option_d: string
           question: string
           question_hi?: string | null
+          question_type?: string
           sort_order?: number | null
           test_id: string
         }
         Update: {
+          answer_text?: string | null
           correct_option?: string
           id?: string
           marks?: number | null
@@ -559,6 +564,7 @@ export type Database = {
           option_d?: string
           question?: string
           question_hi?: string | null
+          question_type?: string
           sort_order?: number | null
           test_id?: string
         }

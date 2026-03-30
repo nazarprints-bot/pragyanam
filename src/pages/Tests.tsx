@@ -4,16 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Brain, Clock, CheckCircle, ArrowRight, Eye, EyeOff, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface Question {
   id: string;
   question: string;
+  question_type: string;
   option_a: string;
   option_b: string;
   option_c: string;
   option_d: string;
   correct_option: string;
+  answer_text: string | null;
   marks: number;
   sort_order: number;
 }
@@ -95,11 +98,17 @@ const Tests = () => {
 
     let score = 0;
     let totalMarks = 0;
+    let hasPending = false;
     questions.forEach((q) => {
       const marks = q.marks || 1;
       totalMarks += marks;
-      if (answers[q.id] === q.correct_option) {
-        score += marks;
+      if (q.question_type === "mcq" || !q.question_type) {
+        if (answers[q.id] === q.correct_option) {
+          score += marks;
+        }
+      } else {
+        // Short/long answers need teacher/AI review — scored as 0 for now
+        hasPending = true;
       }
     });
 
@@ -182,6 +191,11 @@ const Tests = () => {
               <p className="text-muted-foreground">
                 You scored <span className="font-bold text-foreground">{result.score}</span> out of <span className="font-bold text-foreground">{result.total}</span> marks
               </p>
+              {questions.some(q => q.question_type === "short" || q.question_type === "long") && (
+                <p className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
+                  ℹ️ Short & long answer questions will be reviewed by your teacher. Your final score may change.
+                </p>
+              )}
             </div>
             <Button onClick={handleExitTest} className="gradient-navy text-white border-0 hover:opacity-90">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tests
@@ -192,6 +206,7 @@ const Tests = () => {
     }
 
     // Question screen
+    const qType = q.question_type || "mcq";
     const options = [
       { key: "A", value: q.option_a },
       { key: "B", value: q.option_b },
@@ -233,28 +248,61 @@ const Tests = () => {
           {/* Question Card */}
           <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Question {currentQ + 1} of {questions.length}</span>
+              <div className="flex items-center gap-2">
+                <span>Question {currentQ + 1} of {questions.length}</span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  qType === "mcq" ? "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold"
+                  : qType === "short" ? "bg-emerald/10 text-emerald"
+                  : "bg-accent text-accent-foreground"
+                }`}>
+                  {qType === "mcq" ? "MCQ" : qType === "short" ? "Short Answer" : "Long Answer"}
+                </span>
+              </div>
               <span>{q.marks || 1} mark{(q.marks || 1) > 1 ? "s" : ""}</span>
             </div>
             <h2 className="text-lg font-bold text-foreground">{q.question}</h2>
-            <div className="space-y-3">
-              {options.map((opt) => (
-                <button
-                  key={opt.key}
-                  onClick={() => handleSelectOption(q.id, opt.key)}
-                  className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all font-medium ${
-                    answers[q.id] === opt.key
-                      ? "border-navy bg-navy/10 dark:border-gold dark:bg-gold/10 text-foreground"
-                      : "border-border hover:border-navy/30 dark:hover:border-gold/30 text-foreground"
-                  }`}
-                >
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-muted text-xs font-bold mr-3">
-                    {opt.key}
-                  </span>
-                  {opt.value}
-                </button>
-              ))}
-            </div>
+
+            {/* MCQ Options */}
+            {qType === "mcq" && (
+              <div className="space-y-3">
+                {options.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => handleSelectOption(q.id, opt.key)}
+                    className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all font-medium ${
+                      answers[q.id] === opt.key
+                        ? "border-navy bg-navy/10 dark:border-gold dark:bg-gold/10 text-foreground"
+                        : "border-border hover:border-navy/30 dark:hover:border-gold/30 text-foreground"
+                    }`}
+                  >
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-muted text-xs font-bold mr-3">
+                      {opt.key}
+                    </span>
+                    {opt.value}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Short Answer */}
+            {qType === "short" && (
+              <Textarea
+                value={answers[q.id] || ""}
+                onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                placeholder="Type your short answer here..."
+                className="min-h-[80px]"
+              />
+            )}
+
+            {/* Long Answer */}
+            {qType === "long" && (
+              <Textarea
+                value={answers[q.id] || ""}
+                onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                placeholder="Write your detailed answer here..."
+                className="min-h-[180px]"
+              />
+            )}
           </div>
 
           {/* Navigation */}
