@@ -29,7 +29,10 @@ const StudentHome = () => {
 
       setLiveClasses(liveRes.data || []);
       setUpcomingClasses(upcomingRes.data || []);
-      setPopularCourses(coursesRes.data || []);
+      const sortedCourses = (coursesRes.data || [])
+        .sort((a: any, b: any) => (b.enrollments?.[0]?.count || 0) - (a.enrollments?.[0]?.count || 0))
+        .slice(0, 6);
+      setPopularCourses(sortedCourses);
       setEnrolledCourses((enrollRes.data || []).map((e: any) => e.courses).filter(Boolean));
       setLoading(false);
     };
