@@ -2,12 +2,12 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 const courses = [
-  { title: "Class 6–8", titleHi: "कक्षा 6–8", desc: "Foundation building with strong basics", icon: "📘", count: "120+ Videos" },
-  { title: "Class 9–10", titleHi: "कक्षा 9–10", desc: "Board exam preparation & concepts", icon: "📗", count: "200+ Videos" },
-  { title: "Class 11–12", titleHi: "कक्षा 11–12", desc: "Advanced subjects & board prep", icon: "📕", count: "300+ Videos" },
-  { title: "Police Exam", titleHi: "पुलिस परीक्षा", desc: "Complete preparation with mock tests", icon: "🛡️", count: "150+ Videos" },
-  { title: "Army Exam", titleHi: "आर्मी परीक्षा", desc: "Physical & written exam preparation", icon: "⭐", count: "180+ Videos" },
-  { title: "Scholarship", titleHi: "छात्रवृत्ति", desc: "NTSE, Olympiad & state scholarship", icon: "🏆", count: "100+ Videos" },
+  { title: "Class 6–8", titleHi: "कक्षा 6–8", desc: "Foundation building with strong basics", icon: "📘", count: "LIVE CLASSES" },
+  { title: "Class 9–10", titleHi: "कक्षा 9–10", desc: "Board exam preparation & concepts", icon: "📗", count: "LIVE CLASSES" },
+  { title: "Class 11–12", titleHi: "कक्षा 11–12", desc: "Advanced subjects & board prep", icon: "📕", count: "LIVE CLASSES" },
+  { title: "Police Exam", titleHi: "पुलिस परीक्षा", desc: "Complete preparation with mock tests", icon: "🛡️", count: "LIVE CLASSES" },
+  { title: "Army Exam", titleHi: "आर्मी परीक्षा", desc: "Physical & written exam preparation", icon: "⭐", count: "LIVE CLASSES" },
+  { title: "Scholarship", titleHi: "छात्रवृत्ति", desc: "NTSE, Olympiad & state scholarship", icon: "🏆", count: "LIVE CLASSES" },
 ];
 
 const CoursesSection = () => {
