@@ -98,11 +98,17 @@ const Tests = () => {
 
     let score = 0;
     let totalMarks = 0;
+    let hasPending = false;
     questions.forEach((q) => {
       const marks = q.marks || 1;
       totalMarks += marks;
-      if (answers[q.id] === q.correct_option) {
-        score += marks;
+      if (q.question_type === "mcq" || !q.question_type) {
+        if (answers[q.id] === q.correct_option) {
+          score += marks;
+        }
+      } else {
+        // Short/long answers need teacher/AI review — scored as 0 for now
+        hasPending = true;
       }
     });
 
