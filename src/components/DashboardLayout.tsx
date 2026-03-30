@@ -33,6 +33,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/tests", icon: Brain, label: "Tests" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: "Doubts" },
     { to: "/dashboard/students", icon: Users, label: "Students" },
+    { to: "/dashboard/profile", icon: UserCircle, label: "Profile" },
   ];
 
   const adminLinks = [
