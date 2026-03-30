@@ -34,31 +34,31 @@ const Dashboard = () => {
   };
 
   const statCards = role === "student" ? [
-    { icon: BookOpen, label: "Enrolled Courses", labelHi: "नामांकित कोर्स", value: stats.courses, color: "bg-accent text-accent-foreground" },
-    { icon: Brain, label: "Tests Taken", labelHi: "दिए गए टेस्ट", value: stats.tests, color: "bg-secondary/10 text-secondary" },
+    { icon: BookOpen, label: "Enrolled Courses", labelHi: "नामांकित कोर्स", value: stats.courses, color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
+    { icon: Brain, label: "Tests Taken", labelHi: "दिए गए टेस्ट", value: stats.tests, color: "bg-gold/10 text-gold-warm" },
     { icon: MessageCircle, label: "Doubts Asked", labelHi: "पूछे गए डाउट", value: stats.doubts, color: "bg-emerald/10 text-emerald" },
-    { icon: TrendingUp, label: "Avg Score", labelHi: "औसत स्कोर", value: "—", color: "bg-gold/10 text-saffron-dark" },
+    { icon: TrendingUp, label: "Avg Score", labelHi: "औसत स्कोर", value: "—", color: "bg-saffron/10 text-saffron-dark" },
   ] : role === "teacher" ? [
-    { icon: BookOpen, label: "My Courses", labelHi: "मेरे कोर्स", value: stats.courses, color: "bg-accent text-accent-foreground" },
-    { icon: Users, label: "Students", labelHi: "छात्र", value: stats.students, color: "bg-secondary/10 text-secondary" },
+    { icon: BookOpen, label: "My Courses", labelHi: "मेरे कोर्स", value: stats.courses, color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
+    { icon: Users, label: "Students", labelHi: "छात्र", value: stats.students, color: "bg-gold/10 text-gold-warm" },
     { icon: Brain, label: "Tests Created", labelHi: "बनाए गए टेस्ट", value: stats.tests, color: "bg-emerald/10 text-emerald" },
-    { icon: MessageCircle, label: "Pending Doubts", labelHi: "लंबित डाउट", value: stats.doubts, color: "bg-gold/10 text-saffron-dark" },
+    { icon: MessageCircle, label: "Pending Doubts", labelHi: "लंबित डाउट", value: stats.doubts, color: "bg-saffron/10 text-saffron-dark" },
   ] : [
-    { icon: Users, label: "Total Users", labelHi: "कुल उपयोगकर्ता", value: "—", color: "bg-accent text-accent-foreground" },
-    { icon: BookOpen, label: "Total Courses", labelHi: "कुल कोर्स", value: stats.courses, color: "bg-secondary/10 text-secondary" },
+    { icon: Users, label: "Total Users", labelHi: "कुल उपयोगकर्ता", value: "—", color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
+    { icon: BookOpen, label: "Total Courses", labelHi: "कुल कोर्स", value: stats.courses, color: "bg-gold/10 text-gold-warm" },
     { icon: Brain, label: "Total Tests", labelHi: "कुल टेस्ट", value: stats.tests, color: "bg-emerald/10 text-emerald" },
-    { icon: Award, label: "Revenue", labelHi: "राजस्व", value: "₹0", color: "bg-gold/10 text-saffron-dark" },
+    { icon: Award, label: "Revenue", labelHi: "राजस्व", value: "₹0", color: "bg-saffron/10 text-saffron-dark" },
   ];
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Greeting */}
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold font-heading text-foreground">
+        <div className="gradient-navy rounded-2xl p-6 text-white">
+          <h1 className="text-2xl lg:text-3xl font-extrabold font-heading">
             {greeting()} 👋
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-white/60 mt-1">
             {profile?.full_name || "User"}, here's your overview / यहाँ आपका अवलोकन है
           </p>
         </div>
@@ -75,7 +75,7 @@ const Dashboard = () => {
               </div>
               <p className="text-2xl font-extrabold font-heading text-foreground">{stat.value}</p>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className="text-xs text-primary">{stat.labelHi}</p>
+              <p className="text-xs text-gold-warm">{stat.labelHi}</p>
             </div>
           ))}
         </div>
@@ -122,7 +122,7 @@ const QuickAction = ({ icon, label, labelHi, to }: { icon: string; label: string
   return (
     <button
       onClick={() => navigate(to)}
-      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-soft transition-all text-center w-full"
+      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-gold/40 hover:shadow-gold transition-all text-center w-full group"
     >
       <span className="text-2xl">{icon}</span>
       <span className="text-sm font-medium text-foreground">{label}</span>

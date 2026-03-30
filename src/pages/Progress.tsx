@@ -40,29 +40,29 @@ const Progress = () => {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
           </div>
         ) : (
           <>
             {/* Overview Cards */}
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-card rounded-2xl p-5 border border-border text-center">
-                <BookOpen className="w-8 h-8 mx-auto text-primary mb-2" />
+                <BookOpen className="w-8 h-8 mx-auto text-navy dark:text-gold mb-2" />
                 <p className="text-2xl font-extrabold text-foreground">{enrollments.length}</p>
                 <p className="text-sm text-muted-foreground">Courses Enrolled</p>
-                <p className="text-xs text-primary">नामांकित कोर्स</p>
+                <p className="text-xs text-gold-warm">नामांकित कोर्स</p>
               </div>
               <div className="bg-card rounded-2xl p-5 border border-border text-center">
-                <Brain className="w-8 h-8 mx-auto text-secondary mb-2" />
+                <Brain className="w-8 h-8 mx-auto text-gold-warm mb-2" />
                 <p className="text-2xl font-extrabold text-foreground">{attempts.length}</p>
                 <p className="text-sm text-muted-foreground">Tests Taken</p>
-                <p className="text-xs text-primary">दिए गए टेस्ट</p>
+                <p className="text-xs text-gold-warm">दिए गए टेस्ट</p>
               </div>
               <div className="bg-card rounded-2xl p-5 border border-border text-center">
                 <BarChart3 className="w-8 h-8 mx-auto text-emerald mb-2" />
                 <p className="text-2xl font-extrabold text-foreground">{avgScore}%</p>
                 <p className="text-sm text-muted-foreground">Average Score</p>
-                <p className="text-xs text-primary">औसत स्कोर</p>
+                <p className="text-xs text-gold-warm">औसत स्कोर</p>
               </div>
             </div>
 
@@ -81,10 +81,10 @@ const Progress = () => {
                     <div key={enr.id} className="flex items-center gap-4">
                       <div className="flex-1">
                         <p className="font-medium text-foreground text-sm">{(enr as any).courses?.title}</p>
-                        <p className="text-xs text-primary">{(enr as any).courses?.title_hi}</p>
+                        <p className="text-xs text-gold-warm">{(enr as any).courses?.title_hi}</p>
                         <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                           <div
-                            className="h-full gradient-saffron rounded-full transition-all"
+                            className="h-full gradient-gold rounded-full transition-all"
                             style={{ width: `${enr.progress || 0}%` }}
                           />
                         </div>
@@ -121,7 +121,7 @@ const Progress = () => {
                         </div>
                       </div>
                       <span className={`text-sm font-bold ${
-                        (att.percentage || 0) >= 70 ? "text-emerald" : (att.percentage || 0) >= 40 ? "text-gold" : "text-destructive"
+                        (att.percentage || 0) >= 70 ? "text-emerald" : (att.percentage || 0) >= 40 ? "text-gold-warm" : "text-destructive"
                       }`}>
                         {att.percentage?.toFixed(0)}%
                       </span>
