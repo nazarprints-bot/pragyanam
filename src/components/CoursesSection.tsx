@@ -12,7 +12,7 @@ const courses = [
 
 const CoursesSection = () => {
   return (
-    <section id="courses" className="py-20 lg:py-28">
+    <section id="courses" className="py-20 lg:py-28 bg-cream">
       <div className="max-w-6xl mx-auto px-5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -20,7 +20,7 @@ const CoursesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <p className="text-[12px] font-semibold text-primary uppercase tracking-widest mb-3">Courses</p>
+          <p className="text-[12px] font-semibold text-accent uppercase tracking-widest mb-3">Courses</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
             Learn what matters
           </h2>
@@ -37,13 +37,13 @@ const CoursesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="group bg-card rounded-xl p-5 border border-border hover:border-primary/20 hover:shadow-card cursor-pointer transition-all duration-200"
+              className="group bg-background rounded-xl p-5 border border-border hover:border-accent/30 hover:shadow-gold cursor-pointer transition-all duration-300"
             >
               <div className="text-2xl mb-3">{course.icon}</div>
               <h3 className="text-[15px] font-semibold text-foreground mb-0.5">{course.title}</h3>
-              <p className="text-[12px] text-primary font-medium mb-1.5">{course.titleHi}</p>
+              <p className="text-[12px] text-accent font-semibold mb-1.5">{course.titleHi}</p>
               <p className="text-[13px] text-muted-foreground leading-relaxed mb-3">{course.desc}</p>
-              <div className="flex items-center text-[12px] font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center text-[12px] font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                 Explore <ArrowRight className="w-3 h-3 ml-1" />
               </div>
             </motion.div>
