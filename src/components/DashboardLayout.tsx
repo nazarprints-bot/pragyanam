@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, FileText, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu, X,
-  Upload, Bell, ChevronDown
+  Upload, Bell, ChevronDown, Video, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
