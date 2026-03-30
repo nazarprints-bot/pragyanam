@@ -42,7 +42,7 @@ const Tests = () => {
     if (error) {
       toast.error("Failed to update: " + error.message);
     } else {
-      toast.success(test.is_published ? "Test unpublished / टेस्ट अनपब्लिश" : "Test published! / टेस्ट पब्लिश हो गया!");
+      toast.success(test.is_published ? "Test unpublished" : "Test published!");
       fetchTests();
     }
   };
@@ -52,7 +52,7 @@ const Tests = () => {
     if (error) {
       toast.error("Failed to delete: " + error.message);
     } else {
-      toast.success("Test deleted / टेस्ट डिलीट हो गया");
+      toast.success("Test deleted");
       fetchTests();
     }
   };
@@ -62,10 +62,10 @@ const Tests = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-extrabold font-heading text-foreground">
-            Tests / टेस्ट
+            Tests
           </h1>
           <p className="text-sm text-muted-foreground">
-            {role === "student" ? "Take tests and track your performance / टेस्ट दें और अपना प्रदर्शन ट्रैक करें" : "Manage and create tests / टेस्ट बनाएं और प्रबंधित करें"}
+            {role === "student" ? "Take tests and track your performance" : "Manage and create tests"}
           </p>
         </div>
 
@@ -77,7 +77,7 @@ const Tests = () => {
           <div className="text-center py-16 bg-card rounded-2xl border border-border">
             <Brain className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-bold text-foreground mb-1">No Tests Available</h3>
-            <p className="text-sm text-muted-foreground">अभी कोई टेस्ट उपलब्ध नहीं है</p>
+            <p className="text-sm text-muted-foreground">No tests available at the moment</p>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -102,8 +102,7 @@ const Tests = () => {
                       </span>
                     </div>
                   </div>
-                  <h3 className="font-bold text-foreground mb-0.5">{test.title}</h3>
-                  <p className="text-xs text-gold-warm mb-3">{test.title_hi}</p>
+                  <h3 className="font-bold text-foreground mb-3">{test.title}</h3>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {test.duration_minutes} min

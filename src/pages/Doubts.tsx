@@ -36,7 +36,7 @@ const Doubts = () => {
     if (error) {
       toast.error("Failed to post doubt");
     } else {
-      toast.success("Doubt posted! / डाउट पोस्ट हो गया!");
+      toast.success("Doubt posted successfully!");
       setNewDoubt({ title: "", description: "" });
       setShowForm(false);
       fetchDoubts();
@@ -62,7 +62,7 @@ const Doubts = () => {
       setReplyText((prev) => ({ ...prev, [doubtId]: "" }));
       const res = await supabase.from("doubt_replies").select("*").eq("doubt_id", doubtId).order("created_at");
       setReplies((prev) => ({ ...prev, [doubtId]: res.data || [] }));
-      toast.success("Reply posted! / उत्तर पोस्ट हो गया!");
+      toast.success("Reply posted!");
     }
   };
 
@@ -72,9 +72,9 @@ const Doubts = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-foreground">
-              Doubts / डाउट
+              Doubts
             </h1>
-            <p className="text-sm text-muted-foreground">Ask and solve doubts / डाउट पूछें और हल करें</p>
+            <p className="text-sm text-muted-foreground">Ask and solve doubts</p>
           </div>
           {role === "student" && (
             <Button onClick={() => setShowForm(!showForm)} className="gradient-navy text-white border-0 hover:opacity-90">
@@ -86,13 +86,13 @@ const Doubts = () => {
         {showForm && (
           <form onSubmit={handleCreateDoubt} className="bg-card rounded-2xl p-6 border border-border space-y-4">
             <Input
-              placeholder="Doubt title / डाउट का शीर्षक"
+              placeholder="Doubt title"
               required
               value={newDoubt.title}
               onChange={(e) => setNewDoubt({ ...newDoubt, title: e.target.value })}
             />
             <Textarea
-              placeholder="Describe your doubt in detail / अपना डाउट विस्तार से बताएं"
+              placeholder="Describe your doubt in detail"
               required
               value={newDoubt.description}
               onChange={(e) => setNewDoubt({ ...newDoubt, description: e.target.value })}
@@ -112,7 +112,7 @@ const Doubts = () => {
           <div className="text-center py-16 bg-card rounded-2xl border border-border">
             <MessageCircle className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-bold text-foreground mb-1">No Doubts Yet</h3>
-            <p className="text-sm text-muted-foreground">अभी कोई डाउट नहीं है</p>
+            <p className="text-sm text-muted-foreground">No doubts have been posted yet</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -128,14 +128,14 @@ const Doubts = () => {
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">{doubt.description}</p>
                 <p className="text-xs text-muted-foreground mb-3">
-                  {new Date(doubt.created_at).toLocaleDateString("hi-IN")}
+                  {new Date(doubt.created_at).toLocaleDateString("en-IN")}
                 </p>
 
                 <button
                   onClick={() => fetchReplies(doubt.id)}
                   className="text-sm text-gold-warm hover:underline mb-3"
                 >
-                  View Replies / उत्तर देखें
+                  View Replies
                 </button>
 
                 {replies[doubt.id] && (
@@ -144,7 +144,7 @@ const Doubts = () => {
                       <div key={reply.id} className="bg-muted rounded-xl p-3">
                         <p className="text-sm text-foreground">{reply.content}</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(reply.created_at).toLocaleDateString("hi-IN")}
+                          {new Date(reply.created_at).toLocaleDateString("en-IN")}
                         </p>
                       </div>
                     ))}
@@ -153,7 +153,7 @@ const Doubts = () => {
 
                 <div className="flex gap-2 mt-3">
                   <Input
-                    placeholder="Type reply... / उत्तर लिखें..."
+                    placeholder="Type your reply..."
                     value={replyText[doubt.id] || ""}
                     onChange={(e) => setReplyText({ ...replyText, [doubt.id]: e.target.value })}
                     className="flex-1"

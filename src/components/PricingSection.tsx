@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 const plans = [
   {
     name: "Basic",
-    nameHi: "बेसिक",
     price: "₹99",
     period: "/mo",
     desc: "Essential learning for school students",
@@ -16,7 +15,6 @@ const plans = [
   },
   {
     name: "Pro",
-    nameHi: "प्रो",
     price: "₹249",
     period: "/mo",
     desc: "Complete preparation with live classes",
@@ -26,7 +24,6 @@ const plans = [
   },
   {
     name: "Free",
-    nameHi: "मुफ्त",
     price: "₹0",
     period: "",
     desc: "For students who truly need support",
@@ -52,7 +49,7 @@ const PricingSection = () => {
             Affordable for everyone
           </h2>
           <p className="text-[15px] text-muted-foreground max-w-md mx-auto">
-            सबसे कम कीमत पर सबसे अच्छी शिक्षा
+            The best education at the lowest price
           </p>
         </motion.div>
 
@@ -81,7 +78,6 @@ const PricingSection = () => {
 
               <div className="mb-5">
                 <h3 className="text-[15px] font-bold text-foreground">{plan.name}</h3>
-                <p className="text-[11px] text-accent font-semibold">{plan.nameHi}</p>
               </div>
 
               <div className="mb-1">

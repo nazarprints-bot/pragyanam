@@ -4,14 +4,14 @@ import {
 } from "lucide-react";
 
 const features = [
-  { icon: Video, title: "Live Classes", titleHi: "लाइव कक्षाएं", desc: "Interactive sessions with real-time doubt solving" },
-  { icon: PlayCircle, title: "Recorded Lectures", titleHi: "रिकॉर्डेड लेक्चर", desc: "Access video lectures anytime, organized chapter-wise" },
-  { icon: FileText, title: "Study Material", titleHi: "अध्ययन सामग्री", desc: "PDF notes, practice sheets & chapter summaries" },
-  { icon: Brain, title: "Smart Tests", titleHi: "स्मार्ट टेस्ट", desc: "Chapter tests, mock exams with instant results" },
-  { icon: MessageCircle, title: "Doubt Solving", titleHi: "डाउट सॉल्विंग", desc: "Post doubts and get teacher responses quickly" },
-  { icon: BarChart3, title: "Progress Tracking", titleHi: "प्रगति ट्रैकिंग", desc: "Track completion, scores & performance analytics" },
-  { icon: Globe, title: "Hindi + English", titleHi: "बहु-भाषा", desc: "Full bilingual support across the platform" },
-  { icon: BookOpen, title: "All Subjects", titleHi: "सभी विषय", desc: "Class 6–12, Govt Jobs & Scholarship prep" },
+  { icon: Video, title: "Live Classes", desc: "Interactive sessions with real-time doubt solving" },
+  { icon: PlayCircle, title: "Recorded Lectures", desc: "Access video lectures anytime, organized chapter-wise" },
+  { icon: FileText, title: "Study Material", desc: "PDF notes, practice sheets & chapter summaries" },
+  { icon: Brain, title: "Smart Tests", desc: "Chapter tests, mock exams with instant results" },
+  { icon: MessageCircle, title: "Doubt Solving", desc: "Post doubts and get teacher responses quickly" },
+  { icon: BarChart3, title: "Progress Tracking", desc: "Track completion, scores & performance analytics" },
+  { icon: Globe, title: "Multi-Language", desc: "Full bilingual support across the platform" },
+  { icon: BookOpen, title: "All Subjects", desc: "Class 6–12, Govt Jobs & Scholarship prep" },
 ];
 
 const FeaturesSection = () => {
@@ -33,7 +33,7 @@ const FeaturesSection = () => {
             Everything you need to succeed
           </h2>
           <p className="text-[15px] text-primary-foreground/60 max-w-md mx-auto">
-            सफलता के लिए सब कुछ एक ही जगह
+            All the tools for success in one place
           </p>
         </motion.div>
 
@@ -50,8 +50,7 @@ const FeaturesSection = () => {
               <div className="w-9 h-9 rounded-lg bg-accent/15 flex items-center justify-center mb-3">
                 <feature.icon className="w-[18px] h-[18px] text-accent" />
               </div>
-              <h3 className="text-[14px] font-semibold text-primary-foreground mb-0.5">{feature.title}</h3>
-              <p className="text-[11px] font-medium text-accent mb-1.5">{feature.titleHi}</p>
+              <h3 className="text-[14px] font-semibold text-primary-foreground mb-1.5">{feature.title}</h3>
               <p className="text-[13px] text-primary-foreground/60 leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}

@@ -33,9 +33,9 @@ const Progress = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-extrabold font-heading text-foreground">
-            Progress / प्रगति
+            Progress
           </h1>
-          <p className="text-sm text-muted-foreground">Track your learning journey / अपनी शिक्षा यात्रा ट्रैक करें</p>
+          <p className="text-sm text-muted-foreground">Track your learning journey</p>
         </div>
 
         {loading ? (
@@ -50,30 +50,27 @@ const Progress = () => {
                 <BookOpen className="w-8 h-8 mx-auto text-navy dark:text-gold mb-2" />
                 <p className="text-2xl font-extrabold text-foreground">{enrollments.length}</p>
                 <p className="text-sm text-muted-foreground">Courses Enrolled</p>
-                <p className="text-xs text-gold-warm">नामांकित कोर्स</p>
               </div>
               <div className="bg-card rounded-2xl p-5 border border-border text-center">
                 <Brain className="w-8 h-8 mx-auto text-gold-warm mb-2" />
                 <p className="text-2xl font-extrabold text-foreground">{attempts.length}</p>
                 <p className="text-sm text-muted-foreground">Tests Taken</p>
-                <p className="text-xs text-gold-warm">दिए गए टेस्ट</p>
               </div>
               <div className="bg-card rounded-2xl p-5 border border-border text-center">
                 <BarChart3 className="w-8 h-8 mx-auto text-emerald mb-2" />
                 <p className="text-2xl font-extrabold text-foreground">{avgScore}%</p>
                 <p className="text-sm text-muted-foreground">Average Score</p>
-                <p className="text-xs text-gold-warm">औसत स्कोर</p>
               </div>
             </div>
 
             {/* Enrolled Courses Progress */}
             <div className="bg-card rounded-2xl p-6 border border-border">
               <h2 className="text-lg font-bold font-heading text-foreground mb-4">
-                Course Progress / कोर्स प्रगति
+                Course Progress
               </h2>
               {enrollments.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No courses enrolled yet / अभी कोई कोर्स नामांकित नहीं है
+                  No courses enrolled yet
                 </p>
               ) : (
                 <div className="space-y-4">
@@ -81,7 +78,6 @@ const Progress = () => {
                     <div key={enr.id} className="flex items-center gap-4">
                       <div className="flex-1">
                         <p className="font-medium text-foreground text-sm">{(enr as any).courses?.title}</p>
-                        <p className="text-xs text-gold-warm">{(enr as any).courses?.title_hi}</p>
                         <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full gradient-gold rounded-full transition-all"
@@ -99,11 +95,11 @@ const Progress = () => {
             {/* Test Results */}
             <div className="bg-card rounded-2xl p-6 border border-border">
               <h2 className="text-lg font-bold font-heading text-foreground mb-4">
-                Recent Test Results / हाल के टेस्ट परिणाम
+                Recent Test Results
               </h2>
               {attempts.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No tests taken yet / अभी कोई टेस्ट नहीं दिया
+                  No tests taken yet
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -116,7 +112,7 @@ const Progress = () => {
                             Score: {att.score}/{att.total_marks}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(att.created_at).toLocaleDateString("hi-IN")}
+                            {new Date(att.created_at).toLocaleDateString("en-IN")}
                           </p>
                         </div>
                       </div>

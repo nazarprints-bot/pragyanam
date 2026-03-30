@@ -2,12 +2,12 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 const courses = [
-  { title: "Class 6–8", titleHi: "कक्षा 6–8", desc: "Foundation building with strong basics", icon: "📘" },
-  { title: "Class 9–10", titleHi: "कक्षा 9–10", desc: "Board exam preparation & concepts", icon: "📗" },
-  { title: "Class 11–12", titleHi: "कक्षा 11–12", desc: "Advanced subjects & board prep", icon: "📕" },
-  { title: "Police Exam", titleHi: "पुलिस परीक्षा", desc: "Complete preparation with mock tests", icon: "🛡️" },
-  { title: "Army Exam", titleHi: "आर्मी परीक्षा", desc: "Physical & written exam preparation", icon: "⭐" },
-  { title: "Scholarship", titleHi: "छात्रवृत्ति", desc: "NTSE, Olympiad & state scholarship", icon: "🏆" },
+  { title: "Class 6–8", desc: "Foundation building with strong basics", icon: "📘" },
+  { title: "Class 9–10", desc: "Board exam preparation & concepts", icon: "📗" },
+  { title: "Class 11–12", desc: "Advanced subjects & board prep", icon: "📕" },
+  { title: "Police Exam", desc: "Complete preparation with mock tests", icon: "🛡️" },
+  { title: "Army Exam", desc: "Physical & written exam preparation", icon: "⭐" },
+  { title: "Scholarship", desc: "NTSE, Olympiad & state scholarship", icon: "🏆" },
 ];
 
 const CoursesSection = () => {
@@ -25,7 +25,7 @@ const CoursesSection = () => {
             Learn what matters
           </h2>
           <p className="text-[15px] text-muted-foreground max-w-md mx-auto">
-            School से competitive exams तक — सब कुछ एक जगह
+            From school to competitive exams — everything in one place
           </p>
         </motion.div>
 
@@ -40,8 +40,7 @@ const CoursesSection = () => {
               className="group bg-background rounded-xl p-5 border border-border hover:border-accent/30 hover:shadow-gold cursor-pointer transition-all duration-300"
             >
               <div className="text-2xl mb-3">{course.icon}</div>
-              <h3 className="text-[15px] font-semibold text-foreground mb-0.5">{course.title}</h3>
-              <p className="text-[12px] text-accent font-semibold mb-1.5">{course.titleHi}</p>
+              <h3 className="text-[15px] font-semibold text-foreground mb-1.5">{course.title}</h3>
               <p className="text-[13px] text-muted-foreground leading-relaxed mb-3">{course.desc}</p>
               <div className="flex items-center text-[12px] font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                 Explore <ArrowRight className="w-3 h-3 ml-1" />

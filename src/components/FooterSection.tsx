@@ -12,7 +12,6 @@ const FooterSection = () => {
               </div>
               <div>
                 <span className="text-[15px] font-bold text-primary-foreground">Pragyanam Academy</span>
-                <span className="block text-[11px] text-accent">प्रज्ञानम्</span>
               </div>
             </div>
             <p className="text-[13px] text-primary-foreground/60 max-w-sm leading-relaxed">

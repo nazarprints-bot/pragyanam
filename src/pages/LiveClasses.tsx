@@ -57,7 +57,7 @@ const LiveClasses = () => {
 
     const scheduledAtIso = new Date(form.scheduled_at).toISOString();
     if (!form.scheduled_at || Number.isNaN(new Date(form.scheduled_at).getTime())) {
-      toast.error("Please select valid date & time / सही तारीख और समय चुनें");
+      toast.error("Please select a valid date & time");
       setCreating(false);
       return;
     }
@@ -75,7 +75,7 @@ const LiveClasses = () => {
     if (error) {
       toast.error("Failed to schedule class: " + error.message);
     } else {
-      toast.success("Live class scheduled! / लाइव क्लास शेड्यूल हो गई!");
+      toast.success("Live class scheduled!");
       setShowForm(false);
       setForm({ title: "", title_hi: "", description: "", scheduled_at: "", duration_minutes: 60 });
       await fetchClasses();
@@ -95,7 +95,7 @@ const LiveClasses = () => {
       return;
     }
 
-    toast.success("Class started / क्लास शुरू हो गई");
+    toast.success("Class started");
     await fetchClasses();
     setActiveRoom(classItem.room_id);
   };
@@ -118,7 +118,7 @@ const LiveClasses = () => {
 
     setActiveRoom(null);
     await fetchClasses();
-    toast.success("Class ended / क्लास खत्म हो गई");
+    toast.success("Class ended");
   };
 
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
@@ -133,10 +133,10 @@ const LiveClasses = () => {
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold font-heading text-foreground flex items-center gap-2">
               <Video className="w-5 h-5 text-destructive animate-pulse" />
-              Live Class / लाइव क्लास
+              Live Class
             </h1>
             <Button variant="outline" onClick={() => setActiveRoom(null)}>
-              <X className="w-4 h-4 mr-1" /> Leave / छोड़ें
+              <X className="w-4 h-4 mr-1" /> Leave
             </Button>
           </div>
           <div className="rounded-2xl overflow-hidden border border-border bg-foreground/5" style={{ height: "calc(100vh - 180px)" }}>
@@ -159,12 +159,12 @@ const LiveClasses = () => {
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
               <Video className="w-6 h-6 text-navy dark:text-gold" />
-              Live Classes / लाइव क्लास
+              Live Classes
             </h1>
             <p className="text-sm text-muted-foreground">
               {isTeacherOrAdmin
-                ? "Schedule and manage live classes / लाइव क्लास शेड्यूल करें"
-                : "Join live classes with your teachers / शिक्षकों के साथ लाइव क्लास में जुड़ें"}
+                ? "Schedule and manage live classes"
+                : "Join live classes with your teachers"}
             </p>
           </div>
           {isTeacherOrAdmin && (
@@ -179,17 +179,17 @@ const LiveClasses = () => {
         {showForm && isTeacherOrAdmin && (
           <div className="bg-card rounded-2xl p-6 border border-border">
             <h2 className="text-lg font-bold font-heading text-foreground mb-4">
-              Schedule New Live Class / नई लाइव क्लास
+              Schedule New Live Class
             </h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Title (English)</Label>
+                  <Label>Title</Label>
                   <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Math Revision Class" className="mt-1" />
                 </div>
                 <div>
-                  <Label>Title (Hindi / शीर्षक)</Label>
-                  <Input value={form.title_hi} onChange={(e) => setForm({ ...form, title_hi: e.target.value })} placeholder="जैसे गणित रिवीज़न" className="mt-1" />
+                  <Label>Subtitle (Optional)</Label>
+                  <Input value={form.title_hi} onChange={(e) => setForm({ ...form, title_hi: e.target.value })} placeholder="Optional subtitle" className="mt-1" />
                 </div>
               </div>
               <div>
@@ -198,18 +198,18 @@ const LiveClasses = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Date & Time / तारीख और समय</Label>
+                  <Label>Date & Time</Label>
                   <Input type="datetime-local" required value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="mt-1" />
                 </div>
                 <div>
-                  <Label>Duration (minutes) / अवधि</Label>
+                  <Label>Duration (minutes)</Label>
                   <Input type="number" min={15} max={180} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: Number(e.target.value) })} className="mt-1" />
                 </div>
               </div>
               <div className="flex gap-3">
                 <Button type="submit" disabled={creating} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
                   {creating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Calendar className="w-4 h-4 mr-1" />}
-                  Schedule / शेड्यूल करें
+                  Schedule
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
               </div>
@@ -228,7 +228,7 @@ const LiveClasses = () => {
               <div className="space-y-3">
                 <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-                  Live Now / अभी लाइव
+                  Live Now
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {liveClasses.map((c) => (
@@ -238,14 +238,13 @@ const LiveClasses = () => {
                         <span className="text-xs font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">LIVE</span>
                       </div>
                       <h3 className="font-bold text-foreground">{c.title}</h3>
-                      {c.title_hi && <p className="text-xs text-gold-warm">{c.title_hi}</p>}
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 mb-4">
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{c.duration_minutes} min</span>
                       </div>
                       {isTeacherOrAdmin && c.teacher_id === user?.id ? (
                         <div className="flex gap-2">
                           <Button onClick={() => handleJoinClass(c)} className="flex-1 gradient-navy text-white border-0 hover:opacity-90">
-                            <Play className="w-4 h-4 mr-1" /> Join / जुड़ें
+                            <Play className="w-4 h-4 mr-1" /> Join
                           </Button>
                           <Button variant="destructive" onClick={() => handleEndClass(c)} size="sm">
                             End
@@ -253,7 +252,7 @@ const LiveClasses = () => {
                         </div>
                       ) : (
                         <Button onClick={() => handleJoinClass(c)} className="w-full gradient-navy text-white border-0 hover:opacity-90">
-                          <Play className="w-4 h-4 mr-1" /> Join Live / लाइव जुड़ें
+                          <Play className="w-4 h-4 mr-1" /> Join Live
                         </Button>
                       )}
                     </div>
@@ -264,18 +263,17 @@ const LiveClasses = () => {
 
             {/* Upcoming */}
             <div className="space-y-3">
-              <h2 className="text-lg font-bold text-foreground">📅 Upcoming / आने वाली</h2>
+              <h2 className="text-lg font-bold text-foreground">📅 Upcoming</h2>
               {upcomingClasses.length === 0 ? (
                 <div className="text-center py-12 bg-card rounded-2xl border border-border">
                   <Calendar className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-sm text-muted-foreground">No upcoming classes / कोई आने वाली क्लास नहीं</p>
+                  <p className="text-sm text-muted-foreground">No upcoming classes</p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {upcomingClasses.map((c) => (
                     <div key={c.id} className="bg-card rounded-2xl p-5 border border-border hover:shadow-card hover:border-gold/20 transition-all">
-                      <h3 className="font-bold text-foreground mb-0.5">{c.title}</h3>
-                      {c.title_hi && <p className="text-xs text-gold-warm mb-2">{c.title_hi}</p>}
+                      <h3 className="font-bold text-foreground mb-2">{c.title}</h3>
                       {c.description && <p className="text-xs text-muted-foreground mb-3">{c.description}</p>}
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
                         <span className="flex items-center gap-1">
@@ -290,7 +288,7 @@ const LiveClasses = () => {
                       </div>
                       {isTeacherOrAdmin && c.teacher_id === user?.id && (
                         <Button onClick={() => handleStartClass(c)} className="w-full gradient-navy text-white border-0 hover:opacity-90" size="sm">
-                          <Play className="w-3 h-3 mr-1" /> Start Class / क्लास शुरू करें
+                          <Play className="w-3 h-3 mr-1" /> Start Class
                         </Button>
                       )}
                     </div>
@@ -302,7 +300,7 @@ const LiveClasses = () => {
             {/* Past */}
             {pastClasses.length > 0 && (
               <div className="space-y-3">
-                <h2 className="text-lg font-bold text-muted-foreground">Past Classes / पिछली क्लासें</h2>
+                <h2 className="text-lg font-bold text-muted-foreground">Past Classes</h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {pastClasses.slice(0, 6).map((c) => (
                     <div key={c.id} className="bg-card rounded-2xl p-5 border border-border opacity-70">

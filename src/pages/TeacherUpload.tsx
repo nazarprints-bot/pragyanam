@@ -56,7 +56,7 @@ const TeacherUpload = () => {
     if (error) {
       toast.error("Failed to create course: " + error.message);
     } else {
-      toast.success("Course created! / कोर्स बन गया!");
+      toast.success("Course created!");
       setCourseForm({ title: "", title_hi: "", description: "", description_hi: "", category: "school", class_level: "" });
       setThumbnailFile(null);
       await fetchMyCourses();
@@ -77,14 +77,14 @@ const TeacherUpload = () => {
   const togglePublish = async (course: any) => {
     const { error } = await supabase.from("courses").update({ is_published: !course.is_published }).eq("id", course.id);
     if (error) { toast.error("Failed: " + error.message); return; }
-    toast.success(course.is_published ? "Moved to draft / ड्राफ्ट में" : "Published / पब्लिश हो गया");
+    toast.success(course.is_published ? "Moved to draft" : "Published");
     await fetchMyCourses();
   };
 
   const deleteCourse = async (courseId: string) => {
     const { error } = await supabase.from("courses").delete().eq("id", courseId);
     if (error) { toast.error("Failed: " + error.message); return; }
-    toast.success("Course deleted / कोर्स हट गया");
+    toast.success("Course deleted");
     await fetchMyCourses();
   };
 
@@ -94,38 +94,38 @@ const TeacherUpload = () => {
     <DashboardLayout>
       <div className="space-y-6 max-w-4xl">
         <div>
-          <h1 className="text-2xl font-extrabold font-heading text-foreground">Upload Content / कंटेंट अपलोड करें</h1>
+          <h1 className="text-2xl font-extrabold font-heading text-foreground">Upload Content</h1>
           <p className="text-sm text-muted-foreground">Create courses and upload study material</p>
         </div>
 
         {/* Create Course Form */}
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
-            <Plus className="w-5 h-5 text-gold" /> Create New Course / नया कोर्स बनाएं
+            <Plus className="w-5 h-5 text-gold" /> Create New Course
           </h2>
           <form onSubmit={handleCreateCourse} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Title (English)</Label>
+                <Label>Title</Label>
                 <Input required value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} placeholder="e.g. Mathematics Class 10" className="mt-1" />
               </div>
               <div>
-                <Label>Title (Hindi / शीर्षक)</Label>
-                <Input required value={courseForm.title_hi} onChange={(e) => setCourseForm({ ...courseForm, title_hi: e.target.value })} placeholder="जैसे गणित कक्षा 10" className="mt-1" />
+                <Label>Subtitle (Optional)</Label>
+                <Input value={courseForm.title_hi} onChange={(e) => setCourseForm({ ...courseForm, title_hi: e.target.value })} placeholder="Optional subtitle" className="mt-1" />
               </div>
             </div>
             <div>
-              <Label>Description (English)</Label>
+              <Label>Description</Label>
               <Textarea value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} placeholder="Course description" className="mt-1" />
             </div>
             <div>
-              <Label>Description (Hindi / विवरण)</Label>
-              <Textarea value={courseForm.description_hi} onChange={(e) => setCourseForm({ ...courseForm, description_hi: e.target.value })} placeholder="कोर्स का विवरण" className="mt-1" />
+              <Label>Additional Description (Optional)</Label>
+              <Textarea value={courseForm.description_hi} onChange={(e) => setCourseForm({ ...courseForm, description_hi: e.target.value })} placeholder="Additional details" className="mt-1" />
             </div>
 
             {/* Thumbnail Upload */}
             <div>
-              <Label className="flex items-center gap-1"><Image className="w-4 h-4" /> Course Photo / कोर्स फोटो</Label>
+              <Label className="flex items-center gap-1"><Image className="w-4 h-4" /> Course Photo</Label>
               <Input type="file" accept="image/*" onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} className="mt-1" />
               {thumbnailFile && (
                 <div className="mt-2 w-32 h-20 rounded-lg overflow-hidden border border-border">
@@ -149,7 +149,7 @@ const TeacherUpload = () => {
               </div>
             </div>
             <Button type="submit" disabled={loading} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
-              {loading ? "Creating..." : "Create Course / कोर्स बनाएं"}
+              {loading ? "Creating..." : "Create Course"}
             </Button>
           </form>
         </div>
@@ -157,14 +157,14 @@ const TeacherUpload = () => {
         {/* My Courses */}
         <div className="bg-card rounded-2xl p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-gold" /> My Courses / मेरे कोर्स
+            <BookOpen className="w-5 h-5 text-gold" /> My Courses
           </h2>
           {loadingCourses ? (
             <div className="flex justify-center py-10">
               <div className="animate-spin w-7 h-7 border-4 border-gold border-t-transparent rounded-full" />
             </div>
           ) : courses.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No courses yet / अभी कोई कोर्स नहीं</p>
+            <p className="text-sm text-muted-foreground">No courses yet</p>
           ) : (
             <div className="space-y-3">
               {courses.map((course) => (
@@ -178,9 +178,8 @@ const TeacherUpload = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground truncate">{course.title}</p>
-                    <p className="text-xs text-gold-warm">{course.title_hi}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {course.is_published ? "Published / प्रकाशित" : "Draft / ड्राफ्ट"}
+                      {course.is_published ? "Published" : "Draft"}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

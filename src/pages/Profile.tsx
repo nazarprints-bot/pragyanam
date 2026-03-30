@@ -20,7 +20,7 @@ const Profile = () => {
     phone: profile?.phone || "",
     bio: profile?.bio || "",
     class_level: profile?.class_level || "",
-    language: profile?.language || "hindi",
+    language: profile?.language || "english",
   });
 
   const avatarUrl = profile?.avatar_url
@@ -179,13 +179,13 @@ const Profile = () => {
           )}
 
           <div className="space-y-1.5">
-            <Label className="text-[13px]">Language / भाषा</Label>
+            <Label className="text-[13px]">Language</Label>
             <Select value={formData.language} onValueChange={(v) => setFormData({ ...formData, language: v })}>
               <SelectTrigger className="h-9 text-[13px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="hindi">हिन्दी (Hindi)</SelectItem>
+                <SelectItem value="hindi">Hindi</SelectItem>
                 <SelectItem value="english">English</SelectItem>
               </SelectContent>
             </Select>

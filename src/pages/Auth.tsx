@@ -70,7 +70,7 @@ const Auth = () => {
           </div>
           <h2 className="text-3xl font-extrabold text-white font-heading">Pragyanam</h2>
           <p className="text-white/60 text-sm max-w-sm">
-            प्रज्ञानम् — India's premium learning platform for students & teachers
+            India's premium learning platform for students & teachers
           </p>
         </div>
       </div>

@@ -42,7 +42,7 @@ const AdminUsers = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-foreground">
-              User Management / उपयोगकर्ता प्रबंधन
+              User Management
             </h1>
             <p className="text-sm text-muted-foreground">Manage all platform users</p>
           </div>
@@ -101,21 +101,23 @@ const AdminUsers = () => {
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                          getRole(profile.user_id) === "admin" ? "bg-destructive/10 text-destructive" :
-                          getRole(profile.user_id) === "teacher" ? "bg-gold/10 text-gold-warm" :
-                          "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold"
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                          getRole(profile.user_id) === "admin"
+                            ? "bg-destructive/10 text-destructive"
+                            : getRole(profile.user_id) === "teacher"
+                            ? "bg-gold/10 text-gold-warm"
+                            : "bg-muted text-muted-foreground"
                         }`}>
                           {getRole(profile.user_id)}
                         </span>
                       </td>
                       <td className="p-4 text-sm text-muted-foreground">{profile.phone || "—"}</td>
                       <td className="p-4 text-sm text-muted-foreground">
-                        {new Date(profile.created_at).toLocaleDateString("hi-IN")}
+                        {new Date(profile.created_at).toLocaleDateString("en-IN")}
                       </td>
                       <td className="p-4">
                         <span className={`text-xs ${profile.is_verified ? "text-emerald" : "text-muted-foreground"}`}>
-                          {profile.is_verified ? "✓ Yes" : "✗ No"}
+                          {profile.is_verified ? "✓ Verified" : "Pending"}
                         </span>
                       </td>
                     </tr>

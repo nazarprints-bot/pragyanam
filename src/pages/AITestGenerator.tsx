@@ -34,11 +34,11 @@ const AITestGenerator = () => {
 
   const handleGenerate = async () => {
     if (mode === "topic" && !topic.trim()) {
-      toast.error("Please enter a topic / कृपया विषय दर्ज करें");
+      toast.error("Please enter a topic");
       return;
     }
     if (mode === "notes" && !notes.trim()) {
-      toast.error("Please paste your notes / कृपया नोट्स पेस्ट करें");
+      toast.error("Please paste your notes");
       return;
     }
 
@@ -59,7 +59,7 @@ const AITestGenerator = () => {
       if (data?.error) throw new Error(data.error);
 
       setQuestions(data.questions || []);
-      toast.success(`${data.questions?.length || 0} questions generated! / प्रश्न बन गए!`);
+      toast.success(`${data.questions?.length || 0} questions generated!`);
     } catch (err: any) {
       toast.error(err.message || "Failed to generate questions");
     } finally {
@@ -69,7 +69,7 @@ const AITestGenerator = () => {
 
   const handleSaveTest = async () => {
     if (!testTitle.trim()) {
-      toast.error("Please enter a test title / कृपया टेस्ट का शीर्षक दें");
+      toast.error("Please enter a test title");
       return;
     }
     if (!user || questions.length === 0) return;
@@ -108,7 +108,7 @@ const AITestGenerator = () => {
       const { error: qError } = await supabase.from("test_questions").insert(questionsToInsert);
       if (qError) throw qError;
 
-      toast.success("Test saved successfully! / टेस्ट सेव हो गया!");
+      toast.success("Test saved successfully!");
       setQuestions([]);
       setTestTitle("");
       setTestTitleHi("");
@@ -127,10 +127,10 @@ const AITestGenerator = () => {
         <div>
           <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-gold" />
-            AI Test Generator / AI टेस्ट जनरेटर
+            AI Test Generator
           </h1>
           <p className="text-sm text-muted-foreground">
-            Generate MCQ tests using AI from a topic or your notes / AI से MCQ टेस्ट बनाएं
+            Generate MCQ tests using AI from a topic or your notes
           </p>
         </div>
 
@@ -146,7 +146,7 @@ const AITestGenerator = () => {
               }`}
             >
               <Brain className="w-4 h-4" />
-              Topic se Generate / विषय से
+              Generate from Topic
             </button>
             <button
               onClick={() => setMode("notes")}
@@ -157,13 +157,13 @@ const AITestGenerator = () => {
               }`}
             >
               <FileText className="w-4 h-4" />
-              Notes / PDF se Generate / नोट्स से
+              Generate from Notes
             </button>
           </div>
 
           {mode === "topic" ? (
             <div>
-              <Label>Topic / विषय</Label>
+              <Label>Topic</Label>
               <Input
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
@@ -173,7 +173,7 @@ const AITestGenerator = () => {
             </div>
           ) : (
             <div>
-              <Label>Paste Notes / Content / नोट्स पेस्ट करें</Label>
+              <Label>Paste Notes / Content</Label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -184,7 +184,7 @@ const AITestGenerator = () => {
           )}
 
           <div>
-            <Label>Number of Questions / प्रश्नों की संख्या</Label>
+            <Label>Number of Questions</Label>
             <Input
               type="number"
               min={5}
@@ -203,12 +203,12 @@ const AITestGenerator = () => {
             {generating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating... / बना रहा है...
+                Generating...
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Generate Questions / प्रश्न बनाएं
+                Generate Questions
               </>
             )}
           </Button>
@@ -219,14 +219,14 @@ const AITestGenerator = () => {
           <div className="bg-card rounded-2xl p-6 border border-border space-y-4">
             <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
               <Brain className="w-5 h-5 text-gold" />
-              Generated Questions ({questions.length}) / बने हुए प्रश्न
+              Generated Questions ({questions.length})
             </h2>
 
             {/* Save Test Form */}
             <div className="bg-muted/50 rounded-xl p-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Test Title (English)</Label>
+                  <Label>Test Title</Label>
                   <Input
                     value={testTitle}
                     onChange={(e) => setTestTitle(e.target.value)}
@@ -235,11 +235,11 @@ const AITestGenerator = () => {
                   />
                 </div>
                 <div>
-                  <Label>Test Title (Hindi / शीर्षक)</Label>
+                  <Label>Subtitle (Optional)</Label>
                   <Input
                     value={testTitleHi}
                     onChange={(e) => setTestTitleHi(e.target.value)}
-                    placeholder="जैसे अध्याय 5 टेस्ट"
+                    placeholder="Optional subtitle"
                     className="mt-1"
                   />
                 </div>
@@ -254,7 +254,7 @@ const AITestGenerator = () => {
                 ) : (
                   <Save className="w-4 h-4 mr-2" />
                 )}
-                Save as Test / टेस्ट सेव करें
+                Save as Test
               </Button>
             </div>
 
@@ -262,12 +262,9 @@ const AITestGenerator = () => {
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
               {questions.map((q, i) => (
                 <div key={i} className="bg-background rounded-xl p-4 border border-border">
-                  <p className="font-medium text-foreground text-sm mb-1">
+                  <p className="font-medium text-foreground text-sm mb-2">
                     Q{i + 1}. {q.question}
                   </p>
-                  {q.question_hi && (
-                    <p className="text-xs text-gold-warm mb-2">{q.question_hi}</p>
-                  )}
                   <div className="grid grid-cols-2 gap-2">
                     {["A", "B", "C", "D"].map((opt) => {
                       const key = `option_${opt.toLowerCase()}` as keyof GeneratedQuestion;
