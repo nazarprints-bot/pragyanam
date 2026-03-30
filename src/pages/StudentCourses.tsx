@@ -6,45 +6,49 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, ArrowRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const StudentCourses = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<Record<string, any>>({});
   const [enrollments, setEnrollments] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const [coursesRes, enrollRes] = await Promise.all([
         supabase.from("courses").select("*").eq("is_published", true),
         user ? supabase.from("enrollments").select("course_id").eq("user_id", user.id) : Promise.resolve({ data: [] }),
       ]);
-      setCourses(coursesRes.data || []);
+      const courseList = coursesRes.data || [];
+      setCourses(courseList);
       setEnrollments((enrollRes.data || []).map((e: any) => e.course_id));
+
+      // Fetch teacher profiles for all courses
+      const teacherIds = [...new Set(courseList.map((c: any) => c.created_by).filter(Boolean))];
+      if (teacherIds.length > 0) {
+        const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", teacherIds);
+        const map: Record<string, any> = {};
+        (profiles || []).forEach((p: any) => { map[p.user_id] = p; });
+        setTeachers(map);
+      }
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [user]);
 
   const handleEnroll = async (courseId: string) => {
     if (!user) return;
-    const { error } = await supabase.from("enrollments").insert({
-      user_id: user.id,
-      course_id: courseId,
-    });
-    if (error) {
-      toast.error("Failed to enroll / नामांकन विफल");
-    } else {
-      setEnrollments([...enrollments, courseId]);
-      toast.success("Enrolled successfully! / सफलतापूर्वक नामांकित!");
-    }
+    const { error } = await supabase.from("enrollments").insert({ user_id: user.id, course_id: courseId });
+    if (error) toast.error("Failed to enroll / नामांकन विफल");
+    else { setEnrollments([...enrollments, courseId]); toast.success("Enrolled! / नामांकित!"); }
   };
 
   const filtered = courses.filter(
-    (c) =>
-      c.title.toLowerCase().includes(search.toLowerCase()) ||
-      c.title_hi.includes(search)
+    (c) => c.title.toLowerCase().includes(search.toLowerCase()) || c.title_hi.includes(search)
   );
 
   return (
@@ -52,19 +56,12 @@ const StudentCourses = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold font-heading text-foreground">
-              Courses / कोर्स
-            </h1>
+            <h1 className="text-2xl font-extrabold font-heading text-foreground">Courses / कोर्स</h1>
             <p className="text-sm text-muted-foreground">Browse and enroll in courses / कोर्स ब्राउज़ करें</p>
           </div>
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search courses..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
+            <Input placeholder="Search courses..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
           </div>
         </div>
 
@@ -82,40 +79,55 @@ const StudentCourses = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((course) => {
               const isEnrolled = enrollments.includes(course.id);
+              const t = teachers[course.created_by];
               return (
                 <div
                   key={course.id}
-                  className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-card transition-shadow"
+                  className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-card transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/dashboard/course/${course.id}`)}
                 >
-                  <div className="h-40 gradient-hero flex items-center justify-center">
-                    <BookOpen className="w-12 h-12 text-primary-foreground/40" />
+                  <div className="h-40 overflow-hidden">
+                    {course.thumbnail_url ? (
+                      <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full gradient-hero flex items-center justify-center">
+                        <BookOpen className="w-12 h-12 text-primary-foreground/40" />
+                      </div>
+                    )}
                   </div>
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
-                        {course.category}
-                      </span>
-                      {course.class_level && (
-                        <span className="text-xs text-muted-foreground">Class {course.class_level}</span>
-                      )}
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">{course.category}</span>
+                      {course.class_level && <span className="text-xs text-muted-foreground">Class {course.class_level}</span>}
                     </div>
                     <h3 className="text-lg font-bold text-foreground">{course.title}</h3>
                     <p className="text-sm text-primary mb-1">{course.title_hi}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{course.description}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{course.description}</p>
+
+                    {/* Teacher Info */}
+                    {t && (
+                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                          {t.avatar_url ? (
+                            <img src={t.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
+                          ) : (
+                            t.full_name?.charAt(0)?.toUpperCase() || "T"
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground truncate">{t.full_name || "Teacher"}</span>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-foreground">
                         {course.is_free ? "Free / मुफ्त" : `₹${course.price}`}
                       </span>
                       {isEnrolled ? (
-                        <Button size="sm" variant="outline" className="text-emerald border-emerald">
+                        <Button size="sm" variant="outline" className="text-emerald border-emerald" onClick={(e) => e.stopPropagation()}>
                           Enrolled ✓
                         </Button>
                       ) : (
-                        <Button
-                          size="sm"
-                          onClick={() => handleEnroll(course.id)}
-                          className="gradient-saffron border-0 text-primary-foreground"
-                        >
+                        <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEnroll(course.id); }} className="gradient-saffron border-0 text-primary-foreground">
                           Enroll <ArrowRight className="w-3 h-3 ml-1" />
                         </Button>
                       )}
