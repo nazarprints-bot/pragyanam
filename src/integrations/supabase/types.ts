@@ -312,6 +312,41 @@ export type Database = {
           },
         ]
       }
+      live_chat_messages: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_chat_messages_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_classes: {
         Row: {
           course_id: string | null
