@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu,
-  Upload, Bell, Video, Sparkles
+  Upload, Bell, Video, Sparkles, UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,6 +21,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/tests", icon: Brain, label: "Tests" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: "Doubts" },
     { to: "/dashboard/progress", icon: BarChart3, label: "Progress" },
+    { to: "/dashboard/profile", icon: UserCircle, label: "Profile" },
   ];
 
   const teacherLinks = [
@@ -32,6 +33,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/tests", icon: Brain, label: "Tests" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: "Doubts" },
     { to: "/dashboard/students", icon: Users, label: "Students" },
+    { to: "/dashboard/profile", icon: UserCircle, label: "Profile" },
   ];
 
   const adminLinks = [
@@ -98,8 +100,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {/* User */}
           <div className="p-3 border-t border-border">
             <div className="flex items-center gap-2.5 mb-2.5 px-1">
-              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-[12px] font-semibold text-accent-foreground">
-                {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
+              <div className="w-8 h-8 rounded-full bg-accent overflow-hidden flex items-center justify-center text-[12px] font-semibold text-accent-foreground">
+                {profile?.avatar_url ? (
+                  <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${profile.avatar_url}`} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  profile?.full_name?.charAt(0)?.toUpperCase() || "U"
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium text-foreground truncate">{profile?.full_name || "User"}</p>

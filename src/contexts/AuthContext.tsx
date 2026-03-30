@@ -11,6 +11,7 @@ interface AuthContextType {
   profile: any;
   loading: boolean;
   signOut: () => Promise<void>;
+  refetchProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  refetchProfile: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -75,8 +77,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setProfile(null);
   };
 
+  const refetchProfile = async () => {
+    if (user) await fetchUserData(user.id);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, role, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, role, profile, loading, signOut, refetchProfile }}>
       {children}
     </AuthContext.Provider>
   );
