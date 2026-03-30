@@ -9,7 +9,12 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import StudentHome from "./pages/StudentHome";
 import StudentCourses from "./pages/StudentCourses";
+import AcademicClasses from "./pages/AcademicClasses";
+import CompetitivePrep from "./pages/CompetitivePrep";
+import TeachersBrowse from "./pages/TeachersBrowse";
+import TeacherProfile from "./pages/TeacherProfile";
 import Tests from "./pages/Tests";
 import Doubts from "./pages/Doubts";
 import Progress from "./pages/Progress";
@@ -38,9 +43,15 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
 
-            {/* Protected Dashboard Routes */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard/courses" element={<ProtectedRoute allowedRoles={["student"]}><StudentCourses /></ProtectedRoute>} />
+            {/* Student Dashboard - new home */}
+            <Route path="/dashboard" element={<ProtectedRoute><StudentHome /></ProtectedRoute>} />
+            <Route path="/dashboard/courses" element={<ProtectedRoute><StudentCourses /></ProtectedRoute>} />
+            <Route path="/dashboard/classes" element={<ProtectedRoute><AcademicClasses /></ProtectedRoute>} />
+            <Route path="/dashboard/classes/academic/:classLevel" element={<ProtectedRoute><AcademicClasses /></ProtectedRoute>} />
+            <Route path="/dashboard/classes/competitive" element={<ProtectedRoute><CompetitivePrep /></ProtectedRoute>} />
+            <Route path="/dashboard/classes/competitive/:category" element={<ProtectedRoute><CompetitivePrep /></ProtectedRoute>} />
+            <Route path="/dashboard/teachers" element={<ProtectedRoute><TeachersBrowse /></ProtectedRoute>} />
+            <Route path="/dashboard/teachers/:teacherId" element={<ProtectedRoute><TeacherProfile /></ProtectedRoute>} />
             <Route path="/dashboard/tests" element={<ProtectedRoute><Tests /></ProtectedRoute>} />
             <Route path="/dashboard/doubts" element={<ProtectedRoute><Doubts /></ProtectedRoute>} />
             <Route path="/dashboard/progress" element={<ProtectedRoute allowedRoles={["student"]}><Progress /></ProtectedRoute>} />
