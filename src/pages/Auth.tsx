@@ -70,7 +70,7 @@ const Auth = () => {
               <GraduationCap className="w-7 h-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold font-heading text-foreground">Pragyanam</h1>
+              <h1 className="text-2xl font-bold font-heading text-foreground">Pragyanam Academy</h1>
               <p className="text-xs text-muted-foreground">प्रज्ञानम्</p>
             </div>
           </div>

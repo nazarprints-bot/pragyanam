@@ -68,7 +68,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 <GraduationCap className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <span className="text-base font-bold font-heading text-foreground">Pragyanam</span>
+                <span className="text-base font-bold font-heading text-foreground">Pragyanam Academy</span>
                 <span className="block text-[10px] text-muted-foreground leading-none">प्रज्ञानम्</span>
               </div>
             </Link>
