@@ -58,7 +58,7 @@ const TeacherUpload = () => {
       toast.error("Failed to create course: " + error.message);
     } else {
       toast.success("Course created! / कोर्स बन गया!");
-      setCourseForm({ title: "", title_hi: "", description: "", description_hi: "", category: "school", class_level: "", price: "0", is_free: false });
+      setCourseForm({ title: "", title_hi: "", description: "", description_hi: "", category: "school", class_level: "" });
       setThumbnailFile(null);
       await fetchMyCourses();
     }
