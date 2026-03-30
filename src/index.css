@@ -75,6 +75,65 @@
     --sidebar-border: 222 40% 26%;
     --sidebar-ring: 43 74% 49%;
   }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 20% 92%;
+
+    --card: 222 40% 10%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 222 40% 10%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 43 74% 49%;
+    --primary-foreground: 222 47% 7%;
+
+    --secondary: 222 40% 16%;
+    --secondary-foreground: 210 20% 88%;
+
+    --muted: 222 40% 14%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 43 74% 49%;
+    --accent-foreground: 222 47% 7%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 30% 18%;
+    --input: 222 30% 18%;
+    --ring: 43 74% 49%;
+
+    --navy: 222 47% 20%;
+    --navy-light: 222 40% 30%;
+    --navy-dark: 222 55% 5%;
+    --gold: 43 74% 49%;
+    --gold-light: 43 80% 65%;
+    --gold-warm: 38 70% 52%;
+    --cream: 222 40% 12%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 10%), hsl(222 55% 5%));
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%), hsl(38 70% 52%));
+    --gradient-card: linear-gradient(180deg, hsl(222 40% 10%), hsl(222 40% 8%));
+    --gradient-subtle: linear-gradient(135deg, hsl(222 40% 9%), hsl(222 35% 11%));
+    --gradient-navy: linear-gradient(135deg, hsl(222 47% 12%), hsl(222 40% 18%));
+
+    --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 0 1px hsl(43 74% 49% / 0.3), 0 4px 20px -2px hsl(43 74% 49% / 0.2);
+    --shadow-gold: 0 4px 14px -2px hsl(43 74% 49% / 0.3);
+
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 220 14% 85%;
+    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-accent: 222 40% 14%;
+    --sidebar-accent-foreground: 220 14% 85%;
+    --sidebar-border: 222 30% 16%;
+    --sidebar-ring: 43 74% 49%;
+  }
 }
 
 @layer base {

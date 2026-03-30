@@ -48,6 +48,7 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
             <Link to="/auth">
               <Button variant="ghost" size="sm" className="text-[13px] text-muted-foreground h-8 px-3">
                 Log in
