@@ -92,6 +92,52 @@ const CourseDetail = () => {
     setLiveClasses(data || []);
   };
 
+  const fetchEnrolledStudents = async () => {
+    if (!courseId) return;
+    // Get enrollments for this course
+    const { data: enrollments } = await supabase
+      .from("enrollments").select("user_id, enrolled_at, progress").eq("course_id", courseId);
+    if (!enrollments || enrollments.length === 0) { setEnrolledStudents([]); return; }
+
+    const userIds = enrollments.map(e => e.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", userIds);
+
+    // Get lesson IDs for this course
+    const { data: subs } = await supabase.from("subjects").select("id").eq("course_id", courseId);
+    let lessonIds: string[] = [];
+    if (subs && subs.length > 0) {
+      const { data: chaps } = await supabase.from("chapters").select("id").in("subject_id", subs.map(s => s.id));
+      if (chaps && chaps.length > 0) {
+        const { data: lsns } = await supabase.from("lessons").select("id").in("chapter_id", chaps.map(c => c.id));
+        lessonIds = (lsns || []).map(l => l.id);
+      }
+    }
+    const totalLessons = lessonIds.length;
+
+    // Get lesson progress for each student
+    let progressMap: Record<string, number> = {};
+    if (totalLessons > 0 && userIds.length > 0) {
+      const { data: lp } = await supabase
+        .from("lesson_progress").select("user_id, lesson_id, is_completed")
+        .in("user_id", userIds).in("lesson_id", lessonIds).eq("is_completed", true);
+      (lp || []).forEach(p => {
+        progressMap[p.user_id] = (progressMap[p.user_id] || 0) + 1;
+      });
+    }
+
+    const profileMap: Record<string, any> = {};
+    (profiles || []).forEach(p => { profileMap[p.user_id] = p; });
+
+    const students = enrollments.map(e => ({
+      ...e,
+      profile: profileMap[e.user_id] || { full_name: "Student", avatar_url: null },
+      completedLessons: progressMap[e.user_id] || 0,
+      totalLessons,
+      percentage: totalLessons > 0 ? Math.round(((progressMap[e.user_id] || 0) / totalLessons) * 100) : 0,
+    }));
+    setEnrolledStudents(students);
+  };
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
