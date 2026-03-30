@@ -302,9 +302,14 @@ const LiveClasses = () => {
                         <span>{c.duration_minutes} min</span>
                       </div>
                       {isTeacherOrAdmin && c.teacher_id === user?.id && (
-                        <Button onClick={() => handleStartClass(c)} className="w-full gradient-navy text-white border-0 hover:opacity-90" size="sm">
-                          <Play className="w-3 h-3 mr-1" /> Start Class
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button onClick={() => handleStartClass(c)} className="flex-1 gradient-navy text-white border-0 hover:opacity-90" size="sm">
+                            <Play className="w-3 h-3 mr-1" /> Start Class
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => handleDeleteClass(c)}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   ))}
