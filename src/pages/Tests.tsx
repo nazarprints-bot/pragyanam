@@ -191,6 +191,11 @@ const Tests = () => {
               <p className="text-muted-foreground">
                 You scored <span className="font-bold text-foreground">{result.score}</span> out of <span className="font-bold text-foreground">{result.total}</span> marks
               </p>
+              {questions.some(q => q.question_type === "short" || q.question_type === "long") && (
+                <p className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
+                  ℹ️ Short & long answer questions will be reviewed by your teacher. Your final score may change.
+                </p>
+              )}
             </div>
             <Button onClick={handleExitTest} className="gradient-navy text-white border-0 hover:opacity-90">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tests
