@@ -100,8 +100,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {/* User */}
           <div className="p-3 border-t border-border">
             <div className="flex items-center gap-2.5 mb-2.5 px-1">
-              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-[12px] font-semibold text-accent-foreground">
-                {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
+              <div className="w-8 h-8 rounded-full bg-accent overflow-hidden flex items-center justify-center text-[12px] font-semibold text-accent-foreground">
+                {profile?.avatar_url ? (
+                  <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${profile.avatar_url}`} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  profile?.full_name?.charAt(0)?.toUpperCase() || "U"
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium text-foreground truncate">{profile?.full_name || "User"}</p>
