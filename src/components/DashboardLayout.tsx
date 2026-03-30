@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, FileText, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu, X,
-  Upload, Bell, ChevronDown
+  Upload, Bell, ChevronDown, Video, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +17,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const studentLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", labelHi: "डैशबोर्ड" },
     { to: "/dashboard/courses", icon: BookOpen, label: "My Courses", labelHi: "मेरे कोर्स" },
+    { to: "/dashboard/live-classes", icon: Video, label: "Live Classes", labelHi: "लाइव क्लास" },
     { to: "/dashboard/tests", icon: Brain, label: "Tests", labelHi: "टेस्ट" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: "Doubts", labelHi: "डाउट" },
     { to: "/dashboard/progress", icon: BarChart3, label: "Progress", labelHi: "प्रगति" },
@@ -26,6 +27,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", labelHi: "डैशबोर्ड" },
     { to: "/dashboard/my-courses", icon: BookOpen, label: "My Courses", labelHi: "मेरे कोर्स" },
     { to: "/dashboard/upload", icon: Upload, label: "Upload Content", labelHi: "कंटेंट अपलोड" },
+    { to: "/dashboard/live-classes", icon: Video, label: "Live Classes", labelHi: "लाइव क्लास" },
+    { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test Generator", labelHi: "AI टेस्ट जनरेटर" },
     { to: "/dashboard/tests", icon: Brain, label: "Manage Tests", labelHi: "टेस्ट प्रबंधन" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: "Student Doubts", labelHi: "छात्र डाउट" },
     { to: "/dashboard/students", icon: Users, label: "Students", labelHi: "छात्र" },
@@ -35,6 +38,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", labelHi: "डैशबोर्ड" },
     { to: "/dashboard/users", icon: Users, label: "Users", labelHi: "उपयोगकर्ता" },
     { to: "/dashboard/all-courses", icon: BookOpen, label: "All Courses", labelHi: "सभी कोर्स" },
+    { to: "/dashboard/live-classes", icon: Video, label: "Live Classes", labelHi: "लाइव क्लास" },
+    { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test Generator", labelHi: "AI टेस्ट जनरेटर" },
     { to: "/dashboard/tests", icon: Brain, label: "Tests", labelHi: "टेस्ट" },
     { to: "/dashboard/analytics", icon: BarChart3, label: "Analytics", labelHi: "एनालिटिक्स" },
     { to: "/dashboard/settings", icon: Settings, label: "Settings", labelHi: "सेटिंग्स" },
