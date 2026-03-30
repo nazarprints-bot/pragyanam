@@ -19,7 +19,7 @@ const TeacherUpload = () => {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [courseForm, setCourseForm] = useState({
     title: "", title_hi: "", description: "", description_hi: "",
-    category: "school", class_level: "", price: "0", is_free: false,
+    category: "school", class_level: "",
   });
 
   const handleCreateCourse = async (e: React.FormEvent) => {
