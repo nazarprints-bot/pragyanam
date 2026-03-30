@@ -279,6 +279,13 @@ const translations: Record<string, Record<Language, string>> = {
 
   // Common
   "common.user": { en: "User", hi: "उपयोगकर्ता" },
+
+  // Live Chat
+  "chat.liveChat": { en: "Live Chat", hi: "लाइव चैट" },
+  "chat.typeMessage": { en: "Type a message...", hi: "संदेश लिखें..." },
+  "chat.send": { en: "Send", hi: "भेजें" },
+  "chat.you": { en: "You", hi: "आप" },
+  "chat.noMessages": { en: "No messages yet. Say hi! 👋", hi: "अभी कोई संदेश नहीं। हैलो बोलिए! 👋" },
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
