@@ -4,10 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, GraduationCap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -16,10 +19,10 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { label: "Home", href: "#home" },
-    { label: "Courses", href: "#courses" },
-    { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
+    { label: t("nav.home"), href: "#home" },
+    { label: t("nav.courses"), href: "#courses" },
+    { label: t("nav.features"), href: "#features" },
+    { label: t("nav.pricing"), href: "#pricing" },
   ];
 
   return (
@@ -48,15 +51,16 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle />
             <Link to="/auth">
               <Button variant="ghost" size="sm" className="text-[13px] text-muted-foreground h-8 px-3">
-                Log in
+                {t("nav.login")}
               </Button>
             </Link>
             <Link to="/auth">
               <Button size="sm" className="h-8 px-4 text-[13px] font-semibold gradient-navy text-primary-foreground hover:opacity-90 rounded-lg">
-                Get started <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                {t("nav.getStarted")} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Link>
           </div>
@@ -88,11 +92,11 @@ const Navbar = () => {
               ))}
               <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-border">
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button variant="ghost" className="w-full text-[13px] h-9">Log in</Button>
+                  <Button variant="ghost" className="w-full text-[13px] h-9">{t("nav.login")}</Button>
                 </Link>
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
                   <Button className="w-full text-[13px] h-9 gradient-navy text-primary-foreground hover:opacity-90">
-                    Get started
+                    {t("nav.getStarted")}
                   </Button>
                 </Link>
               </div>
