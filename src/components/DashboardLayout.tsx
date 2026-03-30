@@ -47,8 +47,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/users", icon: Users, label: t("sidebar.users") },
     { to: "/dashboard/all-courses", icon: BookOpen, label: t("sidebar.courses") },
     { to: "/dashboard/live-classes", icon: Video, label: t("sidebar.liveClasses") },
-    { to: "/dashboard/ai-test", icon: Sparkles, label: t("sidebar.aiTests") },
+    { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
+    { to: "/dashboard/manual-test", icon: PenTool, label: "Manual Test" },
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
+    { to: "/dashboard/test-responses", icon: Eye, label: "Student Responses" },
     { to: "/dashboard/analytics", icon: BarChart3, label: t("sidebar.analytics") },
     { to: "/dashboard/settings", icon: Settings, label: t("sidebar.settings") },
   ];
