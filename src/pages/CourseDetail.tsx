@@ -141,7 +141,7 @@ const CourseDetail = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      await Promise.all([fetchCourse(), fetchLessons(), fetchLiveClasses()]);
+      await Promise.all([fetchCourse(), fetchLessons(), fetchLiveClasses(), fetchEnrolledStudents()]);
       setLoading(false);
     };
     load();
