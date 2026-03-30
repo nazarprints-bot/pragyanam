@@ -186,6 +186,67 @@ const translations: Record<string, Record<Language, string>> = {
   "sidebar.teacher": { en: "Teacher", hi: "शिक्षक" },
   "sidebar.student": { en: "Student", hi: "छात्र" },
 
+  "sidebar.classes": { en: "Classes", hi: "कक्षाएँ" },
+  "sidebar.teachers": { en: "Teachers", hi: "शिक्षक" },
+
+  // Bottom Nav
+  "bnav.home": { en: "Home", hi: "होम" },
+  "bnav.classes": { en: "Classes", hi: "कक्षाएँ" },
+  "bnav.live": { en: "Live", hi: "लाइव" },
+  "bnav.courses": { en: "Courses", hi: "कोर्सेज़" },
+  "bnav.profile": { en: "Profile", hi: "प्रोफ़ाइल" },
+
+  // Student Home
+  "shome.liveNow": { en: "Live Now", hi: "अभी लाइव" },
+  "shome.joinNow": { en: "Join Now", hi: "अभी जुड़ें" },
+  "shome.continueLearning": { en: "Continue Learning", hi: "पढ़ाई जारी रखें" },
+  "shome.viewAll": { en: "View All", hi: "सब देखें" },
+  "shome.upcomingLive": { en: "Upcoming Live Sessions", hi: "आने वाली लाइव कक्षाएँ" },
+  "shome.academicClasses": { en: "Academic Classes", hi: "स्कूल कक्षाएँ" },
+  "shome.class": { en: "Class", hi: "कक्षा" },
+  "shome.competitivePrep": { en: "Competitive Preparation", hi: "प्रतियोगी तैयारी" },
+  "shome.popularCourses": { en: "Popular Courses", hi: "लोकप्रिय कोर्सेज़" },
+  "shome.armyPrep": { en: "Army Preparation", hi: "सेना तैयारी" },
+  "shome.armyPrepDesc": { en: "Physical & written exam prep", hi: "शारीरिक और लिखित परीक्षा तैयारी" },
+  "shome.policePrep": { en: "Police Preparation", hi: "पुलिस तैयारी" },
+  "shome.policePrepDesc": { en: "Reasoning, GK & practice tests", hi: "रीज़निंग, GK और प्रैक्टिस टेस्ट" },
+  "shome.govtExam": { en: "Govt Exam Basics", hi: "सरकारी परीक्षा बेसिक्स" },
+  "shome.govtExamDesc": { en: "General preparation for govt exams", hi: "सरकारी परीक्षाओं की सामान्य तैयारी" },
+
+  // Academic
+  "academic.selectClass": { en: "Select your class to start learning", hi: "सीखने के लिए अपनी कक्षा चुनें" },
+  "academic.subjectsTeachers": { en: "Subjects & Teachers", hi: "विषय और शिक्षक" },
+  "academic.noContent": { en: "No content yet", hi: "अभी कोई सामग्री नहीं" },
+  "academic.comingSoon": { en: "Coming soon!", hi: "जल्द आ रहा है!" },
+  "academic.liveClass": { en: "Live Class", hi: "लाइव कक्षा" },
+  "academic.recorded": { en: "Recorded", hi: "रिकॉर्डेड" },
+  "academic.notes": { en: "Notes", hi: "नोट्स" },
+  "academic.tests": { en: "Tests", hi: "टेस्ट" },
+
+  // Competitive
+  "competitive.selectExam": { en: "Choose your exam category", hi: "अपनी परीक्षा श्रेणी चुनें" },
+  "competitive.armyTitle": { en: "Army Preparation", hi: "सेना तैयारी" },
+  "competitive.armyDesc": { en: "Physical training & written exam prep", hi: "शारीरिक प्रशिक्षण और लिखित परीक्षा तैयारी" },
+  "competitive.policeTitle": { en: "Police Preparation", hi: "पुलिस तैयारी" },
+  "competitive.policeDesc": { en: "Reasoning, GK & practice tests", hi: "रीज़निंग, सामान्य ज्ञान और प्रैक्टिस टेस्ट" },
+  "competitive.govtTitle": { en: "Government Exam", hi: "सरकारी परीक्षा" },
+  "competitive.govtDesc": { en: "General preparation for government exams", hi: "सरकारी परीक्षाओं की सामान्य तैयारी" },
+  "competitive.coursesComingSoon": { en: "Courses will be added soon", hi: "कोर्सेज़ जल्द जोड़े जाएंगे" },
+
+  // Teachers
+  "teachers.title": { en: "Teachers", hi: "शिक्षक" },
+  "teachers.subtitle": { en: "Browse all teachers on Pragyanam", hi: "प्रज्ञानम् के सभी शिक्षक देखें" },
+  "teachers.search": { en: "Search teachers...", hi: "शिक्षक खोजें..." },
+  "teachers.noTeachers": { en: "No teachers found", hi: "कोई शिक्षक नहीं मिला" },
+  "teachers.profile": { en: "Teacher Profile", hi: "शिक्षक प्रोफ़ाइल" },
+  "teachers.notFound": { en: "Teacher not found", hi: "शिक्षक नहीं मिला" },
+  "teachers.courses": { en: "Courses", hi: "कोर्सेज़" },
+  "teachers.upcoming": { en: "Upcoming", hi: "आने वाले" },
+  "teachers.upcomingLive": { en: "Upcoming Live Classes", hi: "आने वाली लाइव कक्षाएँ" },
+  "teachers.viewDetails": { en: "View", hi: "देखें" },
+  "teachers.coursesRecorded": { en: "Courses & Recorded Lectures", hi: "कोर्सेज़ और रिकॉर्डेड लेक्चर" },
+  "teachers.noCourses": { en: "No courses available yet", hi: "अभी कोई कोर्स उपलब्ध नहीं" },
+
   // Common
   "common.user": { en: "User", hi: "उपयोगकर्ता" },
 };
