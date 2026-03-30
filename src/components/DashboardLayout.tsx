@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu,
-  Upload, Bell, Video, Sparkles, UserCircle
+  Upload, Bell, Video, Sparkles, UserCircle, ClipboardList, PenTool, Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -33,8 +33,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/my-courses", icon: BookOpen, label: t("sidebar.myCourses") },
     { to: "/dashboard/upload", icon: Upload, label: t("sidebar.upload") },
     { to: "/dashboard/live-classes", icon: Video, label: t("sidebar.liveClasses") },
-    { to: "/dashboard/ai-test", icon: Sparkles, label: t("sidebar.aiTests") },
+    { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
+    { to: "/dashboard/manual-test", icon: PenTool, label: "Manual Test" },
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
+    { to: "/dashboard/test-responses", icon: Eye, label: "Student Responses" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: t("sidebar.doubts") },
     { to: "/dashboard/students", icon: Users, label: t("sidebar.students") },
     { to: "/dashboard/profile", icon: UserCircle, label: t("sidebar.profile") },
@@ -45,8 +47,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/users", icon: Users, label: t("sidebar.users") },
     { to: "/dashboard/all-courses", icon: BookOpen, label: t("sidebar.courses") },
     { to: "/dashboard/live-classes", icon: Video, label: t("sidebar.liveClasses") },
-    { to: "/dashboard/ai-test", icon: Sparkles, label: t("sidebar.aiTests") },
+    { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
+    { to: "/dashboard/manual-test", icon: PenTool, label: "Manual Test" },
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
+    { to: "/dashboard/test-responses", icon: Eye, label: "Student Responses" },
     { to: "/dashboard/analytics", icon: BarChart3, label: t("sidebar.analytics") },
     { to: "/dashboard/settings", icon: Settings, label: t("sidebar.settings") },
   ];

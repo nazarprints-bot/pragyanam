@@ -17,6 +17,8 @@ import TeacherUpload from "./pages/TeacherUpload";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AITestGenerator from "./pages/AITestGenerator";
+import ManualTestCreator from "./pages/ManualTestCreator";
+import TestResponses from "./pages/TestResponses";
 import LiveClasses from "./pages/LiveClasses";
 import CourseDetail from "./pages/CourseDetail";
 import Profile from "./pages/Profile";
@@ -51,6 +53,8 @@ const App = () => (
             <Route path="/dashboard/my-courses" element={<ProtectedRoute allowedRoles={["teacher"]}><TeacherUpload /></ProtectedRoute>} />
             <Route path="/dashboard/students" element={<ProtectedRoute allowedRoles={["teacher", "admin"]}><AdminUsers /></ProtectedRoute>} />
             <Route path="/dashboard/ai-test" element={<ProtectedRoute allowedRoles={["teacher", "admin"]}><AITestGenerator /></ProtectedRoute>} />
+            <Route path="/dashboard/manual-test" element={<ProtectedRoute allowedRoles={["teacher", "admin"]}><ManualTestCreator /></ProtectedRoute>} />
+            <Route path="/dashboard/test-responses" element={<ProtectedRoute allowedRoles={["teacher", "admin"]}><TestResponses /></ProtectedRoute>} />
 
             {/* Admin Routes */}
             <Route path="/dashboard/users" element={<ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>} />
