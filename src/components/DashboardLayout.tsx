@@ -20,8 +20,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const studentLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: t("sidebar.dashboard") },
+    { to: "/dashboard/classes", icon: GraduationCap, label: t("sidebar.classes") },
     { to: "/dashboard/courses", icon: BookOpen, label: t("sidebar.courses") },
     { to: "/dashboard/live-classes", icon: Video, label: t("sidebar.liveClasses") },
+    { to: "/dashboard/teachers", icon: Users, label: t("sidebar.teachers") },
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
     { to: "/dashboard/doubts", icon: MessageCircle, label: t("sidebar.doubts") },
     { to: "/dashboard/progress", icon: BarChart3, label: t("sidebar.progress") },
