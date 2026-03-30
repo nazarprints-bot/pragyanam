@@ -121,6 +121,21 @@ const LiveClasses = () => {
     toast.success("Class ended & removed");
   };
 
+  const handleDeleteClass = async (classItem: any) => {
+    const { error } = await supabase
+      .from("live_classes")
+      .delete()
+      .eq("id", classItem.id)
+      .eq("teacher_id", user?.id || "");
+
+    if (error) {
+      toast.error("Failed to delete class: " + error.message);
+      return;
+    }
+    toast.success("Class cancelled & removed");
+    await fetchClasses();
+  };
+
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
   const upcomingClasses = classes.filter((c) => c.status === "scheduled");
   const liveClasses = classes.filter((c) => c.status === "live");
