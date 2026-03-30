@@ -42,7 +42,7 @@ const FooterSection = () => {
 
         <div className="border-t border-primary-foreground/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-primary-foreground/40">
-            © 2026 Pragyanam. All rights reserved.
+            © 2026 Pragyanam Academy. All rights reserved.
           </p>
           <p className="text-sm text-primary-foreground/40 flex items-center gap-1">
             Made with <Heart className="w-3.5 h-3.5 text-primary fill-primary" /> for India's students
