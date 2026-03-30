@@ -1,115 +1,54 @@
 import { motion } from "framer-motion";
 import {
-  Video,
-  FileText,
-  Brain,
-  MessageCircle,
-  BarChart3,
-  Globe,
-  PlayCircle,
-  BookOpen,
+  Video, FileText, Brain, MessageCircle, BarChart3, Globe, PlayCircle, BookOpen,
 } from "lucide-react";
 
 const features = [
-  {
-    icon: Video,
-    title: "Live Classes",
-    titleHi: "लाइव कक्षाएं",
-    desc: "Interactive live sessions with real-time doubt solving and auto-recording.",
-    color: "bg-saffron-light text-accent-foreground",
-  },
-  {
-    icon: PlayCircle,
-    title: "Recorded Lectures",
-    titleHi: "रिकॉर्डेड लेक्चर",
-    desc: "Access video lectures anytime, chapter-wise organized with resume support.",
-    color: "bg-secondary/10 text-secondary",
-  },
-  {
-    icon: FileText,
-    title: "Study Material",
-    titleHi: "अध्ययन सामग्री",
-    desc: "PDF notes, practice sheets, and chapter summaries — downloadable offline.",
-    color: "bg-emerald/10 text-emerald",
-  },
-  {
-    icon: Brain,
-    title: "Smart Tests",
-    titleHi: "स्मार्ट टेस्ट",
-    desc: "Chapter tests, weekly exams, mock tests with instant results & ranking.",
-    color: "bg-gold/10 text-saffron-dark",
-  },
-  {
-    icon: MessageCircle,
-    title: "Doubt Solving",
-    titleHi: "डाउट सॉल्विंग",
-    desc: "Post doubts, get teacher responses, and join discussion threads.",
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    icon: BarChart3,
-    title: "Progress Tracking",
-    titleHi: "प्रगति ट्रैकिंग",
-    desc: "Track completion, test scores, and performance analytics at a glance.",
-    color: "bg-indigo-light/10 text-indigo-light",
-  },
-  {
-    icon: Globe,
-    title: "Multi-Language",
-    titleHi: "बहु-भाषा",
-    desc: "Full Hindi & English support. Regional languages coming soon.",
-    color: "bg-saffron-light text-accent-foreground",
-  },
-  {
-    icon: BookOpen,
-    title: "All Subjects",
-    titleHi: "सभी विषय",
-    desc: "Class 6–12, Police, Army, Govt Jobs, and Scholarship exam prep.",
-    color: "bg-secondary/10 text-secondary",
-  },
+  { icon: Video, title: "Live Classes", titleHi: "लाइव कक्षाएं", desc: "Interactive sessions with real-time doubt solving" },
+  { icon: PlayCircle, title: "Recorded Lectures", titleHi: "रिकॉर्डेड लेक्चर", desc: "Access video lectures anytime, organized chapter-wise" },
+  { icon: FileText, title: "Study Material", titleHi: "अध्ययन सामग्री", desc: "PDF notes, practice sheets & chapter summaries" },
+  { icon: Brain, title: "Smart Tests", titleHi: "स्मार्ट टेस्ट", desc: "Chapter tests, mock exams with instant results" },
+  { icon: MessageCircle, title: "Doubt Solving", titleHi: "डाउट सॉल्विंग", desc: "Post doubts and get teacher responses quickly" },
+  { icon: BarChart3, title: "Progress Tracking", titleHi: "प्रगति ट्रैकिंग", desc: "Track completion, scores & performance analytics" },
+  { icon: Globe, title: "Hindi + English", titleHi: "बहु-भाषा", desc: "Full bilingual support across the platform" },
+  { icon: BookOpen, title: "All Subjects", titleHi: "सभी विषय", desc: "Class 6–12, Govt Jobs & Scholarship prep" },
 ];
 
 const FeaturesSection = () => {
   return (
-    <section id="features" className="py-24 lg:py-32 bg-background">
-      <div className="container mx-auto px-4 lg:px-8">
+    <section id="features" className="py-20 lg:py-28 bg-muted/30">
+      <div className="max-w-6xl mx-auto px-5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-14"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-wider">
-            Features / सुविधाएं
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading text-foreground mt-3 mb-4">
-            Everything You Need to <span className="text-gradient-saffron">Succeed</span>
+          <p className="text-[12px] font-semibold text-primary uppercase tracking-widest mb-3">Features</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
+            Everything you need to succeed
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            सफलता के लिए सब कुछ एक ही जगह — Live classes से लेकर smart tests तक
+          <p className="text-[15px] text-muted-foreground max-w-md mx-auto">
+            सफलता के लिए सब कुछ एक ही जगह
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className="group bg-card rounded-2xl p-6 border border-border hover:shadow-card hover:border-primary/20 transition-all duration-300"
+              transition={{ delay: i * 0.03 }}
+              className="bg-card rounded-xl p-5 border border-border hover:border-primary/15 hover:shadow-soft transition-all duration-200"
             >
-              <div className={`w-12 h-12 rounded-xl ${feature.color} flex items-center justify-center mb-4`}>
-                <feature.icon className="w-6 h-6" />
+              <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center mb-3">
+                <feature.icon className="w-[18px] h-[18px] text-accent-foreground" />
               </div>
-              <h3 className="text-lg font-bold font-heading text-foreground mb-1">
-                {feature.title}
-              </h3>
-              <p className="text-xs font-medium text-primary mb-2">{feature.titleHi}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {feature.desc}
-              </p>
+              <h3 className="text-[14px] font-semibold text-foreground mb-0.5">{feature.title}</h3>
+              <p className="text-[11px] font-medium text-primary mb-1.5">{feature.titleHi}</p>
+              <p className="text-[13px] text-muted-foreground leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}
         </div>
