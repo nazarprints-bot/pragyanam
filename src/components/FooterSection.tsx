@@ -11,7 +11,7 @@ const FooterSection = () => {
                 <GraduationCap className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <span className="text-lg font-bold font-heading text-primary-foreground">Pragyanam</span>
+                <span className="text-lg font-bold font-heading text-primary-foreground">Pragyanam Academy</span>
                 <span className="block text-xs text-primary-foreground/60">प्रज्ञानम्</span>
               </div>
             </div>
