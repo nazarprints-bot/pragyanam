@@ -17,6 +17,8 @@ import TeacherUpload from "./pages/TeacherUpload";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AITestGenerator from "./pages/AITestGenerator";
+import ManualTestCreator from "./pages/ManualTestCreator";
+import TestResponses from "./pages/TestResponses";
 import LiveClasses from "./pages/LiveClasses";
 import CourseDetail from "./pages/CourseDetail";
 import Profile from "./pages/Profile";
