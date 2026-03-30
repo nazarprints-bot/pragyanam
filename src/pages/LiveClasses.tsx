@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
+import LiveChatSidebar from "@/components/LiveChatSidebar";
 import { Video, Plus, Calendar, Clock, Users, Play, X, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ const LiveClasses = () => {
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     title_hi: "",
@@ -98,10 +100,12 @@ const LiveClasses = () => {
     toast.success("Class started");
     await fetchClasses();
     setActiveRoom(classItem.room_id);
+    setActiveClassId(classItem.id);
   };
 
   const handleJoinClass = (classItem: any) => {
     setActiveRoom(classItem.room_id);
+    setActiveClassId(classItem.id);
   };
 
   const handleEndClass = async (classItem: any) => {
@@ -117,6 +121,7 @@ const LiveClasses = () => {
     }
 
     setActiveRoom(null);
+    setActiveClassId(null);
     await fetchClasses();
     toast.success("Class ended & removed");
   };
@@ -141,26 +146,54 @@ const LiveClasses = () => {
   const liveClasses = classes.filter((c) => c.status === "live");
   const pastClasses = classes.filter((c) => c.status === "ended");
 
-  if (activeRoom) {
+  // Build Jitsi URL with stage mode config for students
+  const buildJitsiUrl = (roomId: string) => {
+    const base = `https://meet.jit.si/pragyanam-${roomId}`;
+    if (isTeacherOrAdmin) {
+      // Teacher gets full controls
+      return `${base}#config.prejoinConfig.enabled=false`;
+    }
+    // Student: muted, no camera, hidden toolbar = watch-only "stage mode"
+    return `${base}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=true&config.startWithVideoMuted=true&config.toolbarButtons=[]&config.disableModeratorIndicator=true&config.hideConferenceSubject=true`;
+  };
+
+  if (activeRoom && activeClassId) {
+    const activeClass = classes.find((c) => c.id === activeClassId);
     return (
       <DashboardLayout>
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold font-heading text-foreground flex items-center gap-2">
+            <h1 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
               <Video className="w-5 h-5 text-destructive animate-pulse" />
-              Live Class
+              {activeClass?.title || "Live Class"}
             </h1>
-            <Button variant="outline" onClick={() => setActiveRoom(null)}>
-              <X className="w-4 h-4 mr-1" /> Leave
-            </Button>
+            <div className="flex gap-2">
+              {isTeacherOrAdmin && activeClass?.teacher_id === user?.id && (
+                <Button variant="destructive" size="sm" onClick={() => handleEndClass(activeClass)}>
+                  End Class
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={() => { setActiveRoom(null); setActiveClassId(null); }}>
+                <X className="w-4 h-4 mr-1" /> Leave
+              </Button>
+            </div>
           </div>
-          <div className="rounded-2xl overflow-hidden border border-border bg-foreground/5" style={{ height: "calc(100vh - 180px)" }}>
-            <iframe
-              src={`https://meet.jit.si/pragyanam-${activeRoom}#config.prejoinConfig.enabled=false`}
-              allow="camera; microphone; fullscreen; display-capture"
-              className="w-full h-full"
-              title="Live Class Video"
-            />
+
+          {/* Video + Chat Layout */}
+          <div className="flex flex-col lg:flex-row gap-0 rounded-2xl overflow-hidden border border-border" style={{ height: "calc(100vh - 180px)" }}>
+            {/* Video - 70% on desktop */}
+            <div className="flex-1 lg:w-[70%] bg-black">
+              <iframe
+                src={buildJitsiUrl(activeRoom)}
+                allow="camera; microphone; fullscreen; display-capture"
+                className="w-full h-full min-h-[300px]"
+                title="Live Class Video"
+              />
+            </div>
+            {/* Chat Sidebar - 30% on desktop */}
+            <div className="h-[300px] lg:h-full lg:w-[30%] lg:min-w-[280px]">
+              <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
+            </div>
           </div>
         </div>
       </DashboardLayout>
