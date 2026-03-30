@@ -21,6 +21,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/tests", icon: Brain, label: "Tests" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: "Doubts" },
     { to: "/dashboard/progress", icon: BarChart3, label: "Progress" },
+    { to: "/dashboard/profile", icon: UserCircle, label: "Profile" },
   ];
 
   const teacherLinks = [
