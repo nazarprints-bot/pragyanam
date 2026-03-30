@@ -47,7 +47,7 @@ const PricingSection = () => {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <p className="text-[12px] font-semibold text-primary uppercase tracking-widest mb-3">Pricing</p>
+          <p className="text-[12px] font-semibold text-accent uppercase tracking-widest mb-3">Pricing</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-3">
             Affordable for everyone
           </h2>
@@ -64,12 +64,12 @@ const PricingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className={`relative bg-card rounded-xl p-6 border transition-all duration-200 ${
-                plan.popular ? "border-primary shadow-glow" : "border-border hover:shadow-card"
+              className={`relative bg-background rounded-xl p-6 border transition-all duration-200 ${
+                plan.popular ? "border-accent shadow-glow scale-[1.02]" : "border-border hover:shadow-card"
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[11px] font-semibold px-3 py-1 rounded-full">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 gradient-gold text-foreground text-[11px] font-bold px-4 py-1 rounded-full">
                   Most Popular
                 </div>
               )}
@@ -80,12 +80,12 @@ const PricingSection = () => {
               )}
 
               <div className="mb-5">
-                <h3 className="text-[15px] font-semibold text-foreground">{plan.name}</h3>
-                <p className="text-[11px] text-primary font-medium">{plan.nameHi}</p>
+                <h3 className="text-[15px] font-bold text-foreground">{plan.name}</h3>
+                <p className="text-[11px] text-accent font-semibold">{plan.nameHi}</p>
               </div>
 
               <div className="mb-1">
-                <span className="text-3xl font-bold text-foreground tracking-tight">{plan.price}</span>
+                <span className="text-3xl font-extrabold text-foreground tracking-tight">{plan.price}</span>
                 <span className="text-[13px] text-muted-foreground">{plan.period}</span>
               </div>
               <p className="text-[13px] text-muted-foreground mb-5">{plan.desc}</p>
@@ -93,7 +93,7 @@ const PricingSection = () => {
               <ul className="space-y-2.5 mb-6">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-[13px] text-foreground">
-                    <Check className="w-3.5 h-3.5 text-emerald mt-0.5 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -101,10 +101,10 @@ const PricingSection = () => {
 
               <Link to="/auth">
                 <Button
-                  className={`w-full h-10 text-[13px] font-medium rounded-lg ${
+                  className={`w-full h-10 text-[13px] font-semibold rounded-lg ${
                     plan.popular
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      ? "gradient-navy text-primary-foreground hover:opacity-90"
+                      : "bg-muted text-foreground hover:bg-muted/80"
                   }`}
                 >
                   {plan.cta}

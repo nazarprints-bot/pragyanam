@@ -23,15 +23,15 @@ const Navbar = () => {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? "bg-card/90 backdrop-blur-xl border-b border-border shadow-soft" : "bg-transparent"
+      scrolled ? "bg-background/95 backdrop-blur-xl border-b border-border shadow-soft" : "bg-transparent"
     }`}>
       <div className="max-w-6xl mx-auto px-5">
         <div className="flex items-center justify-between h-16">
           <a href="#home" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg gradient-hero flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg gradient-navy flex items-center justify-center">
               <GraduationCap className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
-            <span className="text-[15px] font-semibold text-foreground tracking-tight">Pragyanam</span>
+            <span className="text-[15px] font-bold text-foreground tracking-tight">Pragyanam</span>
           </a>
 
           <div className="hidden md:flex items-center gap-1">
@@ -39,7 +39,7 @@ const Navbar = () => {
               <a
                 key={link.href}
                 href={link.href}
-                className="px-3.5 py-2 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                className="px-3.5 py-2 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/60"
               >
                 {link.label}
               </a>
@@ -53,7 +53,7 @@ const Navbar = () => {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="sm" className="h-8 px-4 text-[13px] font-medium bg-foreground text-background hover:bg-foreground/90 rounded-lg">
+              <Button size="sm" className="h-8 px-4 text-[13px] font-semibold gradient-navy text-primary-foreground hover:opacity-90 rounded-lg">
                 Get started <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Link>
@@ -71,7 +71,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-card border-b border-border overflow-hidden"
+            className="md:hidden bg-background border-b border-border overflow-hidden"
           >
             <div className="px-5 py-3 flex flex-col gap-1">
               {navLinks.map((link) => (
@@ -89,7 +89,7 @@ const Navbar = () => {
                   <Button variant="ghost" className="w-full text-[13px] h-9">Log in</Button>
                 </Link>
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full text-[13px] h-9 bg-foreground text-background hover:bg-foreground/90">
+                  <Button className="w-full text-[13px] h-9 gradient-navy text-primary-foreground hover:opacity-90">
                     Get started
                   </Button>
                 </Link>
