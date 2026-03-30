@@ -19,7 +19,7 @@ const TeacherUpload = () => {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [courseForm, setCourseForm] = useState({
     title: "", title_hi: "", description: "", description_hi: "",
-    category: "school", class_level: "", price: "0", is_free: false,
+    category: "school", class_level: "",
   });
 
   const handleCreateCourse = async (e: React.FormEvent) => {
@@ -50,8 +50,6 @@ const TeacherUpload = () => {
       description_hi: courseForm.description_hi,
       category: courseForm.category,
       class_level: courseForm.class_level || null,
-      price: Number(courseForm.price),
-      is_free: courseForm.is_free,
       is_published: false,
       created_by: user.id,
       thumbnail_url: thumbnailUrl,
@@ -60,7 +58,7 @@ const TeacherUpload = () => {
       toast.error("Failed to create course: " + error.message);
     } else {
       toast.success("Course created! / कोर्स बन गया!");
-      setCourseForm({ title: "", title_hi: "", description: "", description_hi: "", category: "school", class_level: "", price: "0", is_free: false });
+      setCourseForm({ title: "", title_hi: "", description: "", description_hi: "", category: "school", class_level: "" });
       setThumbnailFile(null);
       await fetchMyCourses();
     }
@@ -137,7 +135,7 @@ const TeacherUpload = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Category</Label>
                 <select value={courseForm.category} onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
@@ -150,15 +148,7 @@ const TeacherUpload = () => {
                 <Label>Class Level</Label>
                 <Input value={courseForm.class_level} onChange={(e) => setCourseForm({ ...courseForm, class_level: e.target.value })} placeholder="e.g. 10" className="mt-1" />
               </div>
-              <div>
-                <Label>Price (₹)</Label>
-                <Input type="number" value={courseForm.price} onChange={(e) => setCourseForm({ ...courseForm, price: e.target.value })} className="mt-1" />
-              </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={courseForm.is_free} onChange={(e) => setCourseForm({ ...courseForm, is_free: e.target.checked })} className="rounded" />
-              <span className="text-sm text-foreground">This course is free / यह कोर्स मुफ्त है</span>
-            </label>
             <Button type="submit" disabled={loading} className="gradient-saffron border-0 text-primary-foreground font-bold">
               {loading ? "Creating..." : "Create Course / कोर्स बनाएं"}
             </Button>
