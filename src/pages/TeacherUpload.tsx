@@ -92,7 +92,7 @@ const TeacherUpload = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-5 sm:space-y-6 max-w-4xl pb-20 lg:pb-0">
         <div>
           <h1 className="text-2xl font-extrabold font-heading text-foreground">Upload Content</h1>
           <p className="text-sm text-muted-foreground">Create courses and upload study material</p>
