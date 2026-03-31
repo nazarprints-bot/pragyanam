@@ -50,11 +50,11 @@ const StudentHome = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-5 sm:space-y-6 pb-20 lg:pb-0 animate-slide-up">
+      <div className="w-full max-w-full overflow-x-hidden space-y-4 sm:space-y-6 pb-20 lg:pb-0 animate-slide-up">
         {/* Greeting */}
-        <div className="gradient-navy rounded-2xl p-4 sm:p-5 text-white card-3d">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
-          <p className="text-white/60 text-xs sm:text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
+        <div className="gradient-navy rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-white card-3d">
+          <h1 className="text-base sm:text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
+          <p className="text-white/60 text-[11px] sm:text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
         </div>
 
         {/* Live Now */}
@@ -138,17 +138,17 @@ const StudentHome = () => {
         {/* Coaching Classes */}
         <section>
           <SectionHeader title={t("shome.academicClasses")} />
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-7 sm:overflow-visible scrollbar-hide">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-2.5">
             {academicClasses.map((cls) => (
               <button
                 key={cls}
                 onClick={() => navigate(`/dashboard/classes/academic/${cls}`)}
-                className="bg-card rounded-xl border border-border p-2.5 sm:p-3 text-center hover:border-primary/40 transition-all group card-3d-subtle btn-press shrink-0 w-[72px] sm:w-auto"
+                className="bg-card rounded-xl border border-border p-2 sm:p-3 text-center hover:border-primary/40 transition-all group card-3d-subtle btn-press"
               >
-                <div className="w-8 h-8 sm:w-9 sm:h-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center mb-1 group-hover:bg-primary/20 transition-colors">
-                  <GraduationCap className="w-4 h-4 text-primary" />
+                <div className="w-7 h-7 sm:w-9 sm:h-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center mb-1 group-hover:bg-primary/20 transition-colors">
+                  <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                 </div>
-                <span className="text-xs sm:text-sm font-bold text-foreground whitespace-nowrap">{t("shome.class")} {cls}</span>
+                <span className="text-[10px] sm:text-sm font-bold text-foreground whitespace-nowrap">{t("shome.class")} {cls}</span>
               </button>
             ))}
           </div>
@@ -157,7 +157,7 @@ const StudentHome = () => {
         {/* Competitive Preparation */}
         <section>
           <SectionHeader title={t("shome.competitivePrep")} actionLabel={t("shome.viewAll")} onAction={() => navigate("/dashboard/classes/competitive")} />
-          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible scrollbar-hide">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <CompetitiveCard
               icon={<Swords className="w-5 h-5 text-amber-600" />}
               title={t("shome.armyPrep")}
@@ -225,7 +225,7 @@ const SectionHeader = ({ title, actionLabel, onAction }: { title: string; action
 );
 
 const CompetitiveCard = ({ icon, title, desc, onClick }: { icon: React.ReactNode; title: string; desc: string; onClick: () => void }) => (
-  <button onClick={onClick} className="bg-card rounded-xl border border-border p-3 sm:p-4 text-left hover:border-primary/30 transition-all group card-3d-subtle btn-press shrink-0 w-[160px] sm:w-auto">
+  <button onClick={onClick} className="bg-card rounded-xl border border-border p-3 sm:p-4 text-left hover:border-primary/30 transition-all group card-3d-subtle btn-press w-full">
     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center mb-2 group-hover:bg-primary/10 transition-colors">
       {icon}
     </div>
