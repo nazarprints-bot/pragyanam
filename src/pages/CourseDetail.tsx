@@ -31,6 +31,8 @@ const CourseDetail = () => {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [courseTests, setCourseTests] = useState<any[]>([]);
   const [hasCertificate, setHasCertificate] = useState(false);
+  const [testPassed, setTestPassed] = useState(false);
+  const [bestTestScore, setBestTestScore] = useState<number | null>(null);
 
   // Teacher lesson form
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
