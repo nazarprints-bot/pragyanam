@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu, X,
-  Upload, Video, Sparkles, UserCircle, PenTool, Eye
+  Upload, Video, Sparkles, UserCircle, PenTool, Eye, Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -29,6 +29,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
     { to: "/dashboard/doubts", icon: MessageCircle, label: t("sidebar.doubts") },
     { to: "/dashboard/progress", icon: BarChart3, label: t("sidebar.progress") },
+    { to: "/dashboard/notifications", icon: Bell, label: "Notifications" },
     { to: "/dashboard/profile", icon: UserCircle, label: t("sidebar.profile") },
   ];
 
@@ -39,6 +40,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
     { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: t("sidebar.doubts") },
+    { to: "/dashboard/notifications", icon: Bell, label: "Notifications" },
     { to: "/dashboard/profile", icon: UserCircle, label: t("sidebar.profile") },
   ];
 
@@ -52,6 +54,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
     { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
     { to: "/dashboard/analytics", icon: BarChart3, label: t("sidebar.analytics") },
+    { to: "/dashboard/notifications", icon: Bell, label: "Notifications" },
     { to: "/dashboard/settings", icon: Settings, label: t("sidebar.settings") },
   ];
 

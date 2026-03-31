@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Bell, Check, Trash2, X } from "lucide-react";
@@ -17,6 +18,7 @@ interface Notification {
 
 const NotificationPanel = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -151,6 +153,13 @@ const NotificationPanel = () => {
                 </div>
               )}
             </ScrollArea>
+
+            {/* View all link */}
+            <div className="border-t border-border px-4 py-2">
+              <Button variant="ghost" size="sm" className="w-full text-xs text-primary" onClick={() => { setOpen(false); navigate("/dashboard/notifications"); }}>
+                View all notifications
+              </Button>
+            </div>
           </div>
         </>
       )}
