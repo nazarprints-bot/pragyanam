@@ -208,6 +208,51 @@ const CourseDetail = () => {
     else { toast.success("Lesson deleted"); await fetchLessons(); }
   };
 
+  const handleScheduleLive = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!courseId || !user) return;
+    setSchedulingLive(true);
+
+    let thumbnailUrl: string | null = null;
+    if (liveThumbnail) {
+      const ext = liveThumbnail.name.split(".").pop();
+      const path = `live-class-thumbnails/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("course-thumbnails").upload(path, liveThumbnail);
+      if (!upErr) {
+        const { data } = supabase.storage.from("course-thumbnails").getPublicUrl(path);
+        thumbnailUrl = data.publicUrl;
+      }
+    }
+
+    const { error } = await supabase.from("live_classes").insert({
+      title: liveForm.title,
+      title_hi: liveForm.title_hi || "",
+      course_id: courseId,
+      teacher_id: user.id,
+      scheduled_at: new Date(liveForm.scheduled_at).toISOString(),
+      duration_minutes: liveForm.duration_minutes,
+      status: "scheduled",
+      thumbnail_url: thumbnailUrl,
+      max_students: 75,
+    } as any);
+
+    if (error) toast.error("Failed: " + error.message);
+    else {
+      toast.success("Live class scheduled! / लाइव क्लास शेड्यूल हुई!");
+      setLiveForm({ title: "", title_hi: "", scheduled_at: "", duration_minutes: 60 });
+      setLiveThumbnail(null);
+      setShowLiveForm(false);
+      await fetchLiveClasses();
+    }
+    setSchedulingLive(false);
+  };
+
+  const handleDeleteLiveClass = async (classId: string) => {
+    const { error } = await supabase.from("live_classes").delete().eq("id", classId);
+    if (error) toast.error("Failed: " + error.message);
+    else { toast.success("Class removed"); await fetchLiveClasses(); }
+  };
+
   const getEmbedUrl = (url: string) => {
     if (!url) return null;
     // YouTube
