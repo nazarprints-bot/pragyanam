@@ -138,17 +138,17 @@ const StudentHome = () => {
         {/* Coaching Classes */}
         <section>
           <SectionHeader title={t("shome.academicClasses")} />
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-7 sm:overflow-visible scrollbar-hide">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-2.5">
             {academicClasses.map((cls) => (
               <button
                 key={cls}
                 onClick={() => navigate(`/dashboard/classes/academic/${cls}`)}
-                className="bg-card rounded-xl border border-border p-2.5 sm:p-3 text-center hover:border-primary/40 transition-all group card-3d-subtle btn-press shrink-0 w-[72px] sm:w-auto"
+                className="bg-card rounded-xl border border-border p-2 sm:p-3 text-center hover:border-primary/40 transition-all group card-3d-subtle btn-press"
               >
-                <div className="w-8 h-8 sm:w-9 sm:h-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center mb-1 group-hover:bg-primary/20 transition-colors">
-                  <GraduationCap className="w-4 h-4 text-primary" />
+                <div className="w-7 h-7 sm:w-9 sm:h-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center mb-1 group-hover:bg-primary/20 transition-colors">
+                  <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                 </div>
-                <span className="text-xs sm:text-sm font-bold text-foreground whitespace-nowrap">{t("shome.class")} {cls}</span>
+                <span className="text-[10px] sm:text-sm font-bold text-foreground whitespace-nowrap">{t("shome.class")} {cls}</span>
               </button>
             ))}
           </div>
