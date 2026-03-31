@@ -226,10 +226,17 @@ const CourseDetail = () => {
 
   const checkAndIssueCertificate = async () => {
     if (!user || !courseId || hasCertificate) return;
-    // Check if all lessons completed
-    const allDone = lessons.every(l => lessonProgress[l.id] || false);
-    // For now issue certificate when all lessons done (test check can be added)
-    if (!allDone && Object.keys(lessonProgress).length < lessons.length) return;
+    // Check all lessons completed
+    const allDone = lessons.every(l => lessonProgress[l.id]);
+    if (!allDone) {
+      toast.error("Please complete all lessons first! / पहले सभी पाठ पूरे करें!");
+      return;
+    }
+    // Check test passed (if course has tests)
+    if (courseTests.length > 0 && !testPassed) {
+      toast.error("Please pass the course test first (40% minimum)! / पहले कोर्स टेस्ट पास करें!");
+      return;
+    }
 
     const { error } = await supabase.from("certificates").insert({
       user_id: user.id, course_id: courseId,
