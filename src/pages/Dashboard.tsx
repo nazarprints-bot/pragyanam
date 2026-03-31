@@ -3,31 +3,56 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
-import { BookOpen, Brain, MessageCircle, TrendingUp, Users, Award } from "lucide-react";
+import { BookOpen, Brain, MessageCircle, Users, Award, Plus, ArrowRight, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const { user, role, profile } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ courses: 0, tests: 0, doubts: 0, students: 0 });
+  const [myCourses, setMyCourses] = useState<any[]>([]);
+  const [scheduledTests, setScheduledTests] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       if (!user) return;
-      const [courses, tests, doubts] = await Promise.all([
-        role === "student"
-          ? supabase.from("enrollments").select("id", { count: "exact", head: true }).eq("user_id", user.id)
-          : supabase.from("courses").select("id", { count: "exact", head: true }),
-        role === "student"
-          ? supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("user_id", user.id)
-          : supabase.from("tests").select("id", { count: "exact", head: true }),
-        supabase.from("doubts").select("id", { count: "exact", head: true }),
-      ]);
-      setStats({ courses: courses.count || 0, tests: tests.count || 0, doubts: doubts.count || 0, students: 0 });
+
+      if (role === "teacher") {
+        const [coursesRes, testsRes, doubtsRes, myCoursesRes, schedRes] = await Promise.all([
+          supabase.from("courses").select("id", { count: "exact", head: true }).eq("created_by", user.id),
+          supabase.from("tests").select("id", { count: "exact", head: true }).eq("created_by", user.id),
+          supabase.from("doubts").select("id", { count: "exact", head: true }).eq("status", "open"),
+          supabase.from("courses").select("id, title, title_hi, thumbnail_url, is_published, category").eq("created_by", user.id).order("created_at", { ascending: false }).limit(6),
+          supabase.from("tests").select("id, title, scheduled_at, course_id, courses(title)").eq("created_by", user.id).not("scheduled_at", "is", null).eq("is_published", false).order("scheduled_at").limit(5),
+        ]);
+        setStats({
+          courses: coursesRes.count || 0,
+          tests: testsRes.count || 0,
+          doubts: doubtsRes.count || 0,
+          students: 0,
+        });
+        setMyCourses(myCoursesRes.data || []);
+        setScheduledTests(schedRes.data || []);
+      } else if (role === "admin") {
+        const [courses, tests, doubts] = await Promise.all([
+          supabase.from("courses").select("id", { count: "exact", head: true }),
+          supabase.from("tests").select("id", { count: "exact", head: true }),
+          supabase.from("doubts").select("id", { count: "exact", head: true }),
+        ]);
+        setStats({ courses: courses.count || 0, tests: tests.count || 0, doubts: doubts.count || 0, students: 0 });
+      } else {
+        const [courses, tests, doubts] = await Promise.all([
+          supabase.from("enrollments").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          supabase.from("test_attempts").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          supabase.from("doubts").select("id", { count: "exact", head: true }),
+        ]);
+        setStats({ courses: courses.count || 0, tests: tests.count || 0, doubts: doubts.count || 0, students: 0 });
+      }
     };
     fetchStats();
-  }, []);
+  }, [user, role]);
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -36,34 +61,136 @@ const Dashboard = () => {
     return t("dash.goodEvening");
   };
 
-  const statCards = role === "student" ? [
-    { icon: BookOpen, label: t("dash.enrolledCourses"), value: stats.courses, color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
-    { icon: Brain, label: t("dash.testsTaken"), value: stats.tests, color: "bg-gold/10 text-gold-warm" },
-    { icon: MessageCircle, label: t("dash.doubtsAsked"), value: stats.doubts, color: "bg-emerald/10 text-emerald" },
-    { icon: TrendingUp, label: t("dash.avgScore"), value: "—", color: "bg-saffron/10 text-saffron-dark" },
-  ] : role === "teacher" ? [
-    { icon: BookOpen, label: t("dash.myCourses"), value: stats.courses, color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
-    { icon: Users, label: t("dash.studentsLabel"), value: stats.students, color: "bg-gold/10 text-gold-warm" },
-    { icon: Brain, label: t("dash.testsCreated"), value: stats.tests, color: "bg-emerald/10 text-emerald" },
-    { icon: MessageCircle, label: t("dash.pendingDoubts"), value: stats.doubts, color: "bg-saffron/10 text-saffron-dark" },
-  ] : [
-    { icon: Users, label: t("dash.totalUsers"), value: "—", color: "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold" },
-    { icon: BookOpen, label: t("dash.totalCourses"), value: stats.courses, color: "bg-gold/10 text-gold-warm" },
-    { icon: Brain, label: t("dash.totalTests"), value: stats.tests, color: "bg-emerald/10 text-emerald" },
-    { icon: Award, label: t("dash.revenue"), value: "₹0", color: "bg-saffron/10 text-saffron-dark" },
+  // Teacher Dashboard
+  if (role === "teacher") {
+    return (
+      <DashboardLayout>
+        <div className="space-y-5 animate-slide-up">
+          {/* Greeting */}
+          <div className="gradient-navy rounded-2xl p-5 text-white">
+            <h1 className="text-xl font-extrabold font-heading">{greeting()} 👋</h1>
+            <p className="text-white/60 text-sm mt-0.5">{profile?.full_name || "Teacher"}, here's your overview</p>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-card rounded-2xl p-4 border border-border text-center">
+              <BookOpen className="w-7 h-7 mx-auto text-primary mb-1" />
+              <p className="text-xl font-extrabold text-foreground">{stats.courses}</p>
+              <p className="text-xs text-muted-foreground">My Courses</p>
+            </div>
+            <div className="bg-card rounded-2xl p-4 border border-border text-center">
+              <Brain className="w-7 h-7 mx-auto text-primary mb-1" />
+              <p className="text-xl font-extrabold text-foreground">{stats.tests}</p>
+              <p className="text-xs text-muted-foreground">Tests Created</p>
+            </div>
+            <div className="bg-card rounded-2xl p-4 border border-border text-center">
+              <MessageCircle className="w-7 h-7 mx-auto text-primary mb-1" />
+              <p className="text-xl font-extrabold text-foreground">{stats.doubts}</p>
+              <p className="text-xs text-muted-foreground">Open Doubts</p>
+            </div>
+          </div>
+
+          {/* My Courses */}
+          <div className="bg-card rounded-2xl p-5 border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold font-heading text-foreground">My Courses / मेरे कोर्स</h2>
+              <Button size="sm" onClick={() => navigate("/dashboard/upload")} className="bg-primary text-primary-foreground">
+                <Plus className="w-4 h-4 mr-1" /> New Course
+              </Button>
+            </div>
+            {myCourses.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                No courses yet. Create your first course!
+              </p>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {myCourses.map((course) => (
+                  <div
+                    key={course.id}
+                    onClick={() => navigate(`/dashboard/course/${course.id}`)}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-muted/30 cursor-pointer transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                      {course.thumbnail_url ? (
+                        <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                          <BookOpen className="w-5 h-5 text-primary" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm truncate">{course.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{course.category}</span>
+                        <span className={`text-[10px] ${course.is_published ? "text-primary" : "text-muted-foreground"}`}>
+                          {course.is_published ? "Published" : "Draft"}
+                        </span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Scheduled Tests */}
+          {scheduledTests.length > 0 && (
+            <div className="bg-card rounded-2xl p-5 border border-border">
+              <h2 className="text-lg font-bold font-heading text-foreground mb-3 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" /> Scheduled Tests
+              </h2>
+              <div className="space-y-2">
+                {scheduledTests.map((test: any) => (
+                  <div key={test.id} className="flex items-center justify-between p-3 rounded-xl border border-border">
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">{test.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(test as any).courses?.title && `${(test as any).courses.title} · `}
+                        {new Date(test.scheduled_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                        {" · "}
+                        {new Date(test.scheduled_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">Upcoming</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <QuickAction icon="📝" label="Create Test" onClick={() => navigate("/dashboard/manual-test")} />
+            <QuickAction icon="✨" label="AI Test" onClick={() => navigate("/dashboard/ai-test")} />
+            <QuickAction icon="💬" label="Answer Doubts" onClick={() => navigate("/dashboard/doubts")} />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Admin Dashboard
+  const adminStatCards = [
+    { icon: Users, label: t("dash.totalUsers"), value: "—", color: "bg-primary/10 text-primary" },
+    { icon: BookOpen, label: t("dash.totalCourses"), value: stats.courses, color: "bg-primary/10 text-primary" },
+    { icon: Brain, label: t("dash.totalTests"), value: stats.tests, color: "bg-primary/10 text-primary" },
+    { icon: Award, label: t("dash.revenue"), value: "₹0", color: "bg-primary/10 text-primary" },
   ];
 
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 animate-slide-up">
-        <div className="gradient-navy rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white card-3d">
+        <div className="gradient-navy rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
           <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
           <p className="text-white/60 text-xs sm:text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 stagger-children">
-          {statCards.map((stat) => (
-            <div key={stat.label} className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-border card-3d-subtle">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          {adminStatCards.map((stat) => (
+            <div key={stat.label} className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-border">
               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${stat.color} flex items-center justify-center mb-2 sm:mb-3`}>
                 <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
@@ -73,34 +200,13 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border animate-slide-up-delayed">
+        <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border">
           <h2 className="text-sm sm:text-lg font-bold font-heading text-foreground mb-3 sm:mb-4">{t("dash.quickActions")}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 stagger-children">
-            {role === "student" && (
-              <>
-                <QuickAction icon="📚" label={t("dash.browseCourses")} to="/dashboard/courses" />
-                <QuickAction icon="📝" label={t("dash.takeTest")} to="/dashboard/tests" />
-                <QuickAction icon="❓" label={t("dash.askDoubt")} to="/dashboard/doubts" />
-                <QuickAction icon="📊" label={t("dash.viewProgress")} to="/dashboard/progress" />
-              </>
-            )}
-            {role === "teacher" && (
-              <>
-                <QuickAction icon="➕" label="Create Course" to="/dashboard/upload" />
-                <QuickAction icon="📤" label={t("dash.uploadContent")} to="/dashboard/upload" />
-                <QuickAction icon="📝" label={t("dash.createTest")} to="/dashboard/manual-test" />
-                <QuickAction icon="💬" label={t("dash.answerDoubts")} to="/dashboard/doubts" />
-                <QuickAction icon="👨‍🎓" label={t("dash.viewStudents")} to="/dashboard/students" />
-              </>
-            )}
-            {role === "admin" && (
-              <>
-                <QuickAction icon="👥" label={t("dash.manageUsers")} to="/dashboard/users" />
-                <QuickAction icon="📚" label={t("dash.manageCourses")} to="/dashboard/all-courses" />
-                <QuickAction icon="📊" label={t("dash.viewAnalytics")} to="/dashboard/analytics" />
-                <QuickAction icon="⚙️" label={t("dash.settings")} to="/dashboard/settings" />
-              </>
-            )}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <QuickAction icon="👥" label={t("dash.manageUsers")} onClick={() => navigate("/dashboard/users")} />
+            <QuickAction icon="📚" label={t("dash.manageCourses")} onClick={() => navigate("/dashboard/all-courses")} />
+            <QuickAction icon="📊" label={t("dash.viewAnalytics")} onClick={() => navigate("/dashboard/analytics")} />
+            <QuickAction icon="⚙️" label={t("dash.settings")} onClick={() => navigate("/dashboard/settings")} />
           </div>
         </div>
       </div>
@@ -108,14 +214,11 @@ const Dashboard = () => {
   );
 };
 
-const QuickAction = ({ icon, label, to }: { icon: string; label: string; to: string }) => {
-  const navigate = useNavigate();
-  return (
-    <button onClick={() => navigate(to)} className="flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-xl border border-border hover:border-gold/40 hover:shadow-gold transition-all text-center w-full group card-3d-subtle btn-press">
-      <span className="text-xl sm:text-2xl group-hover:animate-float">{icon}</span>
-      <span className="text-[11px] sm:text-sm font-medium text-foreground leading-tight">{label}</span>
-    </button>
-  );
-};
+const QuickAction = ({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) => (
+  <button onClick={onClick} className="flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-xl border border-border hover:border-primary/40 transition-all text-center w-full active:scale-[0.97]">
+    <span className="text-xl sm:text-2xl">{icon}</span>
+    <span className="text-[11px] sm:text-sm font-medium text-foreground leading-tight">{label}</span>
+  </button>
+);
 
 export default Dashboard;
