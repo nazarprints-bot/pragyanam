@@ -260,72 +260,10 @@ const LiveClasses = () => {
               <Video className="w-6 h-6 text-navy dark:text-gold" /> Live Classes
             </h1>
             <p className="text-sm text-muted-foreground">
-              {isTeacherOrAdmin ? "Schedule and manage live classes" : "Join live classes with your teachers"}
+              {isTeacherOrAdmin ? "Manage live classes from your courses" : "Join live classes with your teachers"}
             </p>
           </div>
-          {isTeacherOrAdmin && (
-            <Button onClick={() => setShowForm(!showForm)} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
-              <Plus className="w-4 h-4 mr-1" /> Schedule Class
-            </Button>
-          )}
         </div>
-
-        {/* Create Form */}
-        {showForm && isTeacherOrAdmin && (
-          <div className="bg-card rounded-2xl p-6 border border-border">
-            <h2 className="text-lg font-bold font-heading text-foreground mb-4">Schedule New Live Class</h2>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label>Title</Label>
-                  <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Math Revision" className="mt-1" />
-                </div>
-                <div>
-                  <Label>Subtitle (Optional)</Label>
-                  <Input value={form.title_hi} onChange={(e) => setForm({ ...form, title_hi: e.target.value })} placeholder="Optional subtitle" className="mt-1" />
-                </div>
-              </div>
-              <div>
-                <Label>Description (Optional)</Label>
-                <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What will be covered" className="mt-1" />
-              </div>
-              {/* Thumbnail upload */}
-              <div>
-                <Label>Thumbnail (Optional)</Label>
-                <div className="mt-1 flex items-center gap-3">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-muted rounded-lg cursor-pointer hover:bg-muted/80 transition-colors text-sm">
-                    <Image className="w-4 h-4" />
-                    {thumbnailFile ? thumbnailFile.name : "Choose image"}
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} />
-                  </label>
-                  {thumbnailFile && (
-                    <img src={URL.createObjectURL(thumbnailFile)} alt="Preview" className="w-16 h-10 object-cover rounded" />
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label>Date & Time</Label>
-                  <Input type="datetime-local" required value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="mt-1" />
-                </div>
-                <div>
-                  <Label>Duration (minutes)</Label>
-                  <Input type="number" min={15} max={180} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: Number(e.target.value) })} className="mt-1" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Users className="w-3 h-3" /> Max {MAX_STUDENTS_PER_CLASS} students per class
-              </p>
-              <div className="flex gap-3">
-                <Button type="submit" disabled={creating} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
-                  {creating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Calendar className="w-4 h-4 mr-1" />}
-                  Schedule
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
-              </div>
-            </form>
-          </div>
-        )}
 
         {loading ? (
           <div className="flex justify-center py-12">
