@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Brain, Sparkles, FileText, Loader2, Plus, Save } from "lucide-react";
+import { Brain, Sparkles, FileText, Loader2, Save, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import { toast } from "sonner";
 
 interface GeneratedQuestion {
@@ -20,6 +25,11 @@ interface GeneratedQuestion {
   marks: number;
 }
 
+interface Course {
+  id: string;
+  title: string;
+}
+
 const AITestGenerator = () => {
   const { user } = useAuth();
   const [mode, setMode] = useState<"topic" | "notes">("topic");
@@ -31,6 +41,22 @@ const AITestGenerator = () => {
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [scheduledDate, setScheduledDate] = useState<Date>();
+  const [scheduledTime, setScheduledTime] = useState("09:00");
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("courses")
+        .select("id, title")
+        .eq("created_by", user.id)
+        .then(({ data }) => {
+          if (data) setCourses(data);
+        });
+    }
+  }, [user]);
 
   const handleGenerate = async () => {
     if (mode === "topic" && !topic.trim()) {
@@ -74,6 +100,14 @@ const AITestGenerator = () => {
     }
     if (!user || questions.length === 0) return;
 
+    let scheduledAt: string | null = null;
+    if (scheduledDate) {
+      const [hours, minutes] = scheduledTime.split(":").map(Number);
+      const dt = new Date(scheduledDate);
+      dt.setHours(hours, minutes, 0, 0);
+      scheduledAt = dt.toISOString();
+    }
+
     setSaving(true);
     try {
       const { data: test, error: testError } = await supabase
@@ -84,8 +118,10 @@ const AITestGenerator = () => {
           type: "chapter",
           total_marks: questions.reduce((sum, q) => sum + (q.marks || 1), 0),
           duration_minutes: Math.max(questions.length * 2, 10),
-          is_published: false,
+          is_published: !scheduledAt,
           created_by: user.id,
+          course_id: selectedCourse || null,
+          scheduled_at: scheduledAt,
         })
         .select()
         .single();
@@ -108,12 +144,18 @@ const AITestGenerator = () => {
       const { error: qError } = await supabase.from("test_questions").insert(questionsToInsert);
       if (qError) throw qError;
 
-      toast.success("Test saved successfully!");
+      toast.success(
+        scheduledAt
+          ? `Test scheduled for ${format(new Date(scheduledAt), "PPP p")}!`
+          : "Test saved & published!"
+      );
       setQuestions([]);
       setTestTitle("");
       setTestTitleHi("");
       setTopic("");
       setNotes("");
+      setSelectedCourse("");
+      setScheduledDate(undefined);
     } catch (err: any) {
       toast.error(err.message || "Failed to save test");
     } finally {
@@ -244,6 +286,70 @@ const AITestGenerator = () => {
                   />
                 </div>
               </div>
+
+              {/* Course Selection */}
+              <div>
+                <Label>Link to Course (Optional)</Label>
+                <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select a course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No course</SelectItem>
+                    {courses.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Schedule */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Schedule Date (Optional)</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full mt-1 justify-start text-left font-normal",
+                          !scheduledDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={scheduledDate}
+                        onSelect={setScheduledDate}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <Label>Schedule Time</Label>
+                  <Input
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              {scheduledDate && (
+                <p className="text-xs text-muted-foreground">
+                  Test will auto-publish on {format(scheduledDate, "PPP")} at {scheduledTime}
+                </p>
+              )}
+
               <Button
                 onClick={handleSaveTest}
                 disabled={saving || !testTitle.trim()}
@@ -254,7 +360,7 @@ const AITestGenerator = () => {
                 ) : (
                   <Save className="w-4 h-4 mr-2" />
                 )}
-                Save as Test
+                {scheduledDate ? "Schedule Test" : "Save & Publish"}
               </Button>
             </div>
 
