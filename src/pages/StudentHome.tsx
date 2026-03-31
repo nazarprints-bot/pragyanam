@@ -150,7 +150,7 @@ const StudentHome = () => {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold font-heading text-foreground">{t("shome.academicClasses")}</h2>
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 stagger-children">
             {academicClasses.map((cls) => (
               <button
                 key={cls}
