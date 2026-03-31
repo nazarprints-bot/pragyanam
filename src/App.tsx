@@ -49,7 +49,10 @@ const queryClient = new QueryClient({
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
+    <div className="relative">
+      <div className="animate-spin w-10 h-10 border-4 border-gold/30 border-t-gold rounded-full" />
+      <div className="absolute inset-0 animate-ping w-10 h-10 border border-gold/20 rounded-full" />
+    </div>
   </div>
 );
 
