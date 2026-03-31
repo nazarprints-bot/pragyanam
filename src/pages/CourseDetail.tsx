@@ -37,6 +37,12 @@ const CourseDetail = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Live class scheduling
+  const [showLiveForm, setShowLiveForm] = useState(false);
+  const [liveForm, setLiveForm] = useState({ title: "", title_hi: "", scheduled_at: "", duration_minutes: 60 });
+  const [liveThumbnail, setLiveThumbnail] = useState<File | null>(null);
+  const [schedulingLive, setSchedulingLive] = useState(false);
+
   const fetchCourse = async () => {
     if (!courseId) return;
     const { data } = await supabase.from("courses").select("*").eq("id", courseId).single();
@@ -202,6 +208,51 @@ const CourseDetail = () => {
     else { toast.success("Lesson deleted"); await fetchLessons(); }
   };
 
+  const handleScheduleLive = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!courseId || !user) return;
+    setSchedulingLive(true);
+
+    let thumbnailUrl: string | null = null;
+    if (liveThumbnail) {
+      const ext = liveThumbnail.name.split(".").pop();
+      const path = `live-class-thumbnails/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("course-thumbnails").upload(path, liveThumbnail);
+      if (!upErr) {
+        const { data } = supabase.storage.from("course-thumbnails").getPublicUrl(path);
+        thumbnailUrl = data.publicUrl;
+      }
+    }
+
+    const { error } = await supabase.from("live_classes").insert({
+      title: liveForm.title,
+      title_hi: liveForm.title_hi || "",
+      course_id: courseId,
+      teacher_id: user.id,
+      scheduled_at: new Date(liveForm.scheduled_at).toISOString(),
+      duration_minutes: liveForm.duration_minutes,
+      status: "scheduled",
+      thumbnail_url: thumbnailUrl,
+      max_students: 75,
+    } as any);
+
+    if (error) toast.error("Failed: " + error.message);
+    else {
+      toast.success("Live class scheduled! / लाइव क्लास शेड्यूल हुई!");
+      setLiveForm({ title: "", title_hi: "", scheduled_at: "", duration_minutes: 60 });
+      setLiveThumbnail(null);
+      setShowLiveForm(false);
+      await fetchLiveClasses();
+    }
+    setSchedulingLive(false);
+  };
+
+  const handleDeleteLiveClass = async (classId: string) => {
+    const { error } = await supabase.from("live_classes").delete().eq("id", classId);
+    if (error) toast.error("Failed: " + error.message);
+    else { toast.success("Class removed"); await fetchLiveClasses(); }
+  };
+
   const getEmbedUrl = (url: string) => {
     if (!url) return null;
     // YouTube
@@ -314,12 +365,59 @@ const CourseDetail = () => {
         </div>
 
         {/* Live Classes for this course */}
-        {liveClasses.length > 0 && (
-          <div className="bg-card rounded-2xl p-6 border border-border">
-            <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
+        <div className="bg-card rounded-2xl p-6 border border-border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
               <Video className="w-5 h-5 text-destructive" />
               Live Classes / लाइव क्लास
             </h2>
+            {canManage && (
+              <Button size="sm" onClick={() => setShowLiveForm(!showLiveForm)} className="gradient-saffron border-0 text-primary-foreground">
+                <Plus className="w-4 h-4 mr-1" /> Schedule Live
+              </Button>
+            )}
+          </div>
+
+          {/* Schedule Live Class Form */}
+          {showLiveForm && canManage && (
+            <form onSubmit={handleScheduleLive} className="border border-border rounded-xl p-4 mb-4 space-y-3 bg-muted/30">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Title</Label>
+                  <Input required value={liveForm.title} onChange={(e) => setLiveForm({ ...liveForm, title: e.target.value })} placeholder="e.g. Trigonometry Revision" className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs">Subtitle (Hindi)</Label>
+                  <Input value={liveForm.title_hi} onChange={(e) => setLiveForm({ ...liveForm, title_hi: e.target.value })} placeholder="Optional" className="mt-1" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Date & Time</Label>
+                  <Input type="datetime-local" required value={liveForm.scheduled_at} onChange={(e) => setLiveForm({ ...liveForm, scheduled_at: e.target.value })} className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs">Duration (min)</Label>
+                  <Input type="number" min={15} max={180} value={liveForm.duration_minutes} onChange={(e) => setLiveForm({ ...liveForm, duration_minutes: Number(e.target.value) })} className="mt-1 w-32" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Thumbnail (Optional)</Label>
+                <Input type="file" accept="image/*" onChange={(e) => setLiveThumbnail(e.target.files?.[0] || null)} className="mt-1" />
+              </div>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" /> Max 75 students per class</p>
+              <div className="flex gap-2">
+                <Button type="submit" size="sm" disabled={schedulingLive} className="gradient-saffron border-0 text-primary-foreground">
+                  {schedulingLive ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Scheduling...</> : <><Calendar className="w-3 h-3 mr-1" /> Schedule</>}
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => setShowLiveForm(false)}>Cancel</Button>
+              </div>
+            </form>
+          )}
+
+          {liveClasses.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No live classes scheduled / कोई लाइव क्लास नहीं</p>
+          ) : (
             <div className="space-y-3">
               {liveClasses.map((lc) => (
                 <div key={lc.id} className="flex items-center justify-between border border-border rounded-xl p-4">
@@ -336,20 +434,30 @@ const CourseDetail = () => {
                       {" · "}
                       <Clock className="w-3 h-3" />
                       {new Date(lc.scheduled_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                      {" · "}
+                      <Users className="w-3 h-3" />
+                      {lc.current_students || 0}/{lc.max_students || 75}
                     </p>
                   </div>
-                  {lc.status === "live" ? (
-                    <Button size="sm" className="gradient-saffron border-0 text-primary-foreground" onClick={() => setActiveRoom(lc.room_id)}>
-                      <Play className="w-3 h-3 mr-1" /> Join
-                    </Button>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Upcoming</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {lc.status === "live" ? (
+                      <Button size="sm" className="gradient-saffron border-0 text-primary-foreground" onClick={() => setActiveRoom(lc.room_id)}>
+                        <Play className="w-3 h-3 mr-1" /> Join
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Upcoming</span>
+                    )}
+                    {canManage && (
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDeleteLiveClass(lc.id)}>
+                        <Trash2 className="w-3 h-3 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Lessons Section */}
         <div className="bg-card rounded-2xl p-6 border border-border">

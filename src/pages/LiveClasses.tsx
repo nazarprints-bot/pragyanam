@@ -3,10 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import LiveChatSidebar from "@/components/LiveChatSidebar";
-import { Video, Plus, Calendar, Clock, Users, Play, X, Loader2, Trash2, Image, Upload } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, X, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 const MAX_STUDENTS_PER_CLASS = 75;
@@ -16,18 +14,8 @@ const LiveClasses = () => {
   const [classes, setClasses] = useState<any[]>([]);
   const [teacherProfiles, setTeacherProfiles] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [form, setForm] = useState({
-    title: "",
-    title_hi: "",
-    description: "",
-    scheduled_at: "",
-    duration_minutes: 60,
-  });
 
   const fetchClasses = async () => {
     const { data, error } = await supabase
@@ -67,54 +55,8 @@ const LiveClasses = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const uploadThumbnail = async (file: File): Promise<string | null> => {
-    const ext = file.name.split(".").pop();
-    const path = `live-class-thumbnails/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("course-thumbnails").upload(path, file);
-    if (error) { toast.error("Thumbnail upload failed"); return null; }
-    const { data } = supabase.storage.from("course-thumbnails").getPublicUrl(path);
-    return data.publicUrl;
-  };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setCreating(true);
 
-    if (!form.scheduled_at || Number.isNaN(new Date(form.scheduled_at).getTime())) {
-      toast.error("Please select a valid date & time");
-      setCreating(false);
-      return;
-    }
-
-    let thumbnailUrl: string | null = null;
-    if (thumbnailFile) {
-      thumbnailUrl = await uploadThumbnail(thumbnailFile);
-    }
-
-    const { error } = await supabase.from("live_classes").insert({
-      title: form.title,
-      title_hi: form.title_hi,
-      description: form.description || null,
-      teacher_id: user.id,
-      scheduled_at: new Date(form.scheduled_at).toISOString(),
-      duration_minutes: form.duration_minutes,
-      status: "scheduled",
-      thumbnail_url: thumbnailUrl,
-      max_students: MAX_STUDENTS_PER_CLASS,
-    } as any);
-
-    if (error) {
-      toast.error("Failed to schedule class: " + error.message);
-    } else {
-      toast.success("Live class scheduled!");
-      setShowForm(false);
-      setForm({ title: "", title_hi: "", description: "", scheduled_at: "", duration_minutes: 60 });
-      setThumbnailFile(null);
-      await fetchClasses();
-    }
-    setCreating(false);
-  };
 
   const handleStartClass = async (classItem: any) => {
     const { error } = await supabase
@@ -316,72 +258,10 @@ const LiveClasses = () => {
               <Video className="w-6 h-6 text-navy dark:text-gold" /> Live Classes
             </h1>
             <p className="text-sm text-muted-foreground">
-              {isTeacherOrAdmin ? "Schedule and manage live classes" : "Join live classes with your teachers"}
+              {isTeacherOrAdmin ? "Manage live classes from your courses" : "Join live classes with your teachers"}
             </p>
           </div>
-          {isTeacherOrAdmin && (
-            <Button onClick={() => setShowForm(!showForm)} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
-              <Plus className="w-4 h-4 mr-1" /> Schedule Class
-            </Button>
-          )}
         </div>
-
-        {/* Create Form */}
-        {showForm && isTeacherOrAdmin && (
-          <div className="bg-card rounded-2xl p-6 border border-border">
-            <h2 className="text-lg font-bold font-heading text-foreground mb-4">Schedule New Live Class</h2>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label>Title</Label>
-                  <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Math Revision" className="mt-1" />
-                </div>
-                <div>
-                  <Label>Subtitle (Optional)</Label>
-                  <Input value={form.title_hi} onChange={(e) => setForm({ ...form, title_hi: e.target.value })} placeholder="Optional subtitle" className="mt-1" />
-                </div>
-              </div>
-              <div>
-                <Label>Description (Optional)</Label>
-                <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What will be covered" className="mt-1" />
-              </div>
-              {/* Thumbnail upload */}
-              <div>
-                <Label>Thumbnail (Optional)</Label>
-                <div className="mt-1 flex items-center gap-3">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-muted rounded-lg cursor-pointer hover:bg-muted/80 transition-colors text-sm">
-                    <Image className="w-4 h-4" />
-                    {thumbnailFile ? thumbnailFile.name : "Choose image"}
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} />
-                  </label>
-                  {thumbnailFile && (
-                    <img src={URL.createObjectURL(thumbnailFile)} alt="Preview" className="w-16 h-10 object-cover rounded" />
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label>Date & Time</Label>
-                  <Input type="datetime-local" required value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="mt-1" />
-                </div>
-                <div>
-                  <Label>Duration (minutes)</Label>
-                  <Input type="number" min={15} max={180} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: Number(e.target.value) })} className="mt-1" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Users className="w-3 h-3" /> Max {MAX_STUDENTS_PER_CLASS} students per class
-              </p>
-              <div className="flex gap-3">
-                <Button type="submit" disabled={creating} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
-                  {creating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Calendar className="w-4 h-4 mr-1" />}
-                  Schedule
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
-              </div>
-            </form>
-          </div>
-        )}
 
         {loading ? (
           <div className="flex justify-center py-12">

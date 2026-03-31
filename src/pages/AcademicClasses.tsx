@@ -67,6 +67,7 @@ const AcademicClasses = () => {
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-foreground">{t("shome.academicClasses")}</h1>
             <p className="text-sm text-muted-foreground">{t("academic.selectClass")}</p>
+
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {classes.map((cls) => (
