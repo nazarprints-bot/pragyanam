@@ -50,11 +50,11 @@ const StudentHome = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-5 sm:space-y-6 pb-20 lg:pb-0 animate-slide-up">
+      <div className="w-full max-w-full overflow-x-hidden space-y-4 sm:space-y-6 pb-20 lg:pb-0 animate-slide-up">
         {/* Greeting */}
-        <div className="gradient-navy rounded-2xl p-4 sm:p-5 text-white card-3d">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
-          <p className="text-white/60 text-xs sm:text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
+        <div className="gradient-navy rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-white card-3d">
+          <h1 className="text-base sm:text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
+          <p className="text-white/60 text-[11px] sm:text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
         </div>
 
         {/* Live Now */}
