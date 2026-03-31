@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap');
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -62,9 +60,10 @@
     --shadow-elevated: 0 10px 25px -5px hsl(222 47% 11% / 0.08), 0 8px 10px -6px hsl(222 47% 11% / 0.04);
     --shadow-glow: 0 0 0 1px hsl(43 74% 49% / 0.2), 0 4px 20px -2px hsl(43 74% 49% / 0.15);
     --shadow-gold: 0 4px 14px -2px hsl(43 74% 49% / 0.25);
+    --shadow-3d: 0 20px 40px -15px hsl(222 47% 11% / 0.15), 0 8px 16px -8px hsl(222 47% 11% / 0.08);
 
-    --font-heading: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
-    --font-body: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+    --font-heading: 'Space Grotesk', 'Noto Sans Devanagari', system-ui, sans-serif;
+    --font-body: 'Plus Jakarta Sans', 'Noto Sans Devanagari', system-ui, sans-serif;
 
     --sidebar-background: 222 47% 20%;
     --sidebar-foreground: 220 14% 90%;
@@ -124,6 +123,7 @@
     --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
     --shadow-glow: 0 0 0 1px hsl(43 74% 49% / 0.3), 0 4px 20px -2px hsl(43 74% 49% / 0.2);
     --shadow-gold: 0 4px 14px -2px hsl(43 74% 49% / 0.3);
+    --shadow-3d: 0 20px 40px -15px hsl(0 0% 0% / 0.4), 0 8px 16px -8px hsl(0 0% 0% / 0.3);
 
     --sidebar-background: 222 47% 8%;
     --sidebar-foreground: 220 14% 85%;
@@ -151,7 +151,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    letter-spacing: -0.025em;
+    letter-spacing: -0.035em;
   }
 }
 
@@ -189,6 +189,9 @@
   .shadow-gold {
     box-shadow: var(--shadow-gold);
   }
+  .shadow-3d {
+    box-shadow: var(--shadow-3d);
+  }
   .text-gradient-gold {
     background: var(--gradient-gold);
     -webkit-background-clip: text;
@@ -207,4 +210,111 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* 3D Card Effects */
+  .card-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .card-3d:hover {
+    transform: translateY(-4px) rotateX(2deg) rotateY(-1deg);
+    box-shadow: var(--shadow-3d);
+  }
+
+  .card-3d-subtle {
+    transform-style: preserve-3d;
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease;
+  }
+  .card-3d-subtle:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Glass Effect */
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Smooth Animations */
+  .animate-slide-up {
+    animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+
+  .animate-slide-up-delayed {
+    opacity: 0;
+    animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.1s forwards;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+
+  /* Stagger children */
+  .stagger-children > * {
+    opacity: 0;
+    animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+  .stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+  .stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+  .stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+  /* Smooth button press */
+  .btn-press {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-press:active {
+    transform: scale(0.97) translateY(1px);
+  }
+
+  /* Gradient border */
+  .gradient-border {
+    position: relative;
+    border: none !important;
+  }
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(43 74% 49% / 0.4), hsl(222 47% 20% / 0.2), hsl(43 74% 49% / 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px -5px hsl(43 74% 49% / 0.2); }
+  50% { box-shadow: 0 0 30px -5px hsl(43 74% 49% / 0.4); }
 }

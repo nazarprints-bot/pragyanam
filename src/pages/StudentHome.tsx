@@ -50,9 +50,9 @@ const StudentHome = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 pb-16 lg:pb-0">
+      <div className="space-y-6 pb-16 lg:pb-0 animate-slide-up">
         {/* Greeting */}
-        <div className="gradient-navy rounded-2xl p-5 text-white">
+        <div className="gradient-navy rounded-2xl p-5 text-white card-3d">
           <h1 className="text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
           <p className="text-white/60 text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
         </div>
@@ -150,12 +150,12 @@ const StudentHome = () => {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold font-heading text-foreground">{t("shome.academicClasses")}</h2>
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 stagger-children">
             {academicClasses.map((cls) => (
               <button
                 key={cls}
                 onClick={() => navigate(`/dashboard/classes/academic/${cls}`)}
-                className="bg-card rounded-xl border border-border p-3 text-center hover:border-primary/40 hover:shadow-md transition-all group"
+                className="bg-card rounded-xl border border-border p-3 text-center hover:border-primary/40 hover:shadow-3d transition-all group card-3d-subtle btn-press"
               >
                 <div className="w-9 h-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center mb-1.5 group-hover:bg-primary/20 transition-colors">
                   <GraduationCap className="w-4 h-4 text-primary" />
@@ -236,7 +236,7 @@ const StudentHome = () => {
 };
 
 const CompetitiveCard = ({ icon, title, desc, onClick }: { icon: React.ReactNode; title: string; desc: string; onClick: () => void }) => (
-  <button onClick={onClick} className="bg-card rounded-xl border border-border p-4 text-left hover:border-primary/30 hover:shadow-md transition-all group">
+  <button onClick={onClick} className="bg-card rounded-xl border border-border p-4 text-left hover:border-primary/30 hover:shadow-3d transition-all group card-3d-subtle btn-press">
     <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-2 group-hover:bg-primary/10 transition-colors">
       {icon}
     </div>
