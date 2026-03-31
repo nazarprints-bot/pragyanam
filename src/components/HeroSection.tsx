@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const HeroSection = () => {
   const { t } = useLanguage();
@@ -49,16 +50,9 @@ const HeroSection = () => {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
             className="flex items-center justify-center gap-6 sm:gap-10 lg:gap-14">
-            {[
-              { value: "5,000+", label: t("hero.students") },
-              { value: "20+", label: t("hero.coursesCount") },
-              { value: "95%", label: t("hero.passRate") },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight">{stat.value}</div>
-                <div className="text-[10px] sm:text-[12px] text-muted-foreground font-medium mt-0.5">{stat.label}</div>
-              </div>
-            ))}
+            <AnimatedCounter end={5000} suffix="+" label={t("hero.students")} />
+            <AnimatedCounter end={20} suffix="+" label={t("hero.coursesCount")} />
+            <AnimatedCounter end={95} suffix="%" label={t("hero.passRate")} />
           </motion.div>
         </div>
       </div>
