@@ -294,38 +294,54 @@ const LiveClasses = () => {
           </div>
         ) : (
           <>
-            {/* Live Now */}
+            {/* Live Now — YouTube thumbnail style */}
             {liveClasses.length > 0 && (
               <div className="space-y-3">
                 <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+                  </span>
                   Live Now
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {liveClasses.map((c) => (
-                    <div key={c.id} className="bg-card rounded-2xl p-5 border-2 border-destructive/30 shadow-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Video className="w-5 h-5 text-destructive animate-pulse" />
-                        <span className="text-xs font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">LIVE</span>
-                      </div>
-                      <h3 className="font-bold text-foreground">{c.title}</h3>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 mb-4">
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{c.duration_minutes} min</span>
-                      </div>
-                      {isTeacherOrAdmin && c.teacher_id === user?.id ? (
-                        <div className="flex gap-2">
-                          <Button onClick={() => handleJoinClass(c)} className="flex-1 gradient-navy text-white border-0 hover:opacity-90">
-                            <Play className="w-4 h-4 mr-1" /> Join
-                          </Button>
-                          <Button variant="destructive" onClick={() => handleEndClass(c)} size="sm">
-                            End
-                          </Button>
+                    <div
+                      key={c.id}
+                      className="group bg-card rounded-xl overflow-hidden border border-destructive/20 hover:border-destructive/40 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                      onClick={() => !(isTeacherOrAdmin && c.teacher_id === user?.id) && handleJoinClass(c)}
+                    >
+                      {/* Thumbnail area */}
+                      <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 aspect-video flex items-center justify-center">
+                        <Video className="w-12 h-12 text-white/20" />
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-destructive text-white text-[10px] font-bold px-2 py-1 rounded">
+                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                          LIVE
                         </div>
-                      ) : (
-                        <Button onClick={() => handleJoinClass(c)} className="w-full gradient-navy text-white border-0 hover:opacity-90">
-                          <Play className="w-4 h-4 mr-1" /> Join Live
-                        </Button>
-                      )}
+                        <div className="absolute bottom-3 right-3 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded">
+                          {c.duration_minutes} min
+                        </div>
+                        {/* Play overlay on hover */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                          <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                        </div>
+                      </div>
+                      {/* Info */}
+                      <div className="p-3">
+                        <h3 className="font-semibold text-foreground text-sm truncate">{c.title}</h3>
+                        {isTeacherOrAdmin && c.teacher_id === user?.id ? (
+                          <div className="flex gap-2 mt-2">
+                            <Button onClick={(e) => { e.stopPropagation(); handleJoinClass(c); }} className="flex-1 bg-destructive hover:bg-destructive/90 text-white" size="sm">
+                              <Play className="w-3 h-3 mr-1" /> Go Live
+                            </Button>
+                            <Button variant="outline" onClick={(e) => { e.stopPropagation(); handleEndClass(c); }} size="sm">
+                              End
+                            </Button>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground mt-1">Tap to join live stream</p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
