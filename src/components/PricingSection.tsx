@@ -15,7 +15,7 @@ const PricingSection = () => {
       popular: false, cta: t("pricing.getStarted"),
     },
     {
-      name: t("pricing.pro"), price: "₹249", period: "/mo",
+      name: t("pricing.pro"), price: "₹299", period: "/mo",
       desc: t("pricing.proDesc"),
       features: [t("pricing.f.everythingBasic"), t("pricing.f.liveClasses"), t("pricing.f.mockExams"), t("pricing.f.priorityDoubt"), t("pricing.f.progressAnalytics"), t("pricing.f.competitivePrep")],
       popular: true, cta: t("pricing.getStarted"),
