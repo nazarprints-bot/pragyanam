@@ -318,3 +318,32 @@
   0%, 100% { box-shadow: 0 0 20px -5px hsl(43 74% 49% / 0.2); }
   50% { box-shadow: 0 0 30px -5px hsl(43 74% 49% / 0.4); }
 }
+
+/* Mobile utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Touch improvements */
+@media (hover: none) {
+  .card-3d:hover,
+  .card-3d-subtle:hover {
+    transform: none;
+    box-shadow: var(--shadow-card);
+  }
+}
+
+/* Smoother scroll on mobile */
+@supports (-webkit-touch-callout: none) {
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}

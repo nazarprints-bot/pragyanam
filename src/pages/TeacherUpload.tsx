@@ -92,7 +92,7 @@ const TeacherUpload = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-5 sm:space-y-6 max-w-4xl pb-20 lg:pb-0">
         <div>
           <h1 className="text-2xl font-extrabold font-heading text-foreground">Upload Content</h1>
           <p className="text-sm text-muted-foreground">Create courses and upload study material</p>
@@ -104,7 +104,7 @@ const TeacherUpload = () => {
             <Plus className="w-5 h-5 text-gold" /> Create New Course
           </h2>
           <form onSubmit={handleCreateCourse} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Title</Label>
                 <Input required value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} placeholder="e.g. Mathematics Class 10" className="mt-1" />
@@ -134,7 +134,7 @@ const TeacherUpload = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Category</Label>
                 <select value={courseForm.category} onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
@@ -167,30 +167,32 @@ const TeacherUpload = () => {
             <p className="text-sm text-muted-foreground">No courses yet</p>
           ) : (
             <div className="space-y-3">
-              {courses.map((course) => (
-                <div key={course.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-gold/20 transition-colors">
-                  <div className="w-20 h-14 rounded-lg overflow-hidden bg-muted shrink-0">
-                    {course.thumbnail_url ? (
-                      <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full gradient-navy flex items-center justify-center"><BookOpen className="w-5 h-5 text-white/30" /></div>
-                    )}
+                {courses.map((course) => (
+                <div key={course.id} className="border border-border rounded-xl p-3 sm:p-4 flex flex-col gap-3 hover:border-gold/20 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-12 sm:w-20 sm:h-14 rounded-lg overflow-hidden bg-muted shrink-0">
+                      {course.thumbnail_url ? (
+                        <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full gradient-navy flex items-center justify-center"><BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-white/30" /></div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm truncate">{course.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {course.is_published ? "Published" : "Draft"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground truncate">{course.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {course.is_published ? "Published" : "Draft"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/course/${course.id}`)}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button size="sm" variant="outline" className="text-xs h-8" onClick={() => navigate(`/dashboard/course/${course.id}`)}>
                       Manage
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => togglePublish(course)}>
-                      {course.is_published ? <><EyeOff className="w-4 h-4 mr-1" /> Unpublish</> : <><Eye className="w-4 h-4 mr-1" /> Publish</>}
+                    <Button size="sm" variant="outline" className="text-xs h-8" onClick={() => togglePublish(course)}>
+                      {course.is_published ? <><EyeOff className="w-3.5 h-3.5 mr-1" /> Unpublish</> : <><Eye className="w-3.5 h-3.5 mr-1" /> Publish</>}
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => deleteCourse(course.id)}>
-                      <Trash2 className="w-4 h-4" />
+                    <Button size="sm" variant="destructive" className="text-xs h-8" onClick={() => deleteCourse(course.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>

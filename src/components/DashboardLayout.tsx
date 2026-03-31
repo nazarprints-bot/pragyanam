@@ -4,8 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, Brain,
-  MessageCircle, BarChart3, Users, Settings, LogOut, Menu,
-  Upload, Bell, Video, Sparkles, UserCircle, ClipboardList, PenTool, Eye
+  MessageCircle, BarChart3, Users, Settings, LogOut, Menu, X,
+  Upload, Bell, Video, Sparkles, UserCircle, PenTool, Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -39,7 +39,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
     { to: "/dashboard/manual-test", icon: PenTool, label: "Manual Test" },
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
-    { to: "/dashboard/test-responses", icon: Eye, label: "Student Responses" },
+    { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: t("sidebar.doubts") },
     { to: "/dashboard/students", icon: Users, label: t("sidebar.students") },
     { to: "/dashboard/profile", icon: UserCircle, label: t("sidebar.profile") },
@@ -53,7 +53,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
     { to: "/dashboard/manual-test", icon: PenTool, label: "Manual Test" },
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
-    { to: "/dashboard/test-responses", icon: Eye, label: "Student Responses" },
+    { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
     { to: "/dashboard/analytics", icon: BarChart3, label: t("sidebar.analytics") },
     { to: "/dashboard/settings", icon: Settings, label: t("sidebar.settings") },
   ];
@@ -69,33 +69,37 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] gradient-navy transform transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] sm:w-[220px] gradient-navy transform transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full">
-          <div className="px-4 py-4 border-b border-white/10">
+          <div className="px-4 py-4 border-b border-white/10 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-gold flex items-center justify-center">
-                <GraduationCap className="w-4 h-4 text-navy-dark" />
+              <div className="w-8 h-8 rounded-lg bg-gold flex items-center justify-center animate-glow-pulse">
+                <GraduationCap className="w-4.5 h-4.5 text-navy-dark" />
               </div>
-              <span className="text-[14px] font-semibold text-white tracking-tight">Pragyanam</span>
+              <span className="text-[15px] font-bold text-white tracking-tight font-heading">Pragyanam</span>
             </Link>
+            <button className="lg:hidden p-1.5 text-white/60 hover:text-white" onClick={() => setSidebarOpen(false)}>
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
-          <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
+          <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto overscroll-contain">
             {links.map((link) => {
               const isActive = location.pathname === link.to;
               return (
                 <Link key={link.to} to={link.to} onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${isActive ? "bg-gold/20 text-gold" : "text-white/60 hover:bg-white/10 hover:text-white"}`}>
-                  <link.icon className="w-4 h-4 shrink-0" />
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all active:scale-[0.97] ${isActive ? "bg-gold/20 text-gold shadow-sm" : "text-white/60 hover:bg-white/10 hover:text-white"}`}>
+                  <link.icon className="w-4.5 h-4.5 shrink-0" />
                   {link.label}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="p-3 border-t border-white/10">
+          <div className="p-3 border-t border-white/10 safe-area-bottom">
             <div className="flex items-center gap-2.5 mb-2.5 px-1">
-              <div className="w-8 h-8 rounded-full bg-gold/20 overflow-hidden flex items-center justify-center text-[12px] font-semibold text-gold">
+              <div className="w-9 h-9 rounded-full bg-gold/20 overflow-hidden flex items-center justify-center text-[13px] font-semibold text-gold">
                 {profile?.avatar_url ? (
                   <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${profile.avatar_url}`} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -107,7 +111,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 <p className="text-[11px] text-white/50">{roleLabel}</p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start text-[12px] text-white/50 hover:text-red-400 hover:bg-white/5 h-8">
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="w-full justify-start text-[12px] text-white/50 hover:text-red-400 hover:bg-white/5 h-9 active:scale-[0.97]">
               <LogOut className="w-3.5 h-3.5 mr-2" />
               {t("sidebar.logOut")}
             </Button>
@@ -115,18 +119,20 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </aside>
 
+      {/* Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-foreground/10 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      <div className="flex-1 lg:ml-[220px]">
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-[220px] min-w-0">
         <header className="sticky top-0 z-30 glass border-b border-border/50">
-          <div className="flex items-center justify-between h-12 px-4">
-            <button className="lg:hidden p-1.5 text-foreground" onClick={() => setSidebarOpen(true)}>
+          <div className="flex items-center justify-between h-12 px-3 sm:px-4">
+            <button className="lg:hidden p-2 -ml-1 text-foreground rounded-lg hover:bg-muted active:scale-95 transition-transform" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex-1" />
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 sm:gap-1">
               <LanguageToggle />
               <ThemeToggle />
               <Button variant="ghost" size="icon" className="relative h-8 w-8">
@@ -135,7 +141,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
         </header>
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className="p-3 sm:p-4 lg:p-6 pb-20 lg:pb-6">{children}</main>
       </div>
     </div>
   );
