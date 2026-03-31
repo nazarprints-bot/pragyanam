@@ -84,7 +84,7 @@ const Notifications = () => {
     setSending(true);
     try {
       // Get target users
-      let targetRoles: string[] = [];
+      let targetRoles: ("admin" | "teacher" | "student")[] = [];
       if (sendTarget === "all_students") targetRoles = ["student"];
       else if (sendTarget === "all_teachers") targetRoles = ["teacher"];
       else targetRoles = ["student", "teacher", "admin"];
