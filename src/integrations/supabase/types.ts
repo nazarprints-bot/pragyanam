@@ -351,13 +351,16 @@ export type Database = {
         Row: {
           course_id: string | null
           created_at: string
+          current_students: number
           description: string | null
           duration_minutes: number | null
           id: string
+          max_students: number
           room_id: string
           scheduled_at: string
           status: string
           teacher_id: string
+          thumbnail_url: string | null
           title: string
           title_hi: string
           updated_at: string
@@ -365,13 +368,16 @@ export type Database = {
         Insert: {
           course_id?: string | null
           created_at?: string
+          current_students?: number
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          max_students?: number
           room_id?: string
           scheduled_at: string
           status?: string
           teacher_id: string
+          thumbnail_url?: string | null
           title: string
           title_hi?: string
           updated_at?: string
@@ -379,13 +385,16 @@ export type Database = {
         Update: {
           course_id?: string | null
           created_at?: string
+          current_students?: number
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          max_students?: number
           room_id?: string
           scheduled_at?: string
           status?: string
           teacher_id?: string
+          thumbnail_url?: string | null
           title?: string
           title_hi?: string
           updated_at?: string
