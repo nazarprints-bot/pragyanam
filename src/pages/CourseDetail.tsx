@@ -37,6 +37,12 @@ const CourseDetail = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Live class scheduling
+  const [showLiveForm, setShowLiveForm] = useState(false);
+  const [liveForm, setLiveForm] = useState({ title: "", title_hi: "", scheduled_at: "", duration_minutes: 60 });
+  const [liveThumbnail, setLiveThumbnail] = useState<File | null>(null);
+  const [schedulingLive, setSchedulingLive] = useState(false);
+
   const fetchCourse = async () => {
     if (!courseId) return;
     const { data } = await supabase.from("courses").select("*").eq("id", courseId).single();
