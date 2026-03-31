@@ -5,11 +5,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu, X,
-  Upload, Bell, Video, Sparkles, UserCircle, PenTool, Eye
+  Upload, Video, Sparkles, UserCircle, PenTool, Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
+import NotificationPanel from "@/components/NotificationPanel";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { role, profile, signOut } = useAuth();
@@ -131,9 +132,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="flex items-center gap-0.5 sm:gap-1">
               <LanguageToggle />
               <ThemeToggle />
-              <Button variant="ghost" size="icon" className="relative h-8 w-8">
-                <Bell className="w-4 h-4 text-muted-foreground" />
-              </Button>
+              <NotificationPanel />
             </div>
           </div>
         </header>
