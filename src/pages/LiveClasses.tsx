@@ -146,52 +146,75 @@ const LiveClasses = () => {
   const liveClasses = classes.filter((c) => c.status === "live");
   const pastClasses = classes.filter((c) => c.status === "ended");
 
-  // Build Jitsi URL with stage mode config for students
+  // Build Jitsi URL — fix moderator issue + stage mode for students
   const buildJitsiUrl = (roomId: string) => {
     const base = `https://meet.jit.si/pragyanam-${roomId}`;
+    const commonConfig = `config.prejoinConfig.enabled=false&config.disableDeepLinking=true&config.enableLobby=false&config.hideLobbyButton=true&config.requireDisplayName=false&config.enableWelcomePage=false`;
     if (isTeacherOrAdmin) {
-      // Teacher gets full controls
-      return `${base}#config.prejoinConfig.enabled=false`;
+      return `${base}#${commonConfig}&config.startWithAudioMuted=false&config.startWithVideoMuted=false`;
     }
-    // Student: muted, no camera, hidden toolbar = watch-only "stage mode"
-    return `${base}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=true&config.startWithVideoMuted=true&config.toolbarButtons=[]&config.disableModeratorIndicator=true&config.hideConferenceSubject=true`;
+    // Student: watch-only, no mic/camera, no toolbar, no lobby wait
+    return `${base}#${commonConfig}&config.startWithAudioMuted=true&config.startWithVideoMuted=true&config.toolbarButtons=[]&config.disableModeratorIndicator=true&config.hideConferenceSubject=true&config.notifications=[]&config.disableRemoteMute=true&config.remoteVideoMenu.disabled=true&config.hideConferenceTimer=true`;
   };
 
   if (activeRoom && activeClassId) {
     const activeClass = classes.find((c) => c.id === activeClassId);
     return (
       <DashboardLayout>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
-              <Video className="w-5 h-5 text-destructive animate-pulse" />
-              {activeClass?.title || "Live Class"}
-            </h1>
-            <div className="flex gap-2">
-              {isTeacherOrAdmin && activeClass?.teacher_id === user?.id && (
-                <Button variant="destructive" size="sm" onClick={() => handleEndClass(activeClass)}>
-                  End Class
-                </Button>
-              )}
-              <Button variant="outline" size="sm" onClick={() => { setActiveRoom(null); setActiveClassId(null); }}>
-                <X className="w-4 h-4 mr-1" /> Leave
-              </Button>
-            </div>
-          </div>
+        <div className="flex flex-col h-[calc(100vh-64px)]">
+          {/* YouTube-style top bar */}
+          <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+            {/* Video Area — full width on mobile, ~70% on desktop */}
+            <div className="flex-1 flex flex-col min-w-0">
+              {/* Video */}
+              <div className="relative w-full bg-black" style={{ aspectRatio: "16/9", maxHeight: "calc(100vh - 180px)" }}>
+                <iframe
+                  src={buildJitsiUrl(activeRoom)}
+                  allow="camera; microphone; fullscreen; display-capture; autoplay"
+                  className="absolute inset-0 w-full h-full"
+                  title="Live Class Video"
+                />
+              </div>
 
-          {/* Video + Chat Layout */}
-          <div className="flex flex-col lg:flex-row gap-0 rounded-2xl overflow-hidden border border-border" style={{ height: "calc(100vh - 180px)" }}>
-            {/* Video - 70% on desktop */}
-            <div className="flex-1 lg:w-[70%] bg-black">
-              <iframe
-                src={buildJitsiUrl(activeRoom)}
-                allow="camera; microphone; fullscreen; display-capture"
-                className="w-full h-full min-h-[300px]"
-                title="Live Class Video"
-              />
+              {/* Video info bar — YouTube style */}
+              <div className="px-4 py-3 bg-card border-b border-border">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
+                      </span>
+                      <span className="text-xs font-bold text-destructive uppercase tracking-wide">Live</span>
+                    </div>
+                    <h1 className="text-base lg:text-lg font-bold text-foreground truncate">
+                      {activeClass?.title || "Live Class"}
+                    </h1>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isTeacherOrAdmin && activeClass?.teacher_id === user?.id && (
+                      <Button variant="destructive" size="sm" onClick={() => handleEndClass(activeClass)} className="text-xs">
+                        <X className="w-3 h-3 mr-1" /> End Stream
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => { setActiveRoom(null); setActiveClassId(null); }}
+                      className="text-xs"
+                    >
+                      Leave
+                    </Button>
+                  </div>
+                </div>
+                {activeClass?.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{activeClass.description}</p>
+                )}
+              </div>
             </div>
-            {/* Chat Sidebar - 30% on desktop */}
-            <div className="h-[300px] lg:h-full lg:w-[30%] lg:min-w-[280px]">
+
+            {/* Chat Sidebar — below video on mobile, right side on desktop */}
+            <div className="h-[320px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-l border-border">
               <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
             </div>
           </div>
@@ -271,38 +294,54 @@ const LiveClasses = () => {
           </div>
         ) : (
           <>
-            {/* Live Now */}
+            {/* Live Now — YouTube thumbnail style */}
             {liveClasses.length > 0 && (
               <div className="space-y-3">
                 <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+                  </span>
                   Live Now
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {liveClasses.map((c) => (
-                    <div key={c.id} className="bg-card rounded-2xl p-5 border-2 border-destructive/30 shadow-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Video className="w-5 h-5 text-destructive animate-pulse" />
-                        <span className="text-xs font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">LIVE</span>
-                      </div>
-                      <h3 className="font-bold text-foreground">{c.title}</h3>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 mb-4">
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{c.duration_minutes} min</span>
-                      </div>
-                      {isTeacherOrAdmin && c.teacher_id === user?.id ? (
-                        <div className="flex gap-2">
-                          <Button onClick={() => handleJoinClass(c)} className="flex-1 gradient-navy text-white border-0 hover:opacity-90">
-                            <Play className="w-4 h-4 mr-1" /> Join
-                          </Button>
-                          <Button variant="destructive" onClick={() => handleEndClass(c)} size="sm">
-                            End
-                          </Button>
+                    <div
+                      key={c.id}
+                      className="group bg-card rounded-xl overflow-hidden border border-destructive/20 hover:border-destructive/40 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                      onClick={() => !(isTeacherOrAdmin && c.teacher_id === user?.id) && handleJoinClass(c)}
+                    >
+                      {/* Thumbnail area */}
+                      <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 aspect-video flex items-center justify-center">
+                        <Video className="w-12 h-12 text-white/20" />
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-destructive text-white text-[10px] font-bold px-2 py-1 rounded">
+                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                          LIVE
                         </div>
-                      ) : (
-                        <Button onClick={() => handleJoinClass(c)} className="w-full gradient-navy text-white border-0 hover:opacity-90">
-                          <Play className="w-4 h-4 mr-1" /> Join Live
-                        </Button>
-                      )}
+                        <div className="absolute bottom-3 right-3 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded">
+                          {c.duration_minutes} min
+                        </div>
+                        {/* Play overlay on hover */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                          <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                        </div>
+                      </div>
+                      {/* Info */}
+                      <div className="p-3">
+                        <h3 className="font-semibold text-foreground text-sm truncate">{c.title}</h3>
+                        {isTeacherOrAdmin && c.teacher_id === user?.id ? (
+                          <div className="flex gap-2 mt-2">
+                            <Button onClick={(e) => { e.stopPropagation(); handleJoinClass(c); }} className="flex-1 bg-destructive hover:bg-destructive/90 text-white" size="sm">
+                              <Play className="w-3 h-3 mr-1" /> Go Live
+                            </Button>
+                            <Button variant="outline" onClick={(e) => { e.stopPropagation(); handleEndClass(c); }} size="sm">
+                              End
+                            </Button>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground mt-1">Tap to join live stream</p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
