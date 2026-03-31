@@ -35,6 +35,7 @@ const TestResponses = lazy(() => import("./pages/TestResponses"));
 const LiveClasses = lazy(() => import("./pages/LiveClasses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Certificates = lazy(() => import("./pages/Certificates"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
