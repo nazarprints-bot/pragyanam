@@ -52,7 +52,7 @@ const AdminUsers = () => {
 
   const pendingCount = profiles.filter((p) => {
     const role = getRole(p.user_id);
-    return (role === "teacher") && !p.is_verified;
+    return ((role === "teacher") || (role === "student" && p.is_free_student)) && !p.is_verified;
   }).length;
 
   return (
