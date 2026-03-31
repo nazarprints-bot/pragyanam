@@ -152,6 +152,13 @@ const NotificationPanel = () => {
                 </div>
               )}
             </ScrollArea>
+
+            {/* View all link */}
+            <div className="border-t border-border px-4 py-2">
+              <Button variant="ghost" size="sm" className="w-full text-xs text-primary" onClick={() => { setOpen(false); navigate("/dashboard/notifications"); }}>
+                View all notifications
+              </Button>
+            </div>
           </div>
         </>
       )}
