@@ -104,7 +104,7 @@ const TeacherUpload = () => {
             <Plus className="w-5 h-5 text-gold" /> Create New Course
           </h2>
           <form onSubmit={handleCreateCourse} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Title</Label>
                 <Input required value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} placeholder="e.g. Mathematics Class 10" className="mt-1" />
