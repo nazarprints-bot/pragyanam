@@ -32,7 +32,7 @@ const translations: Record<string, Record<Language, string>> = {
   "hero.subtitle": { en: "Class 6–12, competitive exams, scholarships — live classes, smart tests, and doubt solving. All at the lowest price.", hi: "कक्षा 6–12, प्रतियोगी परीक्षाएँ, छात्रवृत्ति — लाइव कक्षाएँ, स्मार्ट टेस्ट और डाउट सॉल्विंग। सबसे कम कीमत पर।" },
   "hero.cta1": { en: "Start learning free", hi: "मुफ़्त पढ़ना शुरू करें" },
   "hero.cta2": { en: "See how it works", hi: "कैसे काम करता है देखें" },
-  "hero.students": { en: "Students", hi: "छात्र" },
+  "hero.students": { en: "ready to use Students", hi: "छात्र" },
   "hero.coursesCount": { en: "Courses", hi: "कोर्सेज़" },
   "hero.passRate": { en: "Pass Rate", hi: "पास दर" },
 
