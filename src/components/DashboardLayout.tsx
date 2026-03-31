@@ -54,6 +54,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
     { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
     { to: "/dashboard/analytics", icon: BarChart3, label: t("sidebar.analytics") },
+    { to: "/dashboard/notifications", icon: Bell, label: "Notifications" },
     { to: "/dashboard/settings", icon: Settings, label: t("sidebar.settings") },
   ];
 
