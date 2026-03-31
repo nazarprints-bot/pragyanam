@@ -663,6 +663,7 @@ export type Database = {
           duration_minutes: number | null
           id: string
           is_published: boolean | null
+          scheduled_at: string | null
           title: string
           title_hi: string
           total_marks: number | null
@@ -676,6 +677,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           is_published?: boolean | null
+          scheduled_at?: string | null
           title: string
           title_hi?: string
           total_marks?: number | null
@@ -689,6 +691,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           is_published?: boolean | null
+          scheduled_at?: string | null
           title?: string
           title_hi?: string
           total_marks?: number | null
