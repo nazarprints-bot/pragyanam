@@ -155,7 +155,7 @@ const Profile = () => {
               <p className="text-[15px] font-semibold text-foreground">{profile?.full_name || "User"}</p>
               <p className="text-[13px] text-muted-foreground">{user?.email}</p>
               <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-medium bg-primary/15 text-primary rounded-full">{roleLabel}</span>
-              {!profile?.is_verified && (role === "teacher") && (
+              {!profile?.is_verified && (role === "teacher" || (role === "student" && profile?.is_free_student)) && (
                 <span className="inline-block ml-1 mt-1 px-2 py-0.5 text-[11px] font-medium bg-destructive/15 text-destructive rounded-full">
                   Pending Approval
                 </span>
