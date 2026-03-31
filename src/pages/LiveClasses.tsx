@@ -57,54 +57,8 @@ const LiveClasses = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const uploadThumbnail = async (file: File): Promise<string | null> => {
-    const ext = file.name.split(".").pop();
-    const path = `live-class-thumbnails/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("course-thumbnails").upload(path, file);
-    if (error) { toast.error("Thumbnail upload failed"); return null; }
-    const { data } = supabase.storage.from("course-thumbnails").getPublicUrl(path);
-    return data.publicUrl;
-  };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setCreating(true);
 
-    if (!form.scheduled_at || Number.isNaN(new Date(form.scheduled_at).getTime())) {
-      toast.error("Please select a valid date & time");
-      setCreating(false);
-      return;
-    }
-
-    let thumbnailUrl: string | null = null;
-    if (thumbnailFile) {
-      thumbnailUrl = await uploadThumbnail(thumbnailFile);
-    }
-
-    const { error } = await supabase.from("live_classes").insert({
-      title: form.title,
-      title_hi: form.title_hi,
-      description: form.description || null,
-      teacher_id: user.id,
-      scheduled_at: new Date(form.scheduled_at).toISOString(),
-      duration_minutes: form.duration_minutes,
-      status: "scheduled",
-      thumbnail_url: thumbnailUrl,
-      max_students: MAX_STUDENTS_PER_CLASS,
-    } as any);
-
-    if (error) {
-      toast.error("Failed to schedule class: " + error.message);
-    } else {
-      toast.success("Live class scheduled!");
-      setShowForm(false);
-      setForm({ title: "", title_hi: "", description: "", scheduled_at: "", duration_minutes: 60 });
-      setThumbnailFile(null);
-      await fetchClasses();
-    }
-    setCreating(false);
-  };
 
   const handleStartClass = async (classItem: any) => {
     const { error } = await supabase
