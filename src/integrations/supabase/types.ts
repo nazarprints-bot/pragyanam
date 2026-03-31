@@ -477,12 +477,16 @@ export type Database = {
           bio: string | null
           class_level: string | null
           created_at: string
+          district: string | null
           full_name: string
           id: string
           is_free_student: boolean | null
           is_verified: boolean | null
           language: Database["public"]["Enums"]["app_language"]
+          parent_phone: string | null
           phone: string | null
+          school: string | null
+          state: string | null
           updated_at: string
           user_id: string
         }
@@ -491,12 +495,16 @@ export type Database = {
           bio?: string | null
           class_level?: string | null
           created_at?: string
+          district?: string | null
           full_name?: string
           id?: string
           is_free_student?: boolean | null
           is_verified?: boolean | null
           language?: Database["public"]["Enums"]["app_language"]
+          parent_phone?: string | null
           phone?: string | null
+          school?: string | null
+          state?: string | null
           updated_at?: string
           user_id: string
         }
@@ -505,12 +513,16 @@ export type Database = {
           bio?: string | null
           class_level?: string | null
           created_at?: string
+          district?: string | null
           full_name?: string
           id?: string
           is_free_student?: boolean | null
           is_verified?: boolean | null
           language?: Database["public"]["Enums"]["app_language"]
+          parent_phone?: string | null
           phone?: string | null
+          school?: string | null
+          state?: string | null
           updated_at?: string
           user_id?: string
         }
