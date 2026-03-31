@@ -146,16 +146,78 @@ const LiveClasses = () => {
   const liveClasses = classes.filter((c) => c.status === "live");
   const pastClasses = classes.filter((c) => c.status === "ended");
 
-  // Build Jitsi URL — fix moderator issue + stage mode for students
-  const buildJitsiUrl = (roomId: string) => {
-    const base = `https://meet.jit.si/pragyanam-${roomId}`;
-    const commonConfig = `config.prejoinConfig.enabled=false&config.disableDeepLinking=true&config.enableLobby=false&config.hideLobbyButton=true&config.requireDisplayName=false&config.enableWelcomePage=false`;
-    if (isTeacherOrAdmin) {
-      return `${base}#${commonConfig}&config.startWithAudioMuted=false&config.startWithVideoMuted=false`;
+  // Jitsi External API ref
+  const jitsiContainerRef = useRef<HTMLDivElement>(null);
+  const jitsiApiRef = useRef<any>(null);
+
+  const destroyJitsi = useCallback(() => {
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.dispose();
+      jitsiApiRef.current = null;
     }
-    // Student: watch-only, no mic/camera, no toolbar, no lobby wait
-    return `${base}#${commonConfig}&config.startWithAudioMuted=true&config.startWithVideoMuted=true&config.toolbarButtons=[]&config.disableModeratorIndicator=true&config.hideConferenceSubject=true&config.notifications=[]&config.disableRemoteMute=true&config.remoteVideoMenu.disabled=true&config.hideConferenceTimer=true`;
-  };
+  }, []);
+
+  // Initialize Jitsi when activeRoom changes
+  useEffect(() => {
+    if (!activeRoom || !activeClassId || !jitsiContainerRef.current) return;
+
+    // Load Jitsi External API script if not loaded
+    const loadAndInit = () => {
+      destroyJitsi();
+      const roomName = `pragyanam-live-${activeClassId}`;
+      const displayName = profile?.full_name || user?.email || "User";
+
+      const options: any = {
+        roomName,
+        parentNode: jitsiContainerRef.current,
+        width: "100%",
+        height: "100%",
+        userInfo: { displayName },
+        configOverwrite: {
+          prejoinConfig: { enabled: false },
+          startWithAudioMuted: !isTeacherOrAdmin,
+          startWithVideoMuted: !isTeacherOrAdmin,
+          enableLobby: false,
+          enableLobbyChat: false,
+          hideLobbyButton: true,
+          requireDisplayName: false,
+          enableWelcomePage: false,
+          disableDeepLinking: true,
+          disableModeratorIndicator: !isTeacherOrAdmin,
+          hideConferenceSubject: true,
+          hideConferenceTimer: !isTeacherOrAdmin,
+          notifications: isTeacherOrAdmin ? undefined : [],
+          toolbarButtons: isTeacherOrAdmin
+            ? undefined // teacher gets all buttons
+            : [], // student gets no toolbar (watch-only)
+          disableRemoteMute: !isTeacherOrAdmin,
+          remoteVideoMenu: { disabled: !isTeacherOrAdmin },
+        },
+        interfaceConfigOverwrite: {
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
+          TOOLBAR_ALWAYS_VISIBLE: isTeacherOrAdmin,
+          DISABLE_JOIN_LEAVE_NOTIFICATIONS: !isTeacherOrAdmin,
+          FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? undefined : 0,
+          HIDE_INVITE_MORE_HEADER: true,
+        },
+      };
+
+      jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("meet.jit.si", options);
+    };
+
+    if ((window as any).JitsiMeetExternalAPI) {
+      loadAndInit();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://meet.jit.si/external_api.js";
+      script.async = true;
+      script.onload = loadAndInit;
+      document.head.appendChild(script);
+    }
+
+    return () => destroyJitsi();
+  }, [activeRoom, activeClassId, isTeacherOrAdmin, profile, user, destroyJitsi]);
 
   if (activeRoom && activeClassId) {
     const activeClass = classes.find((c) => c.id === activeClassId);
@@ -164,16 +226,14 @@ const LiveClasses = () => {
         <div className="flex flex-col h-[calc(100vh-64px)]">
           {/* YouTube-style top bar */}
           <div className="flex flex-col lg:flex-row flex-1 min-h-0">
-            {/* Video Area — full width on mobile, ~70% on desktop */}
+            {/* Video Area */}
             <div className="flex-1 flex flex-col min-w-0">
-              {/* Video */}
-              <div className="relative w-full bg-black" style={{ aspectRatio: "16/9", maxHeight: "calc(100vh - 180px)" }}>
-                <iframe
-                  src={buildJitsiUrl(activeRoom)}
-                  allow="camera; microphone; fullscreen; display-capture; autoplay"
-                  className="absolute inset-0 w-full h-full"
-                  title="Live Class Video"
-                />
+              {/* Video — Jitsi External API container */}
+              <div
+                ref={jitsiContainerRef}
+                className="relative w-full bg-black"
+                style={{ aspectRatio: "16/9", maxHeight: "calc(100vh - 180px)" }}
+              />
               </div>
 
               {/* Video info bar — YouTube style */}
