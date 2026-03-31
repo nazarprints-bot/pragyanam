@@ -259,7 +259,7 @@ const LiveClasses = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => { setActiveRoom(null); setActiveClassId(null); }}
+                      onClick={() => { destroyJitsi(); setActiveRoom(null); setActiveClassId(null); }}
                       className="text-xs"
                     >
                       Leave
