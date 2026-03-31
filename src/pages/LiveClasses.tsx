@@ -234,7 +234,6 @@ const LiveClasses = () => {
                 className="relative w-full bg-black"
                 style={{ aspectRatio: "16/9", maxHeight: "calc(100vh - 180px)" }}
               />
-              </div>
 
               {/* Video info bar — YouTube style */}
               <div className="px-4 py-3 bg-card border-b border-border">
