@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 // Lazy load — only loaded when user navigates
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const StudentHome = lazy(() => import("./pages/StudentHome"));
+const DashboardRouter = lazy(() => import("./pages/DashboardRouter"));
 const StudentCourses = lazy(() => import("./pages/StudentCourses"));
 const AcademicClasses = lazy(() => import("./pages/AcademicClasses"));
 const CompetitivePrep = lazy(() => import("./pages/CompetitivePrep"));
