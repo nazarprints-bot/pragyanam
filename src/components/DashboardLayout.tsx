@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   GraduationCap, LayoutDashboard, BookOpen, Brain,
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu, X,
-  Upload, Video, Sparkles, UserCircle, PenTool, Eye
+  Upload, Video, Sparkles, UserCircle, PenTool, Eye, Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";

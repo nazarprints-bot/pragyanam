@@ -88,6 +88,7 @@ const App = () => (
               <Route path="/dashboard/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/dashboard/certificates" element={<ProtectedRoute allowedRoles={["student"]}><Certificates /></ProtectedRoute>} />
               <Route path="/dashboard/recorded" element={<ProtectedRoute><RecordedLectures /></ProtectedRoute>} />
+              <Route path="/dashboard/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
               <Route path="/dashboard/recorded/:classLevel" element={<ProtectedRoute><RecordedLectures /></ProtectedRoute>} />
               <Route path="/dashboard/recorded/:classLevel/:subjectId" element={<ProtectedRoute><RecordedLectures /></ProtectedRoute>} />
               <Route path="/dashboard/recorded/:classLevel/:subjectId/:chapterId" element={<ProtectedRoute><RecordedLectures /></ProtectedRoute>} />
