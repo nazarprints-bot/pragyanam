@@ -114,6 +114,19 @@ const CourseDetail = () => {
     if (!courseId) return;
     const { data } = await supabase.from("tests").select("*").eq("course_id", courseId).eq("is_published", true);
     setCourseTests(data || []);
+
+    // Check if student passed any course test (>=40%)
+    if (user && data && data.length > 0) {
+      const testIds = data.map((t: any) => t.id);
+      const { data: attempts } = await supabase
+        .from("test_attempts").select("percentage, test_id")
+        .eq("user_id", user.id).in("test_id", testIds);
+      if (attempts && attempts.length > 0) {
+        const best = Math.max(...attempts.map((a: any) => a.percentage || 0));
+        setBestTestScore(best);
+        setTestPassed(best >= 40);
+      }
+    }
   };
 
   const fetchCertificate = async () => {
