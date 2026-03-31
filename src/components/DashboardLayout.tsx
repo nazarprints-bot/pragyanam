@@ -40,6 +40,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
     { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: t("sidebar.doubts") },
+    { to: "/dashboard/notifications", icon: Bell, label: "Notifications" },
     { to: "/dashboard/profile", icon: UserCircle, label: t("sidebar.profile") },
   ];
 
