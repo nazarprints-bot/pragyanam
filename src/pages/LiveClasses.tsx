@@ -16,18 +16,8 @@ const LiveClasses = () => {
   const [classes, setClasses] = useState<any[]>([]);
   const [teacherProfiles, setTeacherProfiles] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [form, setForm] = useState({
-    title: "",
-    title_hi: "",
-    description: "",
-    scheduled_at: "",
-    duration_minutes: 60,
-  });
 
   const fetchClasses = async () => {
     const { data, error } = await supabase
