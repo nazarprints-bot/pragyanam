@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Users, Search } from "lucide-react";
+import { Search, CheckCircle, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const AdminUsers = () => {
   const { user } = useAuth();
@@ -11,28 +13,47 @@ const AdminUsers = () => {
   const [roles, setRoles] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | "pending">("all");
 
-  useEffect(() => {
-    const fetch = async () => {
-      const [profRes, rolesRes] = await Promise.all([
-        supabase.from("profiles").select("*"),
-        supabase.from("user_roles").select("*"),
-      ]);
-      setProfiles(profRes.data || []);
-      setRoles(rolesRes.data || []);
-      setLoading(false);
-    };
-    fetch();
-  }, []);
+  const fetchData = async () => {
+    const [profRes, rolesRes] = await Promise.all([
+      supabase.from("profiles").select("*"),
+      supabase.from("user_roles").select("*"),
+    ]);
+    setProfiles(profRes.data || []);
+    setRoles(rolesRes.data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchData(); }, []);
 
   const getRole = (userId: string) => {
     const r = roles.find((r) => r.user_id === userId);
     return r?.role || "student";
   };
 
-  const filtered = profiles.filter(
+  const handleVerify = async (userId: string, verified: boolean) => {
+    const { error } = await supabase.from("profiles").update({ is_verified: verified }).eq("user_id", userId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(verified ? "User approved!" : "User verification removed");
+    fetchData();
+  };
+
+  let filtered = profiles.filter(
     (p) => p.full_name?.toLowerCase().includes(search.toLowerCase()) || p.phone?.includes(search)
   );
+
+  if (filter === "pending") {
+    filtered = filtered.filter((p) => {
+      const role = getRole(p.user_id);
+      return (role === "teacher" || role === "student") && !p.is_verified;
+    });
+  }
+
+  const pendingCount = profiles.filter((p) => {
+    const role = getRole(p.user_id);
+    return (role === "teacher") && !p.is_verified;
+  }).length;
 
   return (
     <DashboardLayout>
@@ -49,10 +70,10 @@ const AdminUsers = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="grid grid-cols-4 gap-2 sm:gap-4">
           <div className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-border text-center">
             <p className="text-lg sm:text-2xl font-extrabold text-foreground">{profiles.length}</p>
-            <p className="text-[10px] sm:text-sm text-muted-foreground">Total Users</p>
+            <p className="text-[10px] sm:text-sm text-muted-foreground">Total</p>
           </div>
           <div className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-border text-center">
             <p className="text-lg sm:text-2xl font-extrabold text-foreground">
@@ -66,11 +87,25 @@ const AdminUsers = () => {
             </p>
             <p className="text-[10px] sm:text-sm text-muted-foreground">Students</p>
           </div>
+          <div className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-border text-center cursor-pointer" onClick={() => setFilter(filter === "pending" ? "all" : "pending")}>
+            <p className="text-lg sm:text-2xl font-extrabold text-destructive">{pendingCount}</p>
+            <p className="text-[10px] sm:text-sm text-muted-foreground">Pending</p>
+          </div>
+        </div>
+
+        {/* Filter tabs */}
+        <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
+          <button onClick={() => setFilter("all")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${filter === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+            All Users
+          </button>
+          <button onClick={() => setFilter("pending")} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${filter === "pending" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+            Pending Approval {pendingCount > 0 && `(${pendingCount})`}
+          </button>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-10">
-            <div className="animate-spin w-7 h-7 border-4 border-gold border-t-transparent rounded-full" />
+            <div className="animate-spin w-7 h-7 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
           <>
@@ -79,7 +114,7 @@ const AdminUsers = () => {
               {filtered.map((profile) => (
                 <div key={profile.id} className="bg-card rounded-xl p-3 border border-border">
                   <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-navy/10 dark:bg-gold/10 flex items-center justify-center text-[10px] font-bold text-navy dark:text-gold shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
                       {profile.full_name?.charAt(0)?.toUpperCase() || "U"}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -90,17 +125,25 @@ const AdminUsers = () => {
                       getRole(profile.user_id) === "admin"
                         ? "bg-destructive/10 text-destructive"
                         : getRole(profile.user_id) === "teacher"
-                        ? "bg-gold/10 text-gold-warm"
+                        ? "bg-accent/10 text-accent"
                         : "bg-muted text-muted-foreground"
                     }`}>
                       {getRole(profile.user_id)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>Joined {new Date(profile.created_at).toLocaleDateString("en-IN")}</span>
-                    <span className={profile.is_verified ? "text-emerald" : ""}>
-                      {profile.is_verified ? "✓ Verified" : "Pending"}
-                    </span>
+                    <span>{profile.state ? `${profile.district || ""}, ${profile.state}` : "—"}</span>
+                    <div className="flex items-center gap-1.5">
+                      {profile.is_verified ? (
+                        <span className="text-emerald-500">✓ Approved</span>
+                      ) : (
+                        <>
+                          <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-emerald-500" onClick={() => handleVerify(profile.user_id, true)}>
+                            <CheckCircle className="w-3 h-3 mr-0.5" /> Approve
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -111,12 +154,13 @@ const AdminUsers = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-border bg-navy/5 dark:bg-gold/5">
+                    <tr className="border-b border-border bg-muted/50">
                       <th className="text-left p-3 text-xs font-semibold text-foreground">Name</th>
                       <th className="text-left p-3 text-xs font-semibold text-foreground">Role</th>
                       <th className="text-left p-3 text-xs font-semibold text-foreground">Phone</th>
-                      <th className="text-left p-3 text-xs font-semibold text-foreground">Joined</th>
-                      <th className="text-left p-3 text-xs font-semibold text-foreground">Verified</th>
+                      <th className="text-left p-3 text-xs font-semibold text-foreground">Location</th>
+                      <th className="text-left p-3 text-xs font-semibold text-foreground">Status</th>
+                      <th className="text-left p-3 text-xs font-semibold text-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -124,10 +168,13 @@ const AdminUsers = () => {
                       <tr key={profile.id} className="border-b border-border hover:bg-muted/30">
                         <td className="p-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-full bg-navy/10 dark:bg-gold/10 flex items-center justify-center text-[10px] font-bold text-navy dark:text-gold">
+                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
                               {profile.full_name?.charAt(0)?.toUpperCase() || "U"}
                             </div>
-                            <span className="text-xs font-medium text-foreground">{profile.full_name || "—"}</span>
+                            <div>
+                              <span className="text-xs font-medium text-foreground block">{profile.full_name || "—"}</span>
+                              {profile.school && <span className="text-[10px] text-muted-foreground">{profile.school}</span>}
+                            </div>
                           </div>
                         </td>
                         <td className="p-3">
@@ -135,7 +182,7 @@ const AdminUsers = () => {
                             getRole(profile.user_id) === "admin"
                               ? "bg-destructive/10 text-destructive"
                               : getRole(profile.user_id) === "teacher"
-                              ? "bg-gold/10 text-gold-warm"
+                              ? "bg-accent/10 text-accent"
                               : "bg-muted text-muted-foreground"
                           }`}>
                             {getRole(profile.user_id)}
@@ -143,12 +190,23 @@ const AdminUsers = () => {
                         </td>
                         <td className="p-3 text-xs text-muted-foreground">{profile.phone || "—"}</td>
                         <td className="p-3 text-xs text-muted-foreground">
-                          {new Date(profile.created_at).toLocaleDateString("en-IN")}
+                          {profile.state ? `${profile.district || ""}, ${profile.state}` : "—"}
                         </td>
                         <td className="p-3">
-                          <span className={`text-[10px] ${profile.is_verified ? "text-emerald" : "text-muted-foreground"}`}>
-                            {profile.is_verified ? "✓ Verified" : "Pending"}
+                          <span className={`text-[10px] font-medium ${profile.is_verified ? "text-emerald-500" : "text-destructive"}`}>
+                            {profile.is_verified ? "✓ Approved" : "Pending"}
                           </span>
+                        </td>
+                        <td className="p-3">
+                          {!profile.is_verified ? (
+                            <Button size="sm" variant="outline" className="h-7 px-2.5 text-[11px] text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => handleVerify(profile.user_id, true)}>
+                              <CheckCircle className="w-3 h-3 mr-1" /> Approve
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="ghost" className="h-7 px-2.5 text-[11px] text-muted-foreground" onClick={() => handleVerify(profile.user_id, false)}>
+                              <XCircle className="w-3 h-3 mr-1" /> Revoke
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))}

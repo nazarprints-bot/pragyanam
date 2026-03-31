@@ -12,6 +12,15 @@ import { Camera, Save, Loader2, User, Award, BookOpen, Brain, TrendingUp } from 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+  "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+  "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Delhi", "Jammu & Kashmir", "Ladakh",
+];
+
 const Profile = () => {
   const { user, profile, role, refetchProfile } = useAuth();
   const { t } = useLanguage();
@@ -27,7 +36,27 @@ const Profile = () => {
     bio: profile?.bio || "",
     class_level: profile?.class_level || "",
     language: profile?.language || "english",
+    parent_phone: profile?.parent_phone || "",
+    school: profile?.school || "",
+    state: profile?.state || "",
+    district: profile?.district || "",
   });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || "",
+        phone: profile.phone || "",
+        bio: profile.bio || "",
+        class_level: profile.class_level || "",
+        language: profile.language || "english",
+        parent_phone: profile.parent_phone || "",
+        school: profile.school || "",
+        state: profile.state || "",
+        district: profile.district || "",
+      });
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (!user || role !== "student") return;
@@ -74,8 +103,15 @@ const Profile = () => {
     setLoading(true);
     try {
       const { error } = await supabase.from("profiles").update({
-        full_name: formData.full_name, phone: formData.phone, bio: formData.bio,
-        class_level: formData.class_level, language: formData.language as "hindi" | "english",
+        full_name: formData.full_name,
+        phone: formData.phone,
+        bio: formData.bio,
+        class_level: formData.class_level,
+        language: formData.language as "hindi" | "english",
+        parent_phone: formData.parent_phone || null,
+        school: formData.school || null,
+        state: formData.state || null,
+        district: formData.district || null,
       }).eq("user_id", user.id);
       if (error) throw error;
       await refetchProfile();
@@ -88,6 +124,7 @@ const Profile = () => {
   };
 
   const roleLabel = role === "admin" ? "Admin" : role === "teacher" ? "Teacher" : "Student";
+  const isStudent = role === "student";
   const passedTests = testResults.filter((t) => (t.percentage || 0) >= 60);
   const avgScore = testResults.length > 0
     ? Math.round(testResults.reduce((sum, t) => sum + (t.percentage || 0), 0) / testResults.length)
@@ -118,12 +155,17 @@ const Profile = () => {
               <p className="text-[15px] font-semibold text-foreground">{profile?.full_name || "User"}</p>
               <p className="text-[13px] text-muted-foreground">{user?.email}</p>
               <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-medium bg-primary/15 text-primary rounded-full">{roleLabel}</span>
+              {!profile?.is_verified && (role === "teacher") && (
+                <span className="inline-block ml-1 mt-1 px-2 py-0.5 text-[11px] font-medium bg-destructive/15 text-destructive rounded-full">
+                  Pending Approval
+                </span>
+              )}
             </div>
           </div>
         </div>
 
         {/* Tabs for student */}
-        {role === "student" && (
+        {isStudent && (
           <div className="flex gap-1 bg-muted rounded-lg p-1 mb-6">
             <button onClick={() => setActiveTab("profile")}
               className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "profile" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
@@ -148,19 +190,51 @@ const Profile = () => {
                 <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+91 98765 43210" className="h-9 text-[13px]" />
               </div>
             </div>
-            {role === "student" && (
+
+            {isStudent && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Parent's Phone</Label>
+                    <Input value={formData.parent_phone} onChange={(e) => setFormData({ ...formData, parent_phone: e.target.value })} placeholder="9876543210" className="h-9 text-[13px]" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">School</Label>
+                    <Input value={formData.school} onChange={(e) => setFormData({ ...formData, school: e.target.value })} placeholder="Enter school name" className="h-9 text-[13px]" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[13px]">Class Level</Label>
+                  <Select value={formData.class_level} onValueChange={(v) => setFormData({ ...formData, class_level: v })}>
+                    <SelectTrigger className="h-9 text-[13px]"><SelectValue placeholder="Select class" /></SelectTrigger>
+                    <SelectContent>
+                      {["6", "7", "8", "9", "10", "11", "12"].map((c) => (
+                        <SelectItem key={c} value={c}>Class {c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-[13px]">Class Level</Label>
-                <Select value={formData.class_level} onValueChange={(v) => setFormData({ ...formData, class_level: v })}>
-                  <SelectTrigger className="h-9 text-[13px]"><SelectValue placeholder="Select class" /></SelectTrigger>
+                <Label className="text-[13px]">State</Label>
+                <Select value={formData.state} onValueChange={(v) => setFormData({ ...formData, state: v, district: "" })}>
+                  <SelectTrigger className="h-9 text-[13px]"><SelectValue placeholder="Select state" /></SelectTrigger>
                   <SelectContent>
-                    {["6th", "7th", "8th", "9th", "10th", "11th", "12th"].map((c) => (
-                      <SelectItem key={c} value={c}>{c} Class</SelectItem>
+                    {INDIAN_STATES.map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
+              <div className="space-y-1.5">
+                <Label className="text-[13px]">District</Label>
+                <Input value={formData.district} onChange={(e) => setFormData({ ...formData, district: e.target.value })} placeholder="Enter district" className="h-9 text-[13px]" />
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <Label className="text-[13px]">Language</Label>
               <Select value={formData.language} onValueChange={(v) => setFormData({ ...formData, language: v })}>
@@ -182,7 +256,6 @@ const Profile = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-card rounded-xl border border-border p-4 text-center">
                 <BookOpen className="w-5 h-5 mx-auto text-primary mb-1" />
@@ -201,7 +274,6 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Enrolled Courses */}
             <section>
               <h3 className="text-lg font-bold font-heading text-foreground mb-3">{t("profile.enrolledCourses")}</h3>
               {enrolledCourses.length === 0 ? (
@@ -223,7 +295,6 @@ const Profile = () => {
               )}
             </section>
 
-            {/* Test Achievements */}
             <section>
               <h3 className="text-lg font-bold font-heading text-foreground mb-3">{t("profile.testAchievements")}</h3>
               {testResults.length === 0 ? (
