@@ -21,22 +21,27 @@ const BottomNav = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border lg:hidden">
-      <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 lg:hidden safe-area-bottom">
+      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-1">
         {tabs.map((tab) => {
           const active = isActive(tab);
           return (
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors ${
+              className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-2 px-2 rounded-xl transition-all active:scale-90 ${
                 active
                   ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground"
               }`}
             >
-              <tab.icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              <div className={`relative ${active ? "" : ""}`}>
+                <tab.icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
+                {active && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                )}
+              </div>
+              <span className={`text-[10px] font-medium leading-tight ${active ? "font-semibold" : ""}`}>{tab.label}</span>
             </button>
           );
         })}
