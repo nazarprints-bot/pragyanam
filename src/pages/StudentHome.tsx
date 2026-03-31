@@ -155,7 +155,7 @@ const StudentHome = () => {
               <button
                 key={cls}
                 onClick={() => navigate(`/dashboard/classes/academic/${cls}`)}
-                className="bg-card rounded-xl border border-border p-3 text-center hover:border-primary/40 hover:shadow-md transition-all group"
+                className="bg-card rounded-xl border border-border p-3 text-center hover:border-primary/40 hover:shadow-3d transition-all group card-3d-subtle btn-press"
               >
                 <div className="w-9 h-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center mb-1.5 group-hover:bg-primary/20 transition-colors">
                   <GraduationCap className="w-4 h-4 text-primary" />
