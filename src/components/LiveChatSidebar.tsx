@@ -27,7 +27,7 @@ const THROTTLE_MS = 3000;
 const MAX_MESSAGES = 200;
 
 const ChatMessage = memo(({ msg, isMine, isTeacher, youLabel }: {
-  msg: ChatMessage;
+  msg: IChatMessage;
   isMine: boolean;
   isTeacher?: boolean;
   youLabel: string;
@@ -54,7 +54,7 @@ ChatMessage.displayName = "ChatMessage";
 const LiveChatSidebar = ({ classId, isTeacher }: LiveChatSidebarProps) => {
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<IChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [userName, setUserName] = useState("");
@@ -90,7 +90,7 @@ const LiveChatSidebar = ({ classId, isTeacher }: LiveChatSidebarProps) => {
         .eq("class_id", classId)
         .order("created_at", { ascending: false })
         .limit(MAX_MESSAGES);
-      if (data) setMessages((data as ChatMessage[]).reverse());
+      if (data) setMessages((data as IChatMessage[]).reverse());
     };
     fetchMessages();
   }, [classId]);
@@ -109,7 +109,7 @@ const LiveChatSidebar = ({ classId, isTeacher }: LiveChatSidebarProps) => {
         },
         (payload) => {
           setMessages((prev) => {
-            const updated = [...prev, payload.new as ChatMessage];
+            const updated = [...prev, payload.new as IChatMessage];
             return updated.length > MAX_MESSAGES
               ? updated.slice(updated.length - MAX_MESSAGES)
               : updated;
