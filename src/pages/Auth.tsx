@@ -5,10 +5,22 @@ import { GraduationCap, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+  "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+  "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Delhi", "Jammu & Kashmir", "Ladakh",
+];
+
+const CLASS_LEVELS = ["6", "7", "8", "9", "10", "11", "12"];
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -19,7 +31,11 @@ const Auth = () => {
   const [formData, setFormData] = useState({
     email: "", password: "", fullName: "",
     role: "student" as "student" | "teacher",
+    phone: "", parentPhone: "", school: "",
+    classLevel: "", state: "", district: "",
   });
+
+  const isStudent = formData.role === "student";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +47,44 @@ const Auth = () => {
         toast.success("Login successful!");
         navigate("/dashboard");
       } else {
+        // Validate required fields
+        if (!formData.phone || !formData.state || !formData.district) {
+          toast.error(t("auth.fillAllFields"));
+          setLoading(false);
+          return;
+        }
+        if (isStudent && (!formData.parentPhone || !formData.school || !formData.classLevel)) {
+          toast.error(t("auth.fillAllFields"));
+          setLoading(false);
+          return;
+        }
+
         const { error } = await supabase.auth.signUp({
           email: formData.email, password: formData.password,
-          options: { data: { full_name: formData.fullName, role: formData.role }, emailRedirectTo: window.location.origin },
+          options: {
+            data: {
+              full_name: formData.fullName,
+              role: formData.role,
+            },
+            emailRedirectTo: window.location.origin,
+          },
         });
         if (error) throw error;
-        toast.success("Account created!");
+
+        // Update profile with extra fields after signup
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("profiles").update({
+            phone: formData.phone,
+            parent_phone: formData.parentPhone || null,
+            school: formData.school || null,
+            class_level: isStudent ? formData.classLevel : null,
+            state: formData.state,
+            district: formData.district,
+          }).eq("user_id", user.id);
+        }
+
+        toast.success(t("auth.accountCreated"));
         navigate("/dashboard");
       }
     } catch (error: any) { toast.error(error.message); }
@@ -59,8 +107,8 @@ const Auth = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="w-full max-w-sm">
+      <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="w-full max-w-sm my-4">
           <div className="flex items-center justify-between mb-6">
             <Link to="/" className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" /> {t("auth.backToHome")}
@@ -83,13 +131,9 @@ const Auth = () => {
               {isLogin ? t("auth.signInDesc") : t("auth.getStartedDesc")}
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
               {!isLogin && (
                 <>
-                  <div>
-                    <Label className="text-[13px] text-foreground">{t("auth.fullName")}</Label>
-                    <Input required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} placeholder={t("auth.yourName")} className="mt-1.5 h-9 text-[13px]" />
-                  </div>
                   <div>
                     <Label className="text-[13px] text-foreground">{t("auth.iAmA")}</Label>
                     <div className="grid grid-cols-2 gap-2 mt-1.5">
@@ -101,14 +145,63 @@ const Auth = () => {
                       ))}
                     </div>
                   </div>
+
+                  <div>
+                    <Label className="text-[13px] text-foreground">{t("auth.fullName")} *</Label>
+                    <Input required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} placeholder={t("auth.yourName")} className="mt-1.5 h-9 text-[13px]" />
+                  </div>
+
+                  <div>
+                    <Label className="text-[13px] text-foreground">{t("auth.phone")} *</Label>
+                    <Input required type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="9876543210" className="mt-1.5 h-9 text-[13px]" />
+                  </div>
+
+                  {isStudent && (
+                    <>
+                      <div>
+                        <Label className="text-[13px] text-foreground">{t("auth.parentPhone")} *</Label>
+                        <Input required type="tel" value={formData.parentPhone} onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })} placeholder="9876543210" className="mt-1.5 h-9 text-[13px]" />
+                      </div>
+                      <div>
+                        <Label className="text-[13px] text-foreground">{t("auth.school")} *</Label>
+                        <Input required value={formData.school} onChange={(e) => setFormData({ ...formData, school: e.target.value })} placeholder={t("auth.schoolPlaceholder")} className="mt-1.5 h-9 text-[13px]" />
+                      </div>
+                      <div>
+                        <Label className="text-[13px] text-foreground">{t("auth.class")} *</Label>
+                        <Select value={formData.classLevel} onValueChange={(v) => setFormData({ ...formData, classLevel: v })}>
+                          <SelectTrigger className="mt-1.5 h-9 text-[13px]"><SelectValue placeholder={t("auth.selectClass")} /></SelectTrigger>
+                          <SelectContent>
+                            {CLASS_LEVELS.map((c) => <SelectItem key={c} value={c}>{t("auth.classLabel")} {c}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[13px] text-foreground">{t("auth.state")} *</Label>
+                      <Select value={formData.state} onValueChange={(v) => setFormData({ ...formData, state: v, district: "" })}>
+                        <SelectTrigger className="mt-1.5 h-9 text-[13px]"><SelectValue placeholder={t("auth.selectState")} /></SelectTrigger>
+                        <SelectContent>
+                          {INDIAN_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-[13px] text-foreground">{t("auth.district")} *</Label>
+                      <Input required value={formData.district} onChange={(e) => setFormData({ ...formData, district: e.target.value })} placeholder={t("auth.districtPlaceholder")} className="mt-1.5 h-9 text-[13px]" />
+                    </div>
+                  </div>
                 </>
               )}
+
               <div>
-                <Label className="text-[13px] text-foreground">{t("auth.email")}</Label>
+                <Label className="text-[13px] text-foreground">{t("auth.email")} {!isLogin && "*"}</Label>
                 <Input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="you@example.com" className="mt-1.5 h-9 text-[13px]" />
               </div>
               <div>
-                <Label className="text-[13px] text-foreground">{t("auth.password")}</Label>
+                <Label className="text-[13px] text-foreground">{t("auth.password")} {!isLogin && "*"}</Label>
                 <div className="relative mt-1.5">
                   <Input type={showPassword ? "text" : "password"} required minLength={6} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" className="h-9 text-[13px] pr-9" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">

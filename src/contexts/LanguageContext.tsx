@@ -121,6 +121,7 @@ const translations: Record<string, Record<Language, string>> = {
   "pricing.f.competitivePrep": { en: "Competitive exam preparation", hi: "प्रतियोगी परीक्षा तैयारी" },
   "pricing.f.fullAccess": { en: "100% platform access — no limits", hi: "100% प्लेटफ़ॉर्म एक्सेस — कोई लिमिट नहीं" },
   "pricing.f.verification": { en: "Simple verification process", hi: "सरल वेरिफ़िकेशन प्रक्रिया" },
+  "pricing.f.adminApproval": { en: "Admin approval — genuine students only", hi: "एडमिन अप्रूवल — केवल सच्चे छात्र" },
   "pricing.f.community": { en: "Community & teacher support", hi: "कम्युनिटी और शिक्षक सपोर्ट" },
   "pricing.f.noCompromise": { en: "Same quality — zero compromise", hi: "वही गुणवत्ता — ज़ीरो समझौता" },
 
@@ -153,6 +154,19 @@ const translations: Record<string, Record<Language, string>> = {
   "auth.signUp": { en: "Sign up", hi: "साइन अप" },
   "auth.backToHome": { en: "Back to home", hi: "होम पर वापस" },
   "auth.brandDesc": { en: "India's premium learning platform for students & teachers", hi: "छात्रों और शिक्षकों के लिए भारत का प्रीमियम शिक्षा मंच" },
+  "auth.phone": { en: "Phone number", hi: "फ़ोन नंबर" },
+  "auth.parentPhone": { en: "Parent's phone number", hi: "अभिभावक का फ़ोन नंबर" },
+  "auth.school": { en: "School name", hi: "स्कूल का नाम" },
+  "auth.schoolPlaceholder": { en: "Enter school name", hi: "स्कूल का नाम लिखें" },
+  "auth.class": { en: "Class", hi: "कक्षा" },
+  "auth.selectClass": { en: "Select class", hi: "कक्षा चुनें" },
+  "auth.classLabel": { en: "Class", hi: "कक्षा" },
+  "auth.state": { en: "State", hi: "राज्य" },
+  "auth.selectState": { en: "Select", hi: "चुनें" },
+  "auth.district": { en: "District", hi: "ज़िला" },
+  "auth.districtPlaceholder": { en: "Enter district", hi: "ज़िला लिखें" },
+  "auth.fillAllFields": { en: "Please fill all required fields", hi: "कृपया सभी आवश्यक फ़ील्ड भरें" },
+  "auth.accountCreated": { en: "Account created! Please verify your email.", hi: "खाता बन गया! कृपया अपना ईमेल वेरिफ़ाई करें।" },
 
   // Dashboard
   "dash.goodMorning": { en: "Good Morning", hi: "सुप्रभात" },
