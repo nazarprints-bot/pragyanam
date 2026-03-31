@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Plus Jakarta Sans', 'Noto Sans Devanagari', 'sans-serif'],
+        heading: ['Space Grotesk', 'Noto Sans Devanagari', 'sans-serif'],
         body: ['Plus Jakarta Sans', 'Noto Sans Devanagari', 'sans-serif'],
       },
       colors: {
