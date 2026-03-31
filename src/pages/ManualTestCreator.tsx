@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Plus, Trash2, Save, Loader2, Brain, Sparkles } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, Brain, Sparkles, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +49,19 @@ const ManualTestCreator = () => {
   const [duration, setDuration] = useState(30);
   const [questions, setQuestions] = useState<ManualQuestion[]>([emptyQuestion()]);
   const [saving, setSaving] = useState(false);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [publishNow, setPublishNow] = useState(true);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (!user) return;
+      const { data } = await supabase.from("courses").select("id, title").eq("created_by", user.id);
+      setCourses(data || []);
+    };
+    fetchCourses();
+  }, [user]);
 
   const addQuestion = (type: QuestionType) => setQuestions([...questions, emptyQuestion(type)]);
 
@@ -67,33 +80,35 @@ const ManualTestCreator = () => {
 
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      if (!q.question.trim()) {
-        toast.error(`Question ${i + 1} is empty`);
-        return;
-      }
+      if (!q.question.trim()) { toast.error(`Question ${i + 1} is empty`); return; }
       if (q.question_type === "mcq" && (!q.option_a.trim() || !q.option_b.trim() || !q.option_c.trim() || !q.option_d.trim())) {
-        toast.error(`Question ${i + 1}: All 4 options are required for MCQ`);
-        return;
+        toast.error(`Question ${i + 1}: All 4 options are required for MCQ`); return;
       }
     }
 
     setSaving(true);
     try {
       const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
-      const { data: test, error: testErr } = await supabase
-        .from("tests")
-        .insert({
-          title,
-          title_hi: "",
-          type: "chapter",
-          total_marks: totalMarks,
-          duration_minutes: duration,
-          is_published: false,
-          created_by: user.id,
-        })
-        .select()
-        .single();
+      const isScheduled = !publishNow && scheduledAt;
 
+      const insertData: any = {
+        title,
+        title_hi: "",
+        type: "chapter",
+        total_marks: totalMarks,
+        duration_minutes: duration,
+        is_published: publishNow,
+        created_by: user.id,
+        course_id: selectedCourse || null,
+      };
+
+      if (isScheduled) {
+        insertData.scheduled_at = new Date(scheduledAt).toISOString();
+        insertData.is_published = false;
+      }
+
+      const { data: test, error: testErr } = await supabase
+        .from("tests").insert(insertData).select().single();
       if (testErr) throw testErr;
 
       const qInsert = questions.map((q, i) => ({
@@ -113,7 +128,10 @@ const ManualTestCreator = () => {
       const { error: qErr } = await supabase.from("test_questions").insert(qInsert);
       if (qErr) throw qErr;
 
-      toast.success("Test created successfully!");
+      toast.success(isScheduled
+        ? `Test scheduled for ${new Date(scheduledAt).toLocaleDateString("en-IN")}!`
+        : "Test created successfully!"
+      );
       navigate("/dashboard/tests");
     } catch (err: any) {
       toast.error(err.message || "Failed to create test");
@@ -128,28 +146,81 @@ const ManualTestCreator = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
-              <Brain className="w-6 h-6 text-navy dark:text-gold" />
-              Create Test Manually
+              <Brain className="w-6 h-6 text-primary" />
+              Create Test / टेस्ट बनाएं
             </h1>
-            <p className="text-sm text-muted-foreground">Add MCQ, short answer & long answer questions</p>
+            <p className="text-sm text-muted-foreground">MCQ, Short Answer & Long Answer questions</p>
           </div>
           <Button variant="outline" onClick={() => navigate("/dashboard/ai-test")}>
-            <Sparkles className="w-4 h-4 mr-1" /> Use AI Instead
+            <Sparkles className="w-4 h-4 mr-1" /> AI Help
           </Button>
         </div>
 
         {/* Test Info */}
         <div className="bg-card rounded-2xl p-6 border border-border space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label>Test Title</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Chapter 5 Quiz" className="mt-1" />
+              <Label>Test Title / टेस्ट का नाम</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Monthly Test - March" className="mt-1" />
             </div>
             <div>
               <Label>Duration (minutes)</Label>
               <Input type="number" min={5} max={180} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="mt-1" />
             </div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Course (Optional) / कोर्स</Label>
+              <select
+                value={selectedCourse}
+                onChange={(e) => setSelectedCourse(e.target.value)}
+                className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">-- No Course (General Test) --</option>
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label>Publish / प्रकाशन</Label>
+              <div className="flex gap-2 mt-1">
+                <button
+                  onClick={() => setPublishNow(true)}
+                  className={`flex-1 text-xs py-2 px-3 rounded-lg border transition-colors ${
+                    publishNow ? "border-primary bg-primary/10 font-bold text-foreground" : "border-border text-muted-foreground"
+                  }`}
+                >
+                  Publish Now
+                </button>
+                <button
+                  onClick={() => setPublishNow(false)}
+                  className={`flex-1 text-xs py-2 px-3 rounded-lg border transition-colors ${
+                    !publishNow ? "border-primary bg-primary/10 font-bold text-foreground" : "border-border text-muted-foreground"
+                  }`}
+                >
+                  <Calendar className="w-3 h-3 inline mr-1" /> Schedule
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {!publishNow && (
+            <div>
+              <Label>Schedule Date & Time / तारीख और समय</Label>
+              <Input
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={(e) => setScheduledAt(e.target.value)}
+                className="mt-1 max-w-xs"
+                min={new Date().toISOString().slice(0, 16)}
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Test will auto-publish on this date / इस तारीख को टेस्ट अपने आप publish हो जाएगा
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Questions */}
@@ -160,9 +231,9 @@ const ManualTestCreator = () => {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-foreground">Q{idx + 1}</span>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    q.question_type === "mcq" ? "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold"
-                    : q.question_type === "short" ? "bg-emerald/10 text-emerald"
-                    : "bg-accent text-accent-foreground"
+                    q.question_type === "mcq" ? "bg-primary/10 text-primary"
+                    : q.question_type === "short" ? "bg-accent text-accent-foreground"
+                    : "bg-muted text-muted-foreground"
                   }`}>
                     {typeLabels[q.question_type]}
                   </span>
@@ -188,8 +259,8 @@ const ManualTestCreator = () => {
                     onClick={() => updateQuestion(idx, "question_type", type)}
                     className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                       q.question_type === type
-                        ? "border-navy bg-navy/10 dark:border-gold dark:bg-gold/10 font-bold text-foreground"
-                        : "border-border text-muted-foreground hover:border-navy/30"
+                        ? "border-primary bg-primary/10 font-bold text-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/30"
                     }`}
                   >
                     {typeLabels[type]}
@@ -201,7 +272,7 @@ const ManualTestCreator = () => {
               <Textarea
                 value={q.question}
                 onChange={(e) => updateQuestion(idx, "question", e.target.value)}
-                placeholder="Enter your question"
+                placeholder="Enter your question / प्रश्न लिखें"
                 className="min-h-[60px]"
               />
 
@@ -216,12 +287,12 @@ const ManualTestCreator = () => {
                           value={q[field] as string}
                           onChange={(e) => updateQuestion(idx, field, e.target.value)}
                           placeholder={`Option ${opt}`}
-                          className={q.correct_option === opt ? "border-emerald bg-emerald/5" : ""}
+                          className={q.correct_option === opt ? "border-primary bg-primary/5" : ""}
                         />
                         <button
                           onClick={() => updateQuestion(idx, "correct_option", opt)}
                           className={`absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold px-2 py-0.5 rounded-full transition-colors ${
-                            q.correct_option === opt ? "bg-emerald text-white" : "bg-muted text-muted-foreground hover:bg-emerald/20"
+                            q.correct_option === opt ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-primary/20"
                           }`}
                         >
                           {q.correct_option === opt ? "✓" : opt}
@@ -232,10 +303,10 @@ const ManualTestCreator = () => {
                 </div>
               )}
 
-              {/* Short/Long answer expected answer */}
+              {/* Short/Long answer */}
               {q.question_type !== "mcq" && (
                 <div>
-                  <Label className="text-xs text-muted-foreground">Expected Answer (for reference / AI checking)</Label>
+                  <Label className="text-xs text-muted-foreground">Expected Answer (reference) / अपेक्षित उत्तर</Label>
                   <Textarea
                     value={q.answer_text}
                     onChange={(e) => updateQuestion(idx, "answer_text", e.target.value)}
@@ -254,15 +325,15 @@ const ManualTestCreator = () => {
             <Plus className="w-4 h-4 mr-1" /> MCQ
           </Button>
           <Button variant="outline" onClick={() => addQuestion("short")}>
-            <Plus className="w-4 h-4 mr-1" /> Short Answer
+            <Plus className="w-4 h-4 mr-1" /> Short
           </Button>
           <Button variant="outline" onClick={() => addQuestion("long")}>
-            <Plus className="w-4 h-4 mr-1" /> Long Answer
+            <Plus className="w-4 h-4 mr-1" /> Long
           </Button>
           <div className="flex-1" />
-          <Button onClick={handleSave} disabled={saving} className="gradient-navy text-white border-0 hover:opacity-90 font-bold">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold">
             {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-            Save Test ({questions.length} Q · {questions.reduce((s, q) => s + q.marks, 0)} marks)
+            {publishNow ? "Save & Publish" : "Save & Schedule"} ({questions.length} Q · {questions.reduce((s, q) => s + q.marks, 0)} marks)
           </Button>
         </div>
       </div>

@@ -34,14 +34,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const teacherLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: t("sidebar.dashboard") },
     { to: "/dashboard/my-courses", icon: BookOpen, label: t("sidebar.myCourses") },
-    { to: "/dashboard/upload", icon: Upload, label: t("sidebar.upload") },
-    { to: "/dashboard/live-classes", icon: Video, label: t("sidebar.liveClasses") },
+    { to: "/dashboard/manual-test", icon: PenTool, label: "Create Test" },
     { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
-    { to: "/dashboard/manual-test", icon: PenTool, label: "Manual Test" },
-    { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
     { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
     { to: "/dashboard/doubts", icon: MessageCircle, label: t("sidebar.doubts") },
-    { to: "/dashboard/students", icon: Users, label: t("sidebar.students") },
     { to: "/dashboard/profile", icon: UserCircle, label: t("sidebar.profile") },
   ];
 
