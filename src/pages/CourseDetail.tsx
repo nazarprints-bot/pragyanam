@@ -218,11 +218,8 @@ const CourseDetail = () => {
         .eq("user_id", user.id).eq("course_id", courseId);
     }
 
-    // Check if all lessons complete → offer certificate
-    if (completedCount === totalCount && totalCount > 0) {
-      checkAndIssueCertificate();
-    }
   };
+
 
   const checkAndIssueCertificate = async () => {
     if (!user || !courseId || hasCertificate) return;
