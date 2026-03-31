@@ -50,9 +50,9 @@ const StudentHome = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 pb-16 lg:pb-0">
+      <div className="space-y-6 pb-16 lg:pb-0 animate-slide-up">
         {/* Greeting */}
-        <div className="gradient-navy rounded-2xl p-5 text-white">
+        <div className="gradient-navy rounded-2xl p-5 text-white card-3d">
           <h1 className="text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
           <p className="text-white/60 text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
         </div>
