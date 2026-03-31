@@ -120,6 +120,7 @@ const LiveClasses = () => {
       return;
     }
 
+    destroyJitsi();
     setActiveRoom(null);
     setActiveClassId(null);
     await fetchClasses();
