@@ -157,7 +157,7 @@ const StudentHome = () => {
         {/* Competitive Preparation */}
         <section>
           <SectionHeader title={t("shome.competitivePrep")} actionLabel={t("shome.viewAll")} onAction={() => navigate("/dashboard/classes/competitive")} />
-          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible scrollbar-hide">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <CompetitiveCard
               icon={<Swords className="w-5 h-5 text-amber-600" />}
               title={t("shome.armyPrep")}
