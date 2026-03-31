@@ -236,7 +236,7 @@ const StudentHome = () => {
 };
 
 const CompetitiveCard = ({ icon, title, desc, onClick }: { icon: React.ReactNode; title: string; desc: string; onClick: () => void }) => (
-  <button onClick={onClick} className="bg-card rounded-xl border border-border p-4 text-left hover:border-primary/30 hover:shadow-md transition-all group">
+  <button onClick={onClick} className="bg-card rounded-xl border border-border p-4 text-left hover:border-primary/30 hover:shadow-3d transition-all group card-3d-subtle btn-press">
     <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-2 group-hover:bg-primary/10 transition-colors">
       {icon}
     </div>

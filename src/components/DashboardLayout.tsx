@@ -120,7 +120,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       )}
 
       <div className="flex-1 lg:ml-[220px]">
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
+        <header className="sticky top-0 z-30 glass border-b border-border/50">
           <div className="flex items-center justify-between h-12 px-4">
             <button className="lg:hidden p-1.5 text-foreground" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-5 h-5" />
