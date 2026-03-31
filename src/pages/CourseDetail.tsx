@@ -31,6 +31,8 @@ const CourseDetail = () => {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [courseTests, setCourseTests] = useState<any[]>([]);
   const [hasCertificate, setHasCertificate] = useState(false);
+  const [testPassed, setTestPassed] = useState(false);
+  const [bestTestScore, setBestTestScore] = useState<number | null>(null);
 
   // Teacher lesson form
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
@@ -112,6 +114,19 @@ const CourseDetail = () => {
     if (!courseId) return;
     const { data } = await supabase.from("tests").select("*").eq("course_id", courseId).eq("is_published", true);
     setCourseTests(data || []);
+
+    // Check if student passed any course test (>=40%)
+    if (user && data && data.length > 0) {
+      const testIds = data.map((t: any) => t.id);
+      const { data: attempts } = await supabase
+        .from("test_attempts").select("percentage, test_id")
+        .eq("user_id", user.id).in("test_id", testIds);
+      if (attempts && attempts.length > 0) {
+        const best = Math.max(...attempts.map((a: any) => a.percentage || 0));
+        setBestTestScore(best);
+        setTestPassed(best >= 40);
+      }
+    }
   };
 
   const fetchCertificate = async () => {
@@ -203,18 +218,22 @@ const CourseDetail = () => {
         .eq("user_id", user.id).eq("course_id", courseId);
     }
 
-    // Check if all lessons complete → offer certificate
-    if (completedCount === totalCount && totalCount > 0) {
-      checkAndIssueCertificate();
-    }
   };
+
 
   const checkAndIssueCertificate = async () => {
     if (!user || !courseId || hasCertificate) return;
-    // Check if all lessons completed
-    const allDone = lessons.every(l => lessonProgress[l.id] || false);
-    // For now issue certificate when all lessons done (test check can be added)
-    if (!allDone && Object.keys(lessonProgress).length < lessons.length) return;
+    // Check all lessons completed
+    const allDone = lessons.every(l => lessonProgress[l.id]);
+    if (!allDone) {
+      toast.error("Please complete all lessons first! / पहले सभी पाठ पूरे करें!");
+      return;
+    }
+    // Check test passed (if course has tests)
+    if (courseTests.length > 0 && !testPassed) {
+      toast.error("Please pass the course test first (40% minimum)! / पहले कोर्स टेस्ट पास करें!");
+      return;
+    }
 
     const { error } = await supabase.from("certificates").insert({
       user_id: user.id, course_id: courseId,
@@ -402,7 +421,34 @@ const CourseDetail = () => {
             <Progress value={progressPct} className="h-3" />
             <p className="text-xs text-muted-foreground mt-2">
               {completedCount}/{lessons.length} lessons completed
+              {courseTests.length > 0 && (
+                <span className={`ml-2 ${testPassed ? "text-primary" : "text-destructive"}`}>
+                  · Test: {testPassed ? `Passed (${bestTestScore?.toFixed(0)}%)` : bestTestScore !== null ? `Failed (${bestTestScore?.toFixed(0)}%)` : "Not attempted"}
+                </span>
+              )}
             </p>
+
+            {/* Checklist for certificate */}
+            {!hasCertificate && (
+              <div className="mt-3 space-y-1.5">
+                <p className="text-xs font-semibold text-muted-foreground">Certificate Requirements / प्रमाणपत्र आवश्यकताएं:</p>
+                <div className="flex items-center gap-2 text-xs">
+                  <CheckCircle className={`w-4 h-4 ${progressPct === 100 ? "text-primary" : "text-muted-foreground"}`} />
+                  <span className={progressPct === 100 ? "text-foreground" : "text-muted-foreground"}>
+                    Complete all lessons / सभी पाठ पूरे करें
+                  </span>
+                </div>
+                {courseTests.length > 0 && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <CheckCircle className={`w-4 h-4 ${testPassed ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={testPassed ? "text-foreground" : "text-muted-foreground"}>
+                      Pass course test (40% min) / कोर्स टेस्ट पास करें
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {hasCertificate && (
               <div className="mt-3 flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
                 <Award className="w-5 h-5 text-primary" />
@@ -412,7 +458,7 @@ const CourseDetail = () => {
                 </Button>
               </div>
             )}
-            {progressPct === 100 && !hasCertificate && (
+            {progressPct === 100 && (courseTests.length === 0 || testPassed) && !hasCertificate && (
               <Button
                 size="sm" className="mt-3 bg-primary text-primary-foreground"
                 onClick={checkAndIssueCertificate}
