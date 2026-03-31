@@ -132,9 +132,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="flex items-center gap-0.5 sm:gap-1">
               <LanguageToggle />
               <ThemeToggle />
-              <Button variant="ghost" size="icon" className="relative h-8 w-8">
-                <Bell className="w-4 h-4 text-muted-foreground" />
-              </Button>
+              <NotificationPanel />
             </div>
           </div>
         </header>
