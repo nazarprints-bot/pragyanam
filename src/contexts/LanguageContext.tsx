@@ -121,6 +121,7 @@ const translations: Record<string, Record<Language, string>> = {
   "pricing.f.competitivePrep": { en: "Competitive exam preparation", hi: "प्रतियोगी परीक्षा तैयारी" },
   "pricing.f.fullAccess": { en: "100% platform access — no limits", hi: "100% प्लेटफ़ॉर्म एक्सेस — कोई लिमिट नहीं" },
   "pricing.f.verification": { en: "Simple verification process", hi: "सरल वेरिफ़िकेशन प्रक्रिया" },
+  "pricing.f.adminApproval": { en: "Admin approval — genuine students only", hi: "एडमिन अप्रूवल — केवल सच्चे छात्र" },
   "pricing.f.community": { en: "Community & teacher support", hi: "कम्युनिटी और शिक्षक सपोर्ट" },
   "pricing.f.noCompromise": { en: "Same quality — zero compromise", hi: "वही गुणवत्ता — ज़ीरो समझौता" },
 
