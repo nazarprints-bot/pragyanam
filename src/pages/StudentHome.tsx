@@ -225,7 +225,7 @@ const SectionHeader = ({ title, actionLabel, onAction }: { title: string; action
 );
 
 const CompetitiveCard = ({ icon, title, desc, onClick }: { icon: React.ReactNode; title: string; desc: string; onClick: () => void }) => (
-  <button onClick={onClick} className="bg-card rounded-xl border border-border p-3 sm:p-4 text-left hover:border-primary/30 transition-all group card-3d-subtle btn-press shrink-0 w-[160px] sm:w-auto">
+  <button onClick={onClick} className="bg-card rounded-xl border border-border p-3 sm:p-4 text-left hover:border-primary/30 transition-all group card-3d-subtle btn-press w-full">
     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center mb-2 group-hover:bg-primary/10 transition-colors">
       {icon}
     </div>
