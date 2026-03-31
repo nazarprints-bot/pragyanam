@@ -86,8 +86,9 @@ const Dashboard = () => {
             )}
             {role === "teacher" && (
               <>
+                <QuickAction icon="➕" label="Create Course" to="/dashboard/upload" />
                 <QuickAction icon="📤" label={t("dash.uploadContent")} to="/dashboard/upload" />
-                <QuickAction icon="📝" label={t("dash.createTest")} to="/dashboard/tests" />
+                <QuickAction icon="📝" label={t("dash.createTest")} to="/dashboard/manual-test" />
                 <QuickAction icon="💬" label={t("dash.answerDoubts")} to="/dashboard/doubts" />
                 <QuickAction icon="👨‍🎓" label={t("dash.viewStudents")} to="/dashboard/students" />
               </>
