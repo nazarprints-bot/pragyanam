@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 const LiveClasses = () => {
-  const { user, role } = useAuth();
+  const { user, role, profile } = useAuth();
   const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
