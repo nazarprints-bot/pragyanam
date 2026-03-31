@@ -69,7 +69,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] gradient-navy transform transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] gradient-navy transform transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full">
           <div className="px-4 py-4 border-b border-white/10">
             <Link to="/" className="flex items-center gap-2">
