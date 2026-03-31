@@ -3,10 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import LiveChatSidebar from "@/components/LiveChatSidebar";
-import { Video, Plus, Calendar, Clock, Users, Play, X, Loader2, Trash2, Image, Upload } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, X, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 const MAX_STUDENTS_PER_CLASS = 75;
