@@ -203,7 +203,7 @@ const translations: Record<string, Record<Language, string>> = {
   "shome.continueLearning": { en: "Continue Learning", hi: "पढ़ाई जारी रखें" },
   "shome.viewAll": { en: "View All", hi: "सब देखें" },
   "shome.upcomingLive": { en: "Upcoming Live Sessions", hi: "आने वाली लाइव कक्षाएँ" },
-  "shome.academicClasses": { en: "Academic Classes", hi: "स्कूल कक्षाएँ" },
+  "shome.academicClasses": { en: "Coaching Classes", hi: "कोचिंग कक्षाएँ" },
   "shome.class": { en: "Class", hi: "कक्षा" },
   "shome.competitivePrep": { en: "Competitive Preparation", hi: "प्रतियोगी तैयारी" },
   "shome.popularCourses": { en: "Popular Courses", hi: "लोकप्रिय कोर्सेज़" },
