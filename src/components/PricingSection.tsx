@@ -9,7 +9,7 @@ const PricingSection = () => {
 
   const plans = [
     {
-      name: t("pricing.basic"), price: "₹99", period: "/mo",
+      name: t("pricing.basic"), price: "₹149", period: "/mo",
       desc: t("pricing.basicDesc"),
       features: [t("pricing.f.recordedLectures"), t("pricing.f.pdfStudyMaterial"), t("pricing.f.chapterTests"), t("pricing.f.basicDoubt")],
       popular: false, cta: t("pricing.getStarted"),
