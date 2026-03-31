@@ -27,7 +27,6 @@ const Tests = () => {
   const [attempts, setAttempts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Test-taking state
   const [activeTest, setActiveTest] = useState<any | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -50,17 +49,11 @@ const Tests = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchTests();
-  }, [user, role]);
+  useEffect(() => { fetchTests(); }, [user, role]);
 
-  // Timer
   useEffect(() => {
     if (!activeTest || result) return;
-    if (timeLeft <= 0 && questions.length > 0) {
-      handleSubmit();
-      return;
-    }
+    if (timeLeft <= 0 && questions.length > 0) { handleSubmit(); return; }
     const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(timer);
   }, [timeLeft, activeTest, result, questions.length]);
@@ -69,17 +62,8 @@ const Tests = () => {
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
 
   const handleStartTest = async (test: any) => {
-    const { data, error } = await supabase
-      .from("test_questions")
-      .select("*")
-      .eq("test_id", test.id)
-      .order("sort_order", { ascending: true });
-
-    if (error || !data || data.length === 0) {
-      toast.error("No questions found for this test");
-      return;
-    }
-
+    const { data, error } = await supabase.from("test_questions").select("*").eq("test_id", test.id).order("sort_order", { ascending: true });
+    if (error || !data || data.length === 0) { toast.error("No questions found for this test"); return; }
     setQuestions(data as Question[]);
     setActiveTest(test);
     setCurrentQ(0);
@@ -95,54 +79,27 @@ const Tests = () => {
   const handleSubmit = async () => {
     if (submitting) return;
     setSubmitting(true);
-
     let score = 0;
     let totalMarks = 0;
-    let hasPending = false;
     questions.forEach((q) => {
       const marks = q.marks || 1;
       totalMarks += marks;
       if (q.question_type === "mcq" || !q.question_type) {
-        if (answers[q.id] === q.correct_option) {
-          score += marks;
-        }
-      } else {
-        // Short/long answers need teacher/AI review — scored as 0 for now
-        hasPending = true;
+        if (answers[q.id] === q.correct_option) score += marks;
       }
     });
-
     const percentage = totalMarks > 0 ? (score / totalMarks) * 100 : 0;
     const timeTaken = (activeTest.duration_minutes || 30) * 60 - timeLeft;
-
     const { error } = await supabase.from("test_attempts").insert({
-      user_id: user!.id,
-      test_id: activeTest.id,
-      answers: answers,
-      score,
-      total_marks: totalMarks,
-      percentage,
-      time_taken_seconds: timeTaken,
-      submitted_at: new Date().toISOString(),
+      user_id: user!.id, test_id: activeTest.id, answers, score, total_marks: totalMarks,
+      percentage, time_taken_seconds: timeTaken, submitted_at: new Date().toISOString(),
     });
-
-    if (error) {
-      toast.error("Failed to submit: " + error.message);
-    } else {
-      setResult({ score, total: totalMarks, percentage });
-      toast.success("Test submitted!");
-      await fetchTests();
-    }
+    if (error) { toast.error("Failed to submit: " + error.message); }
+    else { setResult({ score, total: totalMarks, percentage }); toast.success("Test submitted!"); await fetchTests(); }
     setSubmitting(false);
   };
 
-  const handleExitTest = () => {
-    setActiveTest(null);
-    setQuestions([]);
-    setAnswers({});
-    setResult(null);
-    setCurrentQ(0);
-  };
+  const handleExitTest = () => { setActiveTest(null); setQuestions([]); setAnswers({}); setResult(null); setCurrentQ(0); };
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -151,61 +108,48 @@ const Tests = () => {
   };
 
   const togglePublish = async (test: any) => {
-    const { error } = await supabase
-      .from("tests")
-      .update({ is_published: !test.is_published })
-      .eq("id", test.id);
-    if (error) {
-      toast.error("Failed to update: " + error.message);
-    } else {
-      toast.success(test.is_published ? "Test unpublished" : "Test published!");
-      fetchTests();
-    }
+    const { error } = await supabase.from("tests").update({ is_published: !test.is_published }).eq("id", test.id);
+    if (error) toast.error("Failed to update: " + error.message);
+    else { toast.success(test.is_published ? "Test unpublished" : "Test published!"); fetchTests(); }
   };
 
   const deleteTest = async (testId: string) => {
     const { error } = await supabase.from("tests").delete().eq("id", testId);
-    if (error) {
-      toast.error("Failed to delete: " + error.message);
-    } else {
-      toast.success("Test deleted");
-      fetchTests();
-    }
+    if (error) toast.error("Failed to delete: " + error.message);
+    else { toast.success("Test deleted"); fetchTests(); }
   };
 
   // ─── Active Test View ───
   if (activeTest) {
     const q = questions[currentQ];
 
-    // Result screen
     if (result) {
       return (
         <DashboardLayout>
-          <div className="max-w-lg mx-auto text-center space-y-6 py-12">
-            <div className="w-20 h-20 rounded-full bg-emerald/10 flex items-center justify-center mx-auto">
-              <CheckCircle className="w-10 h-10 text-emerald" />
+          <div className="max-w-lg mx-auto text-center space-y-4 sm:space-y-6 py-8 sm:py-12 px-1">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald/10 flex items-center justify-center mx-auto">
+              <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-emerald" />
             </div>
-            <h1 className="text-2xl font-extrabold font-heading text-foreground">Test Completed!</h1>
-            <div className="bg-card rounded-2xl p-6 border border-border space-y-3">
-              <div className="text-4xl font-extrabold text-navy dark:text-gold">{result.percentage.toFixed(0)}%</div>
-              <p className="text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl font-extrabold font-heading text-foreground">Test Completed!</h1>
+            <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border space-y-2 sm:space-y-3">
+              <div className="text-3xl sm:text-4xl font-extrabold text-navy dark:text-gold">{result.percentage.toFixed(0)}%</div>
+              <p className="text-sm text-muted-foreground">
                 You scored <span className="font-bold text-foreground">{result.score}</span> out of <span className="font-bold text-foreground">{result.total}</span> marks
               </p>
               {questions.some(q => q.question_type === "short" || q.question_type === "long") && (
                 <p className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
-                  ℹ️ Short & long answer questions will be reviewed by your teacher. Your final score may change.
+                  ℹ️ Short & long answer questions will be reviewed by your teacher.
                 </p>
               )}
             </div>
-            <Button onClick={handleExitTest} className="gradient-navy text-white border-0 hover:opacity-90">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tests
+            <Button onClick={handleExitTest} className="gradient-navy text-white border-0 hover:opacity-90 text-xs sm:text-sm h-9">
+              <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back to Tests
             </Button>
           </div>
         </DashboardLayout>
       );
     }
 
-    // Question screen
     const qType = q.question_type || "mcq";
     const options = [
       { key: "A", value: q.option_a },
@@ -216,66 +160,51 @@ const Tests = () => {
 
     return (
       <DashboardLayout>
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-bold font-heading text-foreground truncate">{activeTest.title}</h1>
-            <div className={`flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-full ${
+        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="text-sm sm:text-lg font-bold font-heading text-foreground truncate">{activeTest.title}</h1>
+            <div className={`flex items-center gap-1 text-xs sm:text-sm font-bold px-2.5 py-1 rounded-full shrink-0 ${
               timeLeft < 60 ? "bg-destructive/10 text-destructive animate-pulse" : "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold"
             }`}>
-              <Clock className="w-4 h-4" />
+              <Clock className="w-3.5 h-3.5" />
               {formatTime(timeLeft)}
             </div>
           </div>
 
-          {/* Progress */}
-          <div className="flex gap-1">
+          <div className="flex gap-0.5 sm:gap-1">
             {questions.map((_, i) => (
-              <div
-                key={i}
-                className={`h-2 flex-1 rounded-full transition-colors cursor-pointer ${
-                  i === currentQ
-                    ? "bg-navy dark:bg-gold"
-                    : answers[questions[i].id]
-                    ? "bg-emerald/50"
-                    : "bg-muted"
-                }`}
-                onClick={() => setCurrentQ(i)}
-              />
+              <div key={i} className={`h-1.5 sm:h-2 flex-1 rounded-full transition-colors cursor-pointer ${
+                i === currentQ ? "bg-navy dark:bg-gold" : answers[questions[i].id] ? "bg-emerald/50" : "bg-muted"
+              }`} onClick={() => setCurrentQ(i)} />
             ))}
           </div>
 
-          {/* Question Card */}
-          <div className="bg-card rounded-2xl p-6 border border-border space-y-5">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span>Question {currentQ + 1} of {questions.length}</span>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+          <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border space-y-4 sm:space-y-5">
+            <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span>Q {currentQ + 1}/{questions.length}</span>
+                <span className={`text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full ${
                   qType === "mcq" ? "bg-navy/10 text-navy dark:bg-gold/10 dark:text-gold"
                   : qType === "short" ? "bg-emerald/10 text-emerald"
                   : "bg-accent text-accent-foreground"
                 }`}>
-                  {qType === "mcq" ? "MCQ" : qType === "short" ? "Short Answer" : "Long Answer"}
+                  {qType === "mcq" ? "MCQ" : qType === "short" ? "Short" : "Long"}
                 </span>
               </div>
-              <span>{q.marks || 1} mark{(q.marks || 1) > 1 ? "s" : ""}</span>
+              <span className="text-[10px] sm:text-xs">{q.marks || 1} mark{(q.marks || 1) > 1 ? "s" : ""}</span>
             </div>
-            <h2 className="text-lg font-bold text-foreground">{q.question}</h2>
+            <h2 className="text-sm sm:text-lg font-bold text-foreground">{q.question}</h2>
 
-            {/* MCQ Options */}
             {qType === "mcq" && (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {options.map((opt) => (
-                  <button
-                    key={opt.key}
-                    onClick={() => handleSelectOption(q.id, opt.key)}
-                    className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all font-medium ${
+                  <button key={opt.key} onClick={() => handleSelectOption(q.id, opt.key)}
+                    className={`w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 transition-all text-xs sm:text-sm font-medium ${
                       answers[q.id] === opt.key
                         ? "border-navy bg-navy/10 dark:border-gold dark:bg-gold/10 text-foreground"
                         : "border-border hover:border-navy/30 dark:hover:border-gold/30 text-foreground"
-                    }`}
-                  >
-                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-muted text-xs font-bold mr-3">
+                    }`}>
+                    <span className="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-muted text-[10px] sm:text-xs font-bold mr-2 sm:mr-3">
                       {opt.key}
                     </span>
                     {opt.value}
@@ -284,54 +213,31 @@ const Tests = () => {
               </div>
             )}
 
-            {/* Short Answer */}
             {qType === "short" && (
-              <Textarea
-                value={answers[q.id] || ""}
-                onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                placeholder="Type your short answer here..."
-                className="min-h-[80px]"
-              />
+              <Textarea value={answers[q.id] || ""} onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                placeholder="Type your short answer here..." className="min-h-[80px] text-sm" />
             )}
-
-            {/* Long Answer */}
             {qType === "long" && (
-              <Textarea
-                value={answers[q.id] || ""}
-                onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                placeholder="Write your detailed answer here..."
-                className="min-h-[180px]"
-              />
+              <Textarea value={answers[q.id] || ""} onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                placeholder="Write your detailed answer here..." className="min-h-[140px] sm:min-h-[180px] text-sm" />
             )}
           </div>
 
-          {/* Navigation */}
           <div className="flex items-center justify-between">
-            <Button
-              variant="outline"
-              disabled={currentQ === 0}
-              onClick={() => setCurrentQ((c) => c - 1)}
-            >
+            <Button variant="outline" size="sm" disabled={currentQ === 0} onClick={() => setCurrentQ((c) => c - 1)} className="text-xs sm:text-sm h-8 sm:h-9">
               Previous
             </Button>
-            <span className="text-xs text-muted-foreground">
-              {Object.keys(answers).length}/{questions.length} answered
+            <span className="text-[10px] sm:text-xs text-muted-foreground">
+              {Object.keys(answers).length}/{questions.length}
             </span>
             {currentQ < questions.length - 1 ? (
-              <Button
-                className="gradient-navy text-white border-0 hover:opacity-90"
-                onClick={() => setCurrentQ((c) => c + 1)}
-              >
+              <Button className="gradient-navy text-white border-0 hover:opacity-90 text-xs sm:text-sm h-8 sm:h-9" onClick={() => setCurrentQ((c) => c + 1)}>
                 Next
               </Button>
             ) : (
-              <Button
-                className="gradient-navy text-white border-0 hover:opacity-90"
-                disabled={submitting}
-                onClick={handleSubmit}
-              >
-                {submitting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : null}
-                Submit Test
+              <Button className="gradient-navy text-white border-0 hover:opacity-90 text-xs sm:text-sm h-8 sm:h-9" disabled={submitting} onClick={handleSubmit}>
+                {submitting ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : null}
+                Submit
               </Button>
             )}
           </div>
@@ -343,78 +249,72 @@ const Tests = () => {
   // ─── Tests List View ───
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl font-extrabold font-heading text-foreground">Tests</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-foreground">Tests</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {role === "student" ? "Take tests and track your performance" : "Manage and create tests"}
           </p>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
+          <div className="flex justify-center py-10">
+            <div className="animate-spin w-7 h-7 border-4 border-gold border-t-transparent rounded-full" />
           </div>
         ) : tests.length === 0 ? (
-          <div className="text-center py-16 bg-card rounded-2xl border border-border">
-            <Brain className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-bold text-foreground mb-1">No Tests Available</h3>
-            <p className="text-sm text-muted-foreground">No tests available at the moment</p>
+          <div className="text-center py-12 sm:py-16 bg-card rounded-xl sm:rounded-2xl border border-border">
+            <Brain className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-muted-foreground mb-3" />
+            <h3 className="text-sm sm:text-lg font-bold text-foreground mb-1">No Tests Available</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">No tests available at the moment</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {tests.map((test) => {
               const attempt = getAttempt(test.id);
               return (
-                <div key={test.id} className="bg-card rounded-2xl p-5 border border-border hover:shadow-card hover:border-gold/20 transition-all">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-navy/10 dark:bg-gold/10 flex items-center justify-center">
-                      <Brain className="w-5 h-5 text-navy dark:text-gold" />
+                <div key={test.id} className="bg-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-border hover:shadow-card hover:border-gold/20 transition-all">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-navy/10 dark:bg-gold/10 flex items-center justify-center">
+                      <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-navy dark:text-gold" />
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       {isTeacherOrAdmin && (
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        <span className={`text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${
                           test.is_published ? "bg-emerald/10 text-emerald" : "bg-muted text-muted-foreground"
                         }`}>
                           {test.is_published ? "Published" : "Draft"}
                         </span>
                       )}
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                      <span className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-muted text-muted-foreground">
                         {test.type}
                       </span>
                     </div>
                   </div>
-                  <h3 className="font-bold text-foreground mb-3">{test.title}</h3>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {test.duration_minutes} min
-                    </span>
+                  <h3 className="font-bold text-foreground text-sm sm:text-base mb-2 sm:mb-3 line-clamp-2">{test.title}</h3>
+                  <div className="flex items-center gap-3 text-[10px] sm:text-xs text-muted-foreground mb-3 sm:mb-4">
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {test.duration_minutes} min</span>
                     <span>{test.total_marks} marks</span>
                   </div>
 
                   {isTeacherOrAdmin ? (
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => togglePublish(test)}>
+                      <Button variant="outline" size="sm" className="flex-1 text-[10px] sm:text-xs h-8" onClick={() => togglePublish(test)}>
                         {test.is_published ? <EyeOff className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
                         {test.is_published ? "Unpublish" : "Publish"}
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => deleteTest(test.id)} className="text-destructive hover:text-destructive">
+                      <Button variant="outline" size="sm" onClick={() => deleteTest(test.id)} className="text-destructive hover:text-destructive h-8">
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
                   ) : attempt ? (
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-emerald text-sm font-medium">
-                        <CheckCircle className="w-4 h-4" /> Completed
+                      <div className="flex items-center gap-1 text-emerald text-xs sm:text-sm font-medium">
+                        <CheckCircle className="w-3.5 h-3.5" /> Completed
                       </div>
-                      <span className="font-bold text-foreground">{attempt.percentage?.toFixed(0)}%</span>
+                      <span className="font-bold text-foreground text-sm">{attempt.percentage?.toFixed(0)}%</span>
                     </div>
                   ) : (
-                    <Button
-                      className="w-full gradient-navy text-white border-0 hover:opacity-90"
-                      size="sm"
-                      onClick={() => handleStartTest(test)}
-                    >
+                    <Button className="w-full gradient-navy text-white border-0 hover:opacity-90 text-xs sm:text-sm h-8 sm:h-9" onClick={() => handleStartTest(test)}>
                       Start Test <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                   )}

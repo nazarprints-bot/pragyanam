@@ -55,27 +55,27 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-slide-up">
-        <div className="gradient-navy rounded-2xl p-6 text-white card-3d">
-          <h1 className="text-2xl lg:text-3xl font-extrabold font-heading">{greeting()} 👋</h1>
-          <p className="text-white/60 mt-1">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
+      <div className="space-y-4 sm:space-y-6 animate-slide-up">
+        <div className="gradient-navy rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white card-3d">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold font-heading">{greeting()} 👋</h1>
+          <p className="text-white/60 text-xs sm:text-sm mt-0.5">{profile?.full_name || t("common.user")}, {t("dash.overview")}</p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 stagger-children">
           {statCards.map((stat) => (
-            <div key={stat.label} className="bg-card rounded-2xl p-5 border border-border card-3d-subtle">
-              <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center mb-3`}>
-                <stat.icon className="w-5 h-5" />
+            <div key={stat.label} className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-border card-3d-subtle">
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${stat.color} flex items-center justify-center mb-2 sm:mb-3`}>
+                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <p className="text-2xl font-extrabold font-heading text-foreground">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
+              <p className="text-lg sm:text-2xl font-extrabold font-heading text-foreground">{stat.value}</p>
+              <p className="text-[11px] sm:text-sm text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
 
-        <div className="bg-card rounded-2xl p-6 border border-border animate-slide-up-delayed">
-          <h2 className="text-lg font-bold font-heading text-foreground mb-4">{t("dash.quickActions")}</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger-children">
+        <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border animate-slide-up-delayed">
+          <h2 className="text-sm sm:text-lg font-bold font-heading text-foreground mb-3 sm:mb-4">{t("dash.quickActions")}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 stagger-children">
             {role === "student" && (
               <>
                 <QuickAction icon="📚" label={t("dash.browseCourses")} to="/dashboard/courses" />
@@ -111,9 +111,9 @@ const Dashboard = () => {
 const QuickAction = ({ icon, label, to }: { icon: string; label: string; to: string }) => {
   const navigate = useNavigate();
   return (
-    <button onClick={() => navigate(to)} className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-gold/40 hover:shadow-gold transition-all text-center w-full group card-3d-subtle btn-press">
-      <span className="text-2xl group-hover:animate-float">{icon}</span>
-      <span className="text-sm font-medium text-foreground">{label}</span>
+    <button onClick={() => navigate(to)} className="flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-xl border border-border hover:border-gold/40 hover:shadow-gold transition-all text-center w-full group card-3d-subtle btn-press">
+      <span className="text-xl sm:text-2xl group-hover:animate-float">{icon}</span>
+      <span className="text-[11px] sm:text-sm font-medium text-foreground leading-tight">{label}</span>
     </button>
   );
 };
