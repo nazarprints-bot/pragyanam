@@ -424,7 +424,34 @@ const CourseDetail = () => {
             <Progress value={progressPct} className="h-3" />
             <p className="text-xs text-muted-foreground mt-2">
               {completedCount}/{lessons.length} lessons completed
+              {courseTests.length > 0 && (
+                <span className={`ml-2 ${testPassed ? "text-primary" : "text-destructive"}`}>
+                  · Test: {testPassed ? `Passed (${bestTestScore?.toFixed(0)}%)` : bestTestScore !== null ? `Failed (${bestTestScore?.toFixed(0)}%)` : "Not attempted"}
+                </span>
+              )}
             </p>
+
+            {/* Checklist for certificate */}
+            {!hasCertificate && (
+              <div className="mt-3 space-y-1.5">
+                <p className="text-xs font-semibold text-muted-foreground">Certificate Requirements / प्रमाणपत्र आवश्यकताएं:</p>
+                <div className="flex items-center gap-2 text-xs">
+                  <CheckCircle className={`w-4 h-4 ${progressPct === 100 ? "text-primary" : "text-muted-foreground"}`} />
+                  <span className={progressPct === 100 ? "text-foreground" : "text-muted-foreground"}>
+                    Complete all lessons / सभी पाठ पूरे करें
+                  </span>
+                </div>
+                {courseTests.length > 0 && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <CheckCircle className={`w-4 h-4 ${testPassed ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={testPassed ? "text-foreground" : "text-muted-foreground"}>
+                      Pass course test (40% min) / कोर्स टेस्ट पास करें
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {hasCertificate && (
               <div className="mt-3 flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
                 <Award className="w-5 h-5 text-primary" />
@@ -434,7 +461,7 @@ const CourseDetail = () => {
                 </Button>
               </div>
             )}
-            {progressPct === 100 && !hasCertificate && (
+            {progressPct === 100 && (courseTests.length === 0 || testPassed) && !hasCertificate && (
               <Button
                 size="sm" className="mt-3 bg-primary text-primary-foreground"
                 onClick={checkAndIssueCertificate}
