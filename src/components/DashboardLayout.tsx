@@ -74,7 +74,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-[260px] sm:w-[220px] gradient-navy transform transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-screen">
           <div className="px-4 py-4 border-b border-white/10 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gold flex items-center justify-center animate-glow-pulse">
@@ -100,7 +100,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             })}
           </nav>
 
-          <div className="p-3 border-t border-white/10 safe-area-bottom">
+          <div className="shrink-0 p-3 border-t border-white/10 safe-area-bottom">
             <div className="flex items-center gap-2.5 mb-2.5 px-1">
               <div className="w-9 h-9 rounded-full bg-gold/20 overflow-hidden flex items-center justify-center text-[13px] font-semibold text-gold">
                 {profile?.avatar_url ? (
