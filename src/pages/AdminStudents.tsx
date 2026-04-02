@@ -15,13 +15,13 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.97 },
-  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: i * 0.05, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } }),
+  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: i * 0.05, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } }),
   exit: { opacity: 0, y: -10, scale: 0.97, transition: { duration: 0.2 } },
 };
 
 const statVariants = {
   hidden: { opacity: 0, scale: 0.8 },
-  visible: (i: number) => ({ opacity: 1, scale: 1, transition: { delay: i * 0.08, type: "spring", stiffness: 200 } }),
+  visible: (i: number) => ({ opacity: 1, scale: 1, transition: { delay: i * 0.08, type: "spring" as const, stiffness: 200 } }),
 };
 
 type FilterType = "all" | "free" | "paid" | "pending" | "approved" | "disabled";
