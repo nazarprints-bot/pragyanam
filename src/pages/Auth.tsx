@@ -33,6 +33,7 @@ const Auth = () => {
     role: "student" as "student" | "teacher",
     phone: "", parentPhone: "", school: "",
     classLevel: "", state: "", district: "",
+    qualification: "", subjectsTaught: "",
   });
 
   const isStudent = formData.role === "student";
