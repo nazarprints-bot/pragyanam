@@ -57,7 +57,7 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
     if (userError || !user) throw new Error("Not authenticated");
 
-    // Extend trial by 30 days from now
+    // Extend subscription by 30 days from now
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
@@ -71,6 +71,25 @@ serve(async (req) => {
       .eq("user_id", user.id);
 
     if (updateError) throw new Error(`Profile update failed: ${updateError.message}`);
+
+    // Store payment record
+    const { error: paymentError } = await supabaseAdmin
+      .from("payments")
+      .insert({
+        user_id: user.id,
+        razorpay_order_id,
+        razorpay_payment_id,
+        amount: 29900,
+        currency: "INR",
+        status: "paid",
+        plan: "monthly",
+        paid_at: now.toISOString(),
+      });
+
+    if (paymentError) {
+      console.error("Payment record insert failed:", paymentError.message);
+      // Don't throw — profile is already updated, payment is verified
+    }
 
     return new Response(JSON.stringify({ success: true, valid_until: trialEnd.toISOString() }), {
       headers: { ...CORS, "Content-Type": "application/json" },
