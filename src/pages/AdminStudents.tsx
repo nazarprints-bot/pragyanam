@@ -105,6 +105,16 @@ const AdminStudents = () => {
     fetchStudents();
   };
 
+  const handleDelete = async (userId: string) => {
+    const { error: roleErr } = await supabase.from("user_roles").delete().eq("user_id", userId);
+    if (roleErr) { toast.error(roleErr.message); return; }
+    const { error: profErr } = await supabase.from("profiles").delete().eq("user_id", userId);
+    if (profErr) { toast.error(profErr.message); return; }
+    toast.success(isHi ? "उपयोगकर्ता हटाया गया" : "User deleted");
+    setSelectedStudent(null);
+    fetchStudents();
+  };
+
   let filtered = students.filter(
     (p) => p.full_name?.toLowerCase().includes(search.toLowerCase()) || p.phone?.includes(search) || p.school?.toLowerCase().includes(search.toLowerCase())
   );
