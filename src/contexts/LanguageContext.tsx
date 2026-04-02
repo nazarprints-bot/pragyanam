@@ -229,6 +229,8 @@ const translations: Record<string, Record<Language, string>> = {
   "bnav.live": { en: "Live", hi: "लाइव" },
   "bnav.courses": { en: "Courses", hi: "कोर्सेज़" },
   "bnav.profile": { en: "Profile", hi: "प्रोफ़ाइल" },
+  "bnav.tests": { en: "Tests", hi: "टेस्ट" },
+  "bnav.doubts": { en: "Doubts", hi: "डाउट" },
 
   // Student Home
   "shome.liveNow": { en: "Live Now", hi: "अभी लाइव" },

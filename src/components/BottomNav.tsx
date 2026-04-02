@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Video, GraduationCap, UserCircle } from "lucide-react";
+import { Home, BookOpen, Brain, MessageCircle, UserCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const BottomNav = () => {
@@ -10,8 +10,8 @@ const BottomNav = () => {
   const tabs = [
     { path: "/dashboard", icon: Home, label: t("bnav.home"), exact: true },
     { path: "/dashboard/classes", icon: BookOpen, label: t("bnav.classes") },
-    { path: "/dashboard/live-classes", icon: Video, label: t("bnav.live") },
-    { path: "/dashboard/courses", icon: GraduationCap, label: t("bnav.courses") },
+    { path: "/dashboard/tests", icon: Brain, label: t("bnav.tests") },
+    { path: "/dashboard/doubts", icon: MessageCircle, label: t("bnav.doubts") },
     { path: "/dashboard/profile", icon: UserCircle, label: t("bnav.profile") },
   ];
 
@@ -30,12 +30,10 @@ const BottomNav = () => {
               key={tab.path}
               onClick={() => navigate(tab.path)}
               className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-2 px-2 rounded-xl transition-all active:scale-90 ${
-                active
-                  ? "text-primary"
-                  : "text-muted-foreground"
+                active ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <div className={`relative ${active ? "" : ""}`}>
+              <div className="relative">
                 <tab.icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
                 {active && (
                   <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
