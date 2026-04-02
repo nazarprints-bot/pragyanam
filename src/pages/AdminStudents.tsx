@@ -442,6 +442,30 @@ const AdminStudents = () => {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10">
+                        <Trash2 className="w-4 h-4 mr-1.5" /> {isHi ? "खाता हटाएँ (डिलीट)" : "Delete Account"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{isHi ? "क्या आप सुनिश्चित हैं?" : "Are you sure?"}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {isHi
+                            ? `${selectedStudent.full_name} का खाता स्थायी रूप से हटा दिया जाएगा। यह वापस नहीं किया जा सकता।`
+                            : `${selectedStudent.full_name}'s account will be permanently deleted. This cannot be undone.`}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{isHi ? "रद्द करें" : "Cancel"}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(selectedStudent.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          {isHi ? "हाँ, हटाएँ" : "Yes, Delete"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </motion.div>
               </div>
             </div>
