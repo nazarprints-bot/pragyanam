@@ -15,8 +15,6 @@ interface Question {
   option_b: string;
   option_c: string;
   option_d: string;
-  correct_option: string;
-  answer_text: string | null;
   marks: number;
   sort_order: number;
 }
