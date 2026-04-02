@@ -62,7 +62,7 @@ const Tests = () => {
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
 
   const handleStartTest = async (test: any) => {
-    const { data, error } = await supabase.from("test_questions").select("*").eq("test_id", test.id).order("sort_order", { ascending: true });
+    const { data, error } = await supabase.rpc("get_test_questions_safe", { _test_id: test.id });
     if (error || !data || data.length === 0) { toast.error("No questions found for this test"); return; }
     setQuestions(data as Question[]);
     setActiveTest(test);
