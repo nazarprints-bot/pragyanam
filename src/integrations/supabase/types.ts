@@ -478,9 +478,11 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          board: string | null
           class_level: string | null
           created_at: string
           district: string | null
+          experience_years: number | null
           full_name: string
           id: string
           is_disabled: boolean | null
@@ -490,17 +492,21 @@ export type Database = {
           onboarding_completed: boolean
           parent_phone: string | null
           phone: string | null
+          qualification: string | null
           school: string | null
           state: string | null
+          subjects_taught: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          board?: string | null
           class_level?: string | null
           created_at?: string
           district?: string | null
+          experience_years?: number | null
           full_name?: string
           id?: string
           is_disabled?: boolean | null
@@ -510,17 +516,21 @@ export type Database = {
           onboarding_completed?: boolean
           parent_phone?: string | null
           phone?: string | null
+          qualification?: string | null
           school?: string | null
           state?: string | null
+          subjects_taught?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          board?: string | null
           class_level?: string | null
           created_at?: string
           district?: string | null
+          experience_years?: number | null
           full_name?: string
           id?: string
           is_disabled?: boolean | null
@@ -530,8 +540,10 @@ export type Database = {
           onboarding_completed?: boolean
           parent_phone?: string | null
           phone?: string | null
+          qualification?: string | null
           school?: string | null
           state?: string | null
+          subjects_taught?: string | null
           updated_at?: string
           user_id?: string
         }
