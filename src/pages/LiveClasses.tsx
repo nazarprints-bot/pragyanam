@@ -231,6 +231,31 @@ const LiveClasses = () => {
   }, [activeRoom, activeClassId, isTeacherOrAdmin, profile, user, destroyJitsi]);
 
   // ═══════════════ ACTIVE CLASS VIEW ═══════════════
+  // Fullscreen toggle for mobile
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const videoWrapperRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await videoWrapperRef.current?.requestFullscreen();
+        // Lock to landscape on mobile for better viewing
+        try { await (screen.orientation as any)?.lock?.('landscape'); } catch {}
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        try { screen.orientation?.unlock?.(); } catch {}
+        setIsFullscreen(false);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
+
   if (activeRoom && activeClassId) {
     const activeClass = classes.find((c) => c.id === activeClassId);
     const teacher = teacherProfiles[activeClass?.teacher_id];
@@ -239,55 +264,75 @@ const LiveClasses = () => {
         <div className="flex flex-col h-[calc(100vh-64px)]">
           <div className="flex flex-col lg:flex-row flex-1 min-h-0">
             <div className="flex-1 flex flex-col min-w-0">
-              <div ref={jitsiContainerRef} className="relative w-full bg-black"
-                style={{ aspectRatio: "16/9", maxHeight: "calc(100vh - 180px)" }} />
-              {/* Info bar */}
-              <div className="px-4 py-3 bg-card border-b border-border">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive" />
-                      </span>
-                      <span className="text-xs font-bold text-destructive uppercase tracking-wide">Live</span>
-                    </div>
-                    <h1 className="text-base lg:text-lg font-bold text-foreground truncate">
-                      {activeClass?.title || "Live Class"}
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {activeClass?.current_students != null && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Users className="w-3 h-3" /> {activeClass.current_students}/{activeClass.max_students || 75}
-                      </span>
-                    )}
-                    {isTeacherOrAdmin && activeClass?.teacher_id === user?.id && (
-                      <Button variant="destructive" size="sm" onClick={() => handleEndClass(activeClass)} className="text-xs">
-                        <X className="w-3 h-3 mr-1" /> End
-                      </Button>
-                    )}
-                    <Button variant="outline" size="sm" onClick={handleLeaveClass} className="text-xs">Leave</Button>
-                  </div>
+              <div ref={videoWrapperRef} className="relative w-full bg-black flex-1">
+                <div ref={jitsiContainerRef} className="absolute inset-0 w-full h-full" />
+                {/* Fullscreen button overlay */}
+                <button
+                  onClick={toggleFullscreen}
+                  className="absolute top-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white rounded-lg p-2 transition-colors backdrop-blur-sm"
+                  title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                >
+                  {isFullscreen ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                  )}
+                </button>
+                {/* HD quality badge */}
+                <div className="absolute top-3 left-3 z-10 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm">
+                  HD
                 </div>
-                {/* Teacher info */}
-                {teacher && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-[11px] font-bold text-white overflow-hidden">
-                      {teacher.avatar_url ? (
-                        <img src={teacher.avatar_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        teacher.full_name?.charAt(0)?.toUpperCase() || "T"
-                      )}
-                    </div>
-                    <span className="text-sm font-medium text-foreground">{teacher.full_name}</span>
-                  </div>
-                )}
               </div>
+              {/* Info bar - hidden in fullscreen */}
+              {!isFullscreen && (
+                <div className="px-4 py-3 bg-card border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="relative flex h-2.5 w-2.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive" />
+                        </span>
+                        <span className="text-xs font-bold text-destructive uppercase tracking-wide">Live</span>
+                      </div>
+                      <h1 className="text-base lg:text-lg font-bold text-foreground truncate">
+                        {activeClass?.title || "Live Class"}
+                      </h1>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {activeClass?.current_students != null && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Users className="w-3 h-3" /> {activeClass.current_students}/{activeClass.max_students || 75}
+                        </span>
+                      )}
+                      {isTeacherOrAdmin && activeClass?.teacher_id === user?.id && (
+                        <Button variant="destructive" size="sm" onClick={() => handleEndClass(activeClass)} className="text-xs">
+                          <X className="w-3 h-3 mr-1" /> End
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" onClick={handleLeaveClass} className="text-xs">Leave</Button>
+                    </div>
+                  </div>
+                  {teacher && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-[11px] font-bold text-white overflow-hidden">
+                        {teacher.avatar_url ? (
+                          <img src={teacher.avatar_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          teacher.full_name?.charAt(0)?.toUpperCase() || "T"
+                        )}
+                      </div>
+                      <span className="text-sm font-medium text-foreground">{teacher.full_name}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <div className="h-[320px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-l border-border">
-              <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
-            </div>
+            {!isFullscreen && (
+              <div className="h-[320px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-l border-border">
+                <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
+              </div>
+            )}
           </div>
         </div>
       </DashboardLayout>
