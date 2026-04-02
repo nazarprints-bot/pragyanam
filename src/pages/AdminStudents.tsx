@@ -2,13 +2,27 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Search, CheckCircle, XCircle, Users, Phone, MapPin, School, Eye, Calendar, BookOpen, Ban, Shield } from "lucide-react";
+import { Search, CheckCircle, XCircle, Users, Phone, MapPin, School, Eye, Calendar, BookOpen, Ban, Shield, Award, GraduationCap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.97 },
+  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: i * 0.05, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } }),
+  exit: { opacity: 0, y: -10, scale: 0.97, transition: { duration: 0.2 } },
+};
+
+const statVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: (i: number) => ({ opacity: 1, scale: 1, transition: { delay: i * 0.08, type: "spring", stiffness: 200 } }),
+};
 
 type FilterType = "all" | "free" | "paid" | "pending" | "approved" | "disabled";
 
@@ -43,10 +57,16 @@ const AdminStudents = () => {
       }
     });
 
+    // Get doubt counts
+    const { data: doubts } = await supabase.from("doubts").select("user_id").in("user_id", studentIds);
+    const doubtCounts: Record<string, number> = {};
+    (doubts || []).forEach((d: any) => { doubtCounts[d.user_id] = (doubtCounts[d.user_id] || 0) + 1; });
+
     const enriched = (profiles || []).map((p: any) => ({
       ...p,
       enrollCount: enrollCounts[p.user_id] || 0,
       testCount: testCounts[p.user_id] || 0,
+      doubtCount: doubtCounts[p.user_id] || 0,
       avgScore: testScores[p.user_id] ? Math.round(testScores[p.user_id].reduce((a: number, b: number) => a + b, 0) / testScores[p.user_id].length) : null,
     }));
     setStudents(enriched);
@@ -100,11 +120,27 @@ const AdminStudents = () => {
   const approvedCount = students.filter((p) => p.is_verified && !p.is_disabled).length;
   const disabledCount = students.filter((p) => p.is_disabled).length;
 
+  const DetailRow = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null | undefined }) => {
+    if (!value) return null;
+    return (
+      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted/60 transition-colors">
+        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
+          <p className="text-sm font-medium text-foreground truncate">{value}</p>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
               <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
@@ -112,31 +148,34 @@ const AdminStudents = () => {
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">{isHi ? "सभी छात्रों को मैनेज करें" : "Manage all platform students"}</p>
           </div>
-          <div className="relative w-full sm:w-64">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder={isHi ? "नाम, फ़ोन, स्कूल..." : "Name, phone, school..."} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 text-sm" />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
           {[
-            { key: "all" as FilterType, count: students.length, label: isHi ? "कुल" : "Total", color: "text-foreground" },
-            { key: "approved" as FilterType, count: approvedCount, label: isHi ? "स्वीकृत" : "Approved", color: "text-emerald-500" },
-            { key: "pending" as FilterType, count: pendingCount, label: isHi ? "लंबित" : "Pending", color: "text-amber-500" },
-            { key: "paid" as FilterType, count: paidCount, label: isHi ? "पेड" : "Paid", color: "text-primary" },
-            { key: "free" as FilterType, count: freeCount, label: isHi ? "मुफ़्त" : "Free", color: "text-amber-500" },
-            { key: "disabled" as FilterType, count: disabledCount, label: isHi ? "अक्षम" : "Disabled", color: "text-destructive" },
-          ].map((s) => (
-            <div key={s.key} className="bg-card rounded-xl p-2.5 sm:p-3 border border-border text-center cursor-pointer" onClick={() => setFilter(s.key)}>
+            { key: "all" as FilterType, count: students.length, label: isHi ? "कुल" : "Total", color: "text-foreground", bg: "bg-primary/5" },
+            { key: "approved" as FilterType, count: approvedCount, label: isHi ? "स्वीकृत" : "Approved", color: "text-emerald-500", bg: "bg-emerald-500/5" },
+            { key: "pending" as FilterType, count: pendingCount, label: isHi ? "लंबित" : "Pending", color: "text-amber-500", bg: "bg-amber-500/5" },
+            { key: "paid" as FilterType, count: paidCount, label: isHi ? "पेड" : "Paid", color: "text-primary", bg: "bg-primary/5" },
+            { key: "free" as FilterType, count: freeCount, label: isHi ? "मुफ़्त" : "Free", color: "text-amber-500", bg: "bg-amber-500/5" },
+            { key: "disabled" as FilterType, count: disabledCount, label: isHi ? "अक्षम" : "Disabled", color: "text-destructive", bg: "bg-destructive/5" },
+          ].map((s, i) => (
+            <motion.div key={s.key} custom={i} variants={statVariants} initial="hidden" animate="visible"
+              className={`${s.bg} rounded-xl p-2.5 sm:p-3 border border-border text-center cursor-pointer hover:scale-105 transition-transform`}
+              onClick={() => setFilter(s.key)}>
               <p className={`text-lg sm:text-xl font-extrabold ${s.color}`}>{s.count}</p>
               <p className="text-[9px] sm:text-xs text-muted-foreground">{s.label}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Filter tabs */}
-        <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit overflow-x-auto">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+          className="flex gap-1 bg-muted rounded-lg p-1 w-fit overflow-x-auto">
           {([
             { key: "all" as FilterType, label: isHi ? "सभी" : "All" },
             { key: "approved" as FilterType, label: isHi ? "स्वीकृत" : "Approved" },
@@ -146,284 +185,254 @@ const AdminStudents = () => {
             { key: "disabled" as FilterType, label: isHi ? "अक्षम" : "Disabled" },
           ]).map((f) => (
             <button key={f.key} onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${filter === f.key ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 whitespace-nowrap ${filter === f.key ? "bg-card text-foreground shadow-sm scale-105" : "text-muted-foreground hover:text-foreground"}`}>
               {f.label}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Content */}
         {loading ? (
-          <div className="space-y-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-12 bg-card rounded-xl border border-border">
-            <Users className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-sm font-semibold text-foreground">{isHi ? "कोई छात्र नहीं मिला" : "No students found"}</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[1,2,3,4,5,6].map(i => <Skeleton key={i} className="h-40 rounded-xl" />)}
           </div>
+        ) : filtered.length === 0 ? (
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 bg-card rounded-xl border border-border">
+            <Users className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm font-semibold text-foreground">{isHi ? "कोई छात्र नहीं मिला" : "No students found"}</p>
+            <p className="text-xs text-muted-foreground mt-1">{isHi ? "खोज बदलें या फ़िल्टर हटाएँ" : "Try changing search or filters"}</p>
+          </motion.div>
         ) : (
-          <>
-            {/* Mobile view */}
-            <div className="sm:hidden space-y-2.5">
-              {filtered.map((student) => (
-                <div key={student.id} className={`bg-card rounded-xl p-3 border ${student.is_disabled ? "border-destructive/30 opacity-60" : "border-border"}`}>
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
-                      {student.full_name?.charAt(0)?.toUpperCase() || "S"}
+          <AnimatePresence mode="popLayout">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((student, i) => (
+                <motion.div key={student.id} custom={i} variants={cardVariants} initial="hidden" animate="visible" exit="exit" layout
+                  className={`bg-card rounded-xl border p-4 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 ${student.is_disabled ? "border-destructive/30 opacity-60" : "border-border hover:border-primary/20"}`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xs font-bold text-primary shrink-0 ring-2 ring-primary/10">
+                      {student.avatar_url ? (
+                        <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${student.avatar_url}`} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        student.full_name?.charAt(0)?.toUpperCase() || "S"
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">{student.full_name || "—"}</p>
+                      <p className="font-bold text-foreground text-sm truncate">{student.full_name || "—"}</p>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        {student.class_level && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{isHi ? "कक्षा" : "Class"} {student.class_level}</span>}
+                        {student.class_level && <Badge variant="outline" className="text-[9px] h-4 px-1.5">{isHi ? "कक्षा" : "Class"} {student.class_level}</Badge>}
+                        {student.board && <Badge variant="outline" className="text-[9px] h-4 px-1.5 text-primary border-primary/30">{student.board}</Badge>}
                         {student.is_disabled ? (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">{isHi ? "अक्षम" : "Disabled"}</span>
+                          <Badge variant="destructive" className="text-[9px] h-4 px-1.5">{isHi ? "अक्षम" : "Disabled"}</Badge>
+                        ) : student.is_verified ? (
+                          <Badge className="text-[9px] h-4 px-1.5 bg-emerald-500/10 text-emerald-600 border-emerald-500/20">✓</Badge>
                         ) : (
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${student.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"}`}>
-                            {student.is_verified ? (isHi ? "स्वीकृत" : "✓") : (isHi ? "लंबित" : "⏳")}
-                          </span>
+                          <Badge variant="secondary" className="text-[9px] h-4 px-1.5 bg-amber-500/10 text-amber-600 border-amber-500/20">⏳</Badge>
                         )}
-                        {student.is_free_student && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600">{isHi ? "मुफ़्त" : "Free"}</span>}
+                        {student.is_free_student && <Badge variant="secondary" className="text-[9px] h-4 px-1.5 bg-amber-500/10 text-amber-600">{isHi ? "मुफ़्त" : "Free"}</Badge>}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <div className="flex gap-3">
-                      <span>📚 {student.enrollCount}</span>
-                      <span>📝 {student.testCount}</span>
-                      {student.avgScore != null && <span>📊 {student.avgScore}%</span>}
-                    </div>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={() => setSelectedStudent(student)}>
-                        <Eye className="w-3 h-3" />
-                      </Button>
-                      {!student.is_disabled && !student.is_verified && (
-                        <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-emerald-500" onClick={() => handleVerify(student.user_id, true)}>
-                          <CheckCircle className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </div>
+
+                  {/* Quick info */}
+                  <div className="grid grid-cols-2 gap-1.5 text-[10px] text-muted-foreground mb-3">
+                    {student.school && <div className="flex items-center gap-1 bg-muted/40 rounded-lg px-2 py-1"><School className="w-3 h-3 text-primary/60" /><span className="truncate">{student.school}</span></div>}
+                    {student.phone && <div className="flex items-center gap-1 bg-muted/40 rounded-lg px-2 py-1"><Phone className="w-3 h-3 text-primary/60" />{student.phone}</div>}
                   </div>
-                </div>
+
+                  {/* Mini stats */}
+                  <div className="flex gap-2 mb-3">
+                    {[
+                      { val: student.enrollCount, label: isHi ? "कोर्स" : "Courses", emoji: "📚" },
+                      { val: student.testCount, label: isHi ? "टेस्ट" : "Tests", emoji: "📝" },
+                      { val: student.avgScore != null ? `${student.avgScore}%` : "—", label: isHi ? "औसत" : "Avg", emoji: "📊" },
+                    ].map((s) => (
+                      <div key={s.label} className="flex-1 text-center p-1.5 bg-muted/30 rounded-lg">
+                        <p className="text-xs font-bold text-foreground">{s.emoji} {s.val}</p>
+                        <p className="text-[8px] text-muted-foreground">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-1.5">
+                    <Button size="sm" variant="outline" onClick={() => setSelectedStudent(student)} className="h-8 text-xs hover:scale-105 transition-transform">
+                      <Eye className="w-3.5 h-3.5 mr-1" /> {isHi ? "विवरण" : "Details"}
+                    </Button>
+                    {!student.is_disabled && !student.is_verified && (
+                      <Button size="sm" onClick={() => handleVerify(student.user_id, true)} className="flex-1 h-8 text-xs bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 transition-transform">
+                        <CheckCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "स्वीकृत" : "Approve"}
+                      </Button>
+                    )}
+                    {!student.is_disabled && student.is_verified && (
+                      <Button size="sm" variant="outline" onClick={() => handleVerify(student.user_id, false)} className="flex-1 h-8 text-xs text-amber-600 border-amber-500/30 hover:bg-amber-500/10 hover:scale-105 transition-transform">
+                        <XCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "रिवोक" : "Revoke"}
+                      </Button>
+                    )}
+                    {!student.is_disabled && (
+                      <Button size="sm" variant="outline" onClick={() => handleDisable(student.user_id, true)} className="h-8 text-xs text-destructive border-destructive/30 hover:bg-destructive/10 hover:scale-105 transition-transform">
+                        <Ban className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                    {student.is_disabled && (
+                      <Button size="sm" onClick={() => handleDisable(student.user_id, false)} className="flex-1 h-8 text-xs bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 transition-transform">
+                        <CheckCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "सक्रिय" : "Enable"}
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
               ))}
             </div>
-
-            {/* Desktop table */}
-            <div className="hidden sm:block bg-card rounded-2xl border border-border overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/50">
-                      <th className="text-left p-3 text-xs font-semibold text-foreground">{isHi ? "नाम" : "Name"}</th>
-                      <th className="text-left p-3 text-xs font-semibold text-foreground">{isHi ? "कक्षा" : "Class"}</th>
-                      <th className="text-left p-3 text-xs font-semibold text-foreground">{isHi ? "फ़ोन" : "Phone"}</th>
-                      <th className="text-center p-3 text-xs font-semibold text-foreground">{isHi ? "कोर्स" : "Courses"}</th>
-                      <th className="text-center p-3 text-xs font-semibold text-foreground">{isHi ? "टेस्ट" : "Tests"}</th>
-                      <th className="text-center p-3 text-xs font-semibold text-foreground">{isHi ? "स्कोर" : "Avg %"}</th>
-                      <th className="text-left p-3 text-xs font-semibold text-foreground">{isHi ? "स्थिति" : "Status"}</th>
-                      <th className="text-left p-3 text-xs font-semibold text-foreground">{isHi ? "कार्रवाई" : "Actions"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((student) => (
-                      <tr key={student.id} className={`border-b border-border hover:bg-muted/30 ${student.is_disabled ? "opacity-50" : ""}`}>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                              {student.full_name?.charAt(0)?.toUpperCase() || "S"}
-                            </div>
-                            <div>
-                              <span className="text-xs font-medium text-foreground block">{student.full_name || "—"}</span>
-                              {student.school && <span className="text-[10px] text-muted-foreground">{student.school}</span>}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-3 text-xs text-foreground">{student.class_level || "—"}</td>
-                        <td className="p-3 text-xs text-muted-foreground">{student.phone || "—"}</td>
-                        <td className="p-3 text-xs text-center text-foreground font-medium">{student.enrollCount}</td>
-                        <td className="p-3 text-xs text-center text-foreground font-medium">{student.testCount}</td>
-                        <td className="p-3 text-xs text-center text-foreground font-medium">{student.avgScore != null ? `${student.avgScore}%` : "—"}</td>
-                        <td className="p-3">
-                          <div className="flex gap-1 flex-wrap">
-                            {student.is_disabled ? (
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">{isHi ? "अक्षम" : "Disabled"}</span>
-                            ) : (
-                              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-                                student.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                              }`}>
-                                {student.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
-                              </span>
-                            )}
-                            {student.is_free_student && (
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                                {isHi ? "मुफ़्त" : "Free"}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => setSelectedStudent(student)}>
-                              <Eye className="w-3.5 h-3.5" />
-                            </Button>
-                            {!student.is_disabled && !student.is_verified && (
-                              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-500" onClick={() => handleVerify(student.user_id, true)}>
-                                <CheckCircle className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
-                            {!student.is_disabled && student.is_verified && (
-                              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-destructive" onClick={() => handleDisable(student.user_id, true)}>
-                                <Ban className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
-                            {student.is_disabled && (
-                              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-500" onClick={() => handleDisable(student.user_id, false)}>
-                                <CheckCircle className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>
+          </AnimatePresence>
         )}
       </div>
 
       {/* Student Detail Sheet */}
       <Sheet open={!!selectedStudent} onOpenChange={(open) => !open && setSelectedStudent(null)}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="text-lg">{isHi ? "छात्र विवरण" : "Student Details"}</SheetTitle>
-          </SheetHeader>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
           {selectedStudent && (
-            <div className="mt-6 space-y-5">
-              {/* Avatar & Name */}
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-xl font-bold text-primary shrink-0 overflow-hidden">
-                  {selectedStudent.avatar_url ? (
-                    <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${selectedStudent.avatar_url}`} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    selectedStudent.full_name?.charAt(0)?.toUpperCase() || "S"
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">{selectedStudent.full_name || "—"}</h3>
-                  <div className="flex gap-1.5 mt-1 flex-wrap">
-                    {selectedStudent.is_disabled ? (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">{isHi ? "अक्षम" : "Disabled"}</span>
+            <div>
+              {/* Header with gradient */}
+              <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-8">
+                <SheetHeader>
+                  <SheetTitle className="text-sm text-muted-foreground">{isHi ? "छात्र विवरण" : "Student Details"}</SheetTitle>
+                </SheetHeader>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4 mt-4">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-2xl font-bold text-primary shrink-0 overflow-hidden ring-4 ring-background shadow-xl">
+                    {selectedStudent.avatar_url ? (
+                      <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${selectedStudent.avatar_url}`} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        selectedStudent.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                      }`}>
-                        {selectedStudent.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
-                      </span>
-                    )}
-                    {selectedStudent.is_free_student && (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">{isHi ? "मुफ़्त" : "Free"}</span>
+                      selectedStudent.full_name?.charAt(0)?.toUpperCase() || "S"
                     )}
                   </div>
-                </div>
-              </div>
-
-              {/* Info Grid */}
-              <div className="space-y-3">
-                <p className="text-xs font-semibold text-muted-foreground">{isHi ? "व्यक्तिगत जानकारी" : "Personal Info"}</p>
-                <div className="grid grid-cols-1 gap-2.5">
-                  {[
-                    { icon: BookOpen, label: isHi ? "कक्षा" : "Class Level", value: selectedStudent.class_level },
-                    { icon: Phone, label: isHi ? "फ़ोन" : "Phone", value: selectedStudent.phone },
-                    { icon: Phone, label: isHi ? "अभिभावक फ़ोन" : "Parent Phone", value: selectedStudent.parent_phone },
-                    { icon: School, label: isHi ? "स्कूल" : "School", value: selectedStudent.school },
-                    { icon: MapPin, label: isHi ? "जिला" : "District", value: selectedStudent.district },
-                    { icon: MapPin, label: isHi ? "राज्य" : "State", value: selectedStudent.state },
-                    { icon: Calendar, label: isHi ? "शामिल हुए" : "Joined", value: selectedStudent.created_at ? new Date(selectedStudent.created_at).toLocaleDateString("en-IN") : null },
-                  ].filter(item => item.value).map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2.5 p-2.5 bg-muted/50 rounded-lg">
-                      <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">{item.label}</p>
-                        <p className="text-xs font-medium text-foreground">{item.value}</p>
-                      </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">{selectedStudent.full_name || "—"}</h3>
+                    <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                      {selectedStudent.is_disabled ? (
+                        <Badge variant="destructive">{isHi ? "अक्षम" : "Disabled"}</Badge>
+                      ) : selectedStudent.is_verified ? (
+                        <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">{isHi ? "स्वीकृत" : "Approved"}</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20 animate-pulse">{isHi ? "लंबित" : "Pending"}</Badge>
+                      )}
+                      {selectedStudent.is_free_student && <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">{isHi ? "मुफ़्त छात्र" : "Free Student"}</Badge>}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                </motion.div>
               </div>
 
-              {/* Stats */}
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground mb-2">{isHi ? "गतिविधि" : "Activity"}</p>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-lg font-bold text-foreground">{selectedStudent.enrollCount}</p>
-                    <p className="text-[10px] text-muted-foreground">{isHi ? "कोर्स" : "Courses"}</p>
+              <div className="p-6 space-y-6">
+                {/* Academic Info */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "शैक्षणिक जानकारी" : "Academic Info"}</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <DetailRow icon={GraduationCap} label={isHi ? "कक्षा" : "Class Level"} value={selectedStudent.class_level ? `${isHi ? "कक्षा" : "Class"} ${selectedStudent.class_level}` : (isHi ? "अपडेट नहीं किया" : "Not updated")} />
+                    <DetailRow icon={BookOpen} label={isHi ? "बोर्ड" : "Board"} value={selectedStudent.board || (isHi ? "अपडेट नहीं किया" : "Not updated")} />
+                    <DetailRow icon={Award} label={isHi ? "भाषा" : "Preferred Language"} value={selectedStudent.language === "hindi" ? "हिंदी" : "English"} />
                   </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-lg font-bold text-foreground">{selectedStudent.testCount}</p>
-                    <p className="text-[10px] text-muted-foreground">{isHi ? "टेस्ट" : "Tests"}</p>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-lg font-bold text-foreground">{selectedStudent.avgScore != null ? `${selectedStudent.avgScore}%` : "—"}</p>
-                    <p className="text-[10px] text-muted-foreground">{isHi ? "औसत" : "Avg Score"}</p>
-                  </div>
-                </div>
-              </div>
+                </motion.div>
 
-              {/* Actions */}
-              <div className="space-y-2 pt-2">
-                {/* Approve / Revoke */}
-                {!selectedStudent.is_disabled && (
+                <Separator />
+
+                {/* Contact Info */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "संपर्क जानकारी" : "Contact Info"}</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <DetailRow icon={Phone} label={isHi ? "फ़ोन नंबर" : "Phone Number"} value={selectedStudent.phone} />
+                    <DetailRow icon={Phone} label={isHi ? "अभिभावक फ़ोन" : "Parent's Phone"} value={selectedStudent.parent_phone} />
+                  </div>
+                </motion.div>
+
+                <Separator />
+
+                {/* School & Location */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "स्कूल और स्थान" : "School & Location"}</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <DetailRow icon={School} label={isHi ? "स्कूल का नाम" : "School Name"} value={selectedStudent.school} />
+                    <DetailRow icon={MapPin} label={isHi ? "जिला" : "District"} value={selectedStudent.district} />
+                    <DetailRow icon={MapPin} label={isHi ? "राज्य" : "State"} value={selectedStudent.state} />
+                    <DetailRow icon={Calendar} label={isHi ? "शामिल हुए" : "Joined"} value={selectedStudent.created_at ? new Date(selectedStudent.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : null} />
+                  </div>
+                </motion.div>
+
+                <Separator />
+
+                {/* Activity Stats */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{isHi ? "गतिविधि सारांश" : "Activity Summary"}</p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {[
+                      { val: selectedStudent.enrollCount, label: isHi ? "कोर्स एनरोल" : "Enrolled Courses", icon: BookOpen, color: "text-primary" },
+                      { val: selectedStudent.testCount, label: isHi ? "टेस्ट दिए" : "Tests Taken", icon: Award, color: "text-amber-500" },
+                      { val: selectedStudent.avgScore != null ? `${selectedStudent.avgScore}%` : "—", label: isHi ? "औसत स्कोर" : "Avg Score", icon: GraduationCap, color: "text-emerald-500" },
+                      { val: selectedStudent.doubtCount, label: isHi ? "डाउट पूछे" : "Doubts Asked", icon: Users, color: "text-primary" },
+                    ].map((s, i) => (
+                      <motion.div key={s.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.05 }}
+                        className="text-center p-3 bg-muted/40 rounded-xl hover:bg-muted/60 transition-colors">
+                        <s.icon className={`w-5 h-5 mx-auto mb-1.5 ${s.color}`} />
+                        <p className="text-xl font-bold text-foreground">{s.val}</p>
+                        <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+
+                <Separator />
+
+                {/* Actions */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "कार्रवाई" : "Actions"}</p>
+
+                  {!selectedStudent.is_disabled && (
+                    <div className="flex gap-2">
+                      {!selectedStudent.is_verified ? (
+                        <Button onClick={() => handleVerify(selectedStudent.user_id, true)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-[1.02] transition-transform">
+                          <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve Student"}
+                        </Button>
+                      ) : (
+                        <Button variant="outline" onClick={() => handleVerify(selectedStudent.user_id, false)} className="flex-1 text-amber-600 border-amber-500/30 hover:bg-amber-500/10">
+                          <XCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृति हटाएँ" : "Revoke Approval"}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex gap-2">
-                    {!selectedStudent.is_verified ? (
-                      <Button onClick={() => handleVerify(selectedStudent.user_id, true)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
-                        <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve"}
+                    {!selectedStudent.is_disabled ? (
+                      <Button variant="outline" onClick={() => handleDisable(selectedStudent.user_id, true)} className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10">
+                        <Ban className="w-4 h-4 mr-1.5" /> {isHi ? "खाता अक्षम करें" : "Disable Account"}
                       </Button>
                     ) : (
-                      <Button variant="outline" onClick={() => handleVerify(selectedStudent.user_id, false)} className="flex-1 text-amber-600 border-amber-500/30 hover:bg-amber-500/10">
-                        <XCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृति हटाएँ" : "Revoke Approval"}
+                      <Button onClick={() => handleDisable(selectedStudent.user_id, false)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
+                        <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "खाता सक्रिय करें" : "Enable Account"}
                       </Button>
                     )}
                   </div>
-                )}
 
-                {/* Disable / Enable */}
-                <div className="flex gap-2">
-                  {!selectedStudent.is_disabled ? (
-                    <Button variant="outline" onClick={() => handleDisable(selectedStudent.user_id, true)} className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10">
-                      <Ban className="w-4 h-4 mr-1.5" /> {isHi ? "खाता अक्षम करें" : "Disable Account"}
-                    </Button>
-                  ) : (
-                    <Button onClick={() => handleDisable(selectedStudent.user_id, false)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
-                      <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "खाता सक्रिय करें" : "Enable Account"}
-                    </Button>
-                  )}
-                </div>
-
-                {/* Make teacher */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                      <Shield className="w-4 h-4 mr-1.5" /> {isHi ? "शिक्षक बनाएँ" : "Make Teacher"}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{isHi ? "क्या आप सुनिश्चित हैं?" : "Are you sure?"}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {isHi
-                          ? `${selectedStudent.full_name} को छात्र से शिक्षक बना दिया जाएगा।`
-                          : `${selectedStudent.full_name} will be changed from Student to Teacher.`}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{isHi ? "रद्द करें" : "Cancel"}</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleMakeTeacher(selectedStudent.user_id)}>
-                        {isHi ? "हाँ, बदलें" : "Yes, Change Role"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                        <Shield className="w-4 h-4 mr-1.5" /> {isHi ? "शिक्षक बनाएँ (भूमिका बदलें)" : "Make Teacher (Change Role)"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{isHi ? "क्या आप सुनिश्चित हैं?" : "Are you sure?"}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {isHi
+                            ? `${selectedStudent.full_name} को छात्र से शिक्षक बना दिया जाएगा।`
+                            : `${selectedStudent.full_name} will be changed from Student to Teacher.`}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{isHi ? "रद्द करें" : "Cancel"}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleMakeTeacher(selectedStudent.user_id)}>
+                          {isHi ? "हाँ, बदलें" : "Yes, Change Role"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </motion.div>
               </div>
             </div>
           )}
