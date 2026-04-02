@@ -33,6 +33,7 @@ const Auth = () => {
     role: "student" as "student" | "teacher",
     phone: "", parentPhone: "", school: "",
     classLevel: "", state: "", district: "",
+    qualification: "", subjectsTaught: "",
   });
 
   const isStudent = formData.role === "student";
@@ -54,6 +55,11 @@ const Auth = () => {
           return;
         }
         if (isStudent && (!formData.parentPhone || !formData.school || !formData.classLevel)) {
+          toast.error(t("auth.fillAllFields"));
+          setLoading(false);
+          return;
+        }
+        if (!isStudent && (!formData.qualification || !formData.subjectsTaught)) {
           toast.error(t("auth.fillAllFields"));
           setLoading(false);
           return;
@@ -81,6 +87,8 @@ const Auth = () => {
             class_level: isStudent ? formData.classLevel : null,
             state: formData.state,
             district: formData.district,
+            qualification: !isStudent ? formData.qualification : null,
+            subjects_taught: !isStudent ? formData.subjectsTaught : null,
           }).eq("user_id", user.id);
         }
 
@@ -174,6 +182,30 @@ const Auth = () => {
                             {CLASS_LEVELS.map((c) => <SelectItem key={c} value={c}>{t("auth.classLabel")} {c}</SelectItem>)}
                           </SelectContent>
                         </Select>
+                      </div>
+                    </>
+                  )}
+
+                  {!isStudent && (
+                    <>
+                      <div>
+                        <Label className="text-[13px] text-foreground">{t("auth.qualification") || "Qualification / Degree"} *</Label>
+                        <Select value={formData.qualification} onValueChange={(v) => setFormData({ ...formData, qualification: v })}>
+                          <SelectTrigger className="mt-1.5 h-9 text-[13px]"><SelectValue placeholder={t("auth.selectQualification") || "Select qualification"} /></SelectTrigger>
+                          <SelectContent>
+                            {["B.Ed", "M.Ed", "B.A", "M.A", "B.Sc", "M.Sc", "B.Tech", "M.Tech", "PhD", "D.El.Ed", "Other"].map((q) => (
+                              <SelectItem key={q} value={q}>{q}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-[13px] text-foreground">{t("auth.subjectsTaught") || "Subjects You Teach"} *</Label>
+                        <Input required value={formData.subjectsTaught} onChange={(e) => setFormData({ ...formData, subjectsTaught: e.target.value })} placeholder={t("auth.subjectsPlaceholder") || "e.g. Math, Science, Hindi"} className="mt-1.5 h-9 text-[13px]" />
+                      </div>
+                      <div>
+                        <Label className="text-[13px] text-foreground">{t("auth.school") || "School / Institution"}</Label>
+                        <Input value={formData.school} onChange={(e) => setFormData({ ...formData, school: e.target.value })} placeholder={t("auth.schoolPlaceholder")} className="mt-1.5 h-9 text-[13px]" />
                       </div>
                     </>
                   )}
