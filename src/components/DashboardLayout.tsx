@@ -15,11 +15,11 @@ import SearchBar from "@/components/SearchBar";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { role, profile, signOut } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isHi = language === "hi";
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isHi = useLanguage().language === "hi";
 
   const studentLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: t("sidebar.dashboard") },
