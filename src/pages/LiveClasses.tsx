@@ -130,9 +130,12 @@ const LiveClasses = () => {
       const teacherToolbar = [
         'microphone', 'camera', 'toggle-camera', 'desktop', 'fullscreen',
         'fodeviceselection', 'hangup', 'chat', 'raisehand',
-        'tileview', 'settings',
+        'tileview', 'settings', 'videoquality',
       ];
-      const studentToolbar = ['microphone', 'camera', 'toggle-camera', 'raisehand', 'chat', 'tileview', 'fullscreen'];
+      const studentToolbar = [
+        'microphone', 'camera', 'toggle-camera', 'raisehand', 'chat',
+        'tileview', 'fullscreen', 'videoquality',
+      ];
       const options: any = {
         roomName,
         parentNode: jitsiContainerRef.current,
@@ -152,23 +155,51 @@ const LiveClasses = () => {
           toolbarButtons: isTeacherOrAdmin ? teacherToolbar : studentToolbar,
           disableRemoteMute: !isTeacherOrAdmin,
           remoteVideoMenu: { disabled: !isTeacherOrAdmin },
-          // Performance: lower resolution to reduce lag
-          resolution: 480,
+          // HD Quality: 1080p @ 30fps for teacher, 720p receive for students
+          resolution: isTeacherOrAdmin ? 1080 : 720,
           constraints: {
-            video: { height: { ideal: 480, max: 720 }, width: { ideal: 640, max: 1280 } },
+            video: {
+              height: { ideal: isTeacherOrAdmin ? 1080 : 720, max: 1080, min: 360 },
+              width: { ideal: isTeacherOrAdmin ? 1920 : 1280, max: 1920 },
+              frameRate: { ideal: 30, max: 30, min: 15 },
+            },
           },
           enableLayerSuspension: true,
-          channelLastN: 4,
+          // Show more participants for better experience
+          channelLastN: isTeacherOrAdmin ? 8 : 6,
           p2p: { enabled: false },
           disableAudioLevels: true,
           enableNoisyMicDetection: false,
+          // Prefer H.264 for better quality/compatibility
+          preferH264: true,
+          disableH264: false,
+          // Quality settings
+          maxFullResolutionParticipants: 2,
+          videoQuality: {
+            disabledCodec: '',
+            preferredCodec: 'H264',
+            maxBitratesVideo: {
+              low: 200000,
+              standard: 500000,
+              high: 2500000,
+              ssHigh: 2500000,
+            },
+          },
+          // Adaptive last-n for better performance
+          adaptiveLastN: true,
+          startVideoMuted: !isTeacherOrAdmin ? 10 : undefined,
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false, SHOW_WATERMARK_FOR_GUESTS: false,
           TOOLBAR_ALWAYS_VISIBLE: isTeacherOrAdmin,
           DISABLE_JOIN_LEAVE_NOTIFICATIONS: !isTeacherOrAdmin,
-          FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? undefined : 80,
+          FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? 120 : 90,
           HIDE_INVITE_MORE_HEADER: true,
+          DEFAULT_BACKGROUND: '#0a0a0a',
+          OPTIMAL_BROWSERS: ['chrome', 'chromium', 'edge'],
+          VIDEO_QUALITY_LABEL_DISABLED: false,
+          MOBILE_APP_PROMO: false,
+          DISABLE_RINGING: true,
         },
       };
       jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("meet.jit.si", options);
@@ -185,7 +216,6 @@ const LiveClasses = () => {
       };
       jitsiApiRef.current.addEventListener('participantJoined', updateCount);
       jitsiApiRef.current.addEventListener('participantLeft', updateCount);
-      // Set initial count after a short delay
       setTimeout(updateCount, 3000);
     };
     if ((window as any).JitsiMeetExternalAPI) {
