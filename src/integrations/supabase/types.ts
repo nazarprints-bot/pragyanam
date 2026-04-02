@@ -496,6 +496,9 @@ export type Database = {
           school: string | null
           state: string | null
           subjects_taught: string | null
+          subscription_plan: string | null
+          trial_ends_at: string | null
+          trial_starts_at: string | null
           updated_at: string
           user_id: string
         }
@@ -520,6 +523,9 @@ export type Database = {
           school?: string | null
           state?: string | null
           subjects_taught?: string | null
+          subscription_plan?: string | null
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -544,6 +550,9 @@ export type Database = {
           school?: string | null
           state?: string | null
           subjects_taught?: string | null
+          subscription_plan?: string | null
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
           updated_at?: string
           user_id?: string
         }
