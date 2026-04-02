@@ -258,8 +258,8 @@ const CourseDetail = () => {
       const path = `${courseId}/${Date.now()}.${ext}`;
       const { error: uploadErr } = await supabase.storage.from("lesson-files").upload(path, videoFile);
       if (uploadErr) { toast.error("Video upload failed: " + uploadErr.message); setUploading(false); return; }
-      const { data: urlData } = supabase.storage.from("lesson-files").getPublicUrl(path);
-      finalVideoUrl = urlData.publicUrl;
+      const { data: urlData } = await supabase.storage.from("lesson-files").createSignedUrl(path, 3600);
+      finalVideoUrl = urlData?.signedUrl || "";
     }
     const { error } = await supabase.from("lessons").insert({
       chapter_id: chaps[0].id, title: lessonForm.title, title_hi: lessonForm.title_hi || "",
