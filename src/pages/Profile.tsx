@@ -125,6 +125,11 @@ const Profile = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
   const roleLabel = role === "admin" ? "Admin" : role === "teacher" ? "Teacher" : "Student";
   const isStudent = role === "student";
   const passedTests = testResults.filter((t) => (t.percentage || 0) >= 60);
