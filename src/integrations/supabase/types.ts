@@ -746,12 +746,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      teacher_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          district: string | null
+          full_name: string | null
+          school: string | null
+          state: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_test_questions_safe: {
+        Args: { _test_id: string }
+        Returns: {
+          id: string
+          marks: number
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question: string
+          question_type: string
+          sort_order: number
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      grade_and_submit_test: {
+        Args: { _answers: Json; _test_id: string; _time_taken_seconds: number }
+        Returns: Json
       }
       has_role: {
         Args: {
