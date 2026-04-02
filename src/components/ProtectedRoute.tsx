@@ -1,8 +1,16 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ShieldAlert, Clock, CreditCard } from "lucide-react";
+import { ShieldAlert, Clock, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -10,7 +18,70 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { user, role, profile, loading, signOut } = useAuth();
+  const { user, role, profile, loading, signOut, refetchProfile } = useAuth();
+  const [paying, setPaying] = useState(false);
+
+  const handlePayment = async () => {
+    setPaying(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not logged in");
+
+      const orderRes = await supabase.functions.invoke("create-razorpay-order", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (orderRes.error) throw new Error(orderRes.error.message);
+      const { order_id, key_id, amount } = orderRes.data;
+
+      const options = {
+        key: key_id,
+        amount,
+        currency: "INR",
+        name: "Pragyanam Academy",
+        description: "Monthly Subscription - ₹299/month",
+        order_id,
+        handler: async (response: any) => {
+          try {
+            const verifyRes = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              },
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            });
+
+            if (verifyRes.error) throw new Error(verifyRes.error.message);
+
+            toast.success("Payment successful! 🎉 Subscription activated.");
+            await refetchProfile();
+          } catch (err: any) {
+            toast.error("Payment verification failed: " + err.message);
+          }
+        },
+        prefill: {
+          email: user?.email || "",
+          name: profile?.full_name || "",
+          contact: profile?.phone || "",
+        },
+        theme: { color: "#F97316" },
+        modal: {
+          ondismiss: () => setPaying(false),
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (response: any) => {
+        toast.error("Payment failed: " + response.error.description);
+        setPaying(false);
+      });
+      rzp.open();
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+      setPaying(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -74,6 +145,17 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
                 All videos, live classes, tests, doubt support & certificates
               </p>
             </div>
+            <Button
+              onClick={handlePayment}
+              disabled={paying}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base py-3"
+            >
+              {paying ? (
+                <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processing...</>
+              ) : (
+                "Pay ₹299 Now"
+              )}
+            </Button>
             <Button variant="outline" onClick={signOut} className="mt-2">Logout</Button>
           </div>
         </div>
