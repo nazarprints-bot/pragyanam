@@ -292,14 +292,8 @@ const Auth = () => {
               </button>
             </p>
             </>
+            )}
           </div>
-        </motion.div>
-      </div>
-    </div>
-  );
-};
-
-export default Auth;
         </motion.div>
       </div>
     </div>
