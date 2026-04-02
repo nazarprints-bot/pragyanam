@@ -87,6 +87,8 @@ const Auth = () => {
             class_level: isStudent ? formData.classLevel : null,
             state: formData.state,
             district: formData.district,
+            qualification: !isStudent ? formData.qualification : null,
+            subjects_taught: !isStudent ? formData.subjectsTaught : null,
           }).eq("user_id", user.id);
         }
 
