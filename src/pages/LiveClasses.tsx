@@ -77,12 +77,6 @@ const LiveClasses = () => {
       toast.error(`Class is full (${classItem.max_students || MAX_STUDENTS_PER_CLASS} students max)`);
       return;
     }
-    // Increment student count for non-teachers
-    if (!isTeacherOrAdmin) {
-      await supabase.from("live_classes")
-        .update({ current_students: (classItem.current_students || 0) + 1 } as any)
-        .eq("id", classItem.id);
-    }
     setActiveRoom(classItem.room_id);
     setActiveClassId(classItem.id);
   };
