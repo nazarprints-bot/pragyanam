@@ -167,6 +167,10 @@ const Auth = () => {
               <span className="text-[15px] font-semibold text-foreground tracking-tight">Pragyanam</span>
             </div>
 
+            {showPlanSelection ? (
+              <PlanSelection onSelect={handlePlanSelect} loading={loading} />
+            ) : (
+            <>
             <h2 className="text-xl font-bold text-foreground tracking-tight mb-1">
               {isLogin ? t("auth.welcomeBack") : t("auth.createAccount")}
             </h2>
