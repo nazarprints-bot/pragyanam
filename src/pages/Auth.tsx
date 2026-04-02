@@ -59,6 +59,11 @@ const Auth = () => {
           setLoading(false);
           return;
         }
+        if (!isStudent && (!formData.qualification || !formData.subjectsTaught)) {
+          toast.error(t("auth.fillAllFields"));
+          setLoading(false);
+          return;
+        }
 
         const { error } = await supabase.auth.signUp({
           email: formData.email, password: formData.password,
