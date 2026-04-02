@@ -13,6 +13,7 @@ import {
   Award, ArrowRight,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import VideoPlayer from "@/components/VideoPlayer";
 
 const CourseDetail = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -191,22 +192,22 @@ const CourseDetail = () => {
     load();
   }, [courseId, user]);
 
-  // Mark lesson as completed
+  // Mark lesson as completed - only called when video is actually watched (90%+)
   const markLessonComplete = async (lessonId: string) => {
     if (!user) return;
-    // Upsert lesson progress
+    if (lessonProgress[lessonId]) return; // Already completed
+    
     const { error } = await supabase.from("lesson_progress").upsert(
       { user_id: user.id, lesson_id: lessonId, is_completed: true, completed_at: new Date().toISOString() },
       { onConflict: "user_id,lesson_id" }
     );
     if (error) {
-      // Try insert if upsert fails
       await supabase.from("lesson_progress").insert({
         user_id: user.id, lesson_id: lessonId, is_completed: true, completed_at: new Date().toISOString(),
       });
     }
     setLessonProgress(prev => ({ ...prev, [lessonId]: true }));
-    toast.success("Lesson completed! ✓");
+    toast.success("Lesson completed! ✓ पाठ पूरा हुआ!");
 
     // Update enrollment progress
     const completedCount = Object.values({ ...lessonProgress, [lessonId]: true }).filter(Boolean).length;
@@ -217,7 +218,18 @@ const CourseDetail = () => {
         .update({ progress: pct })
         .eq("user_id", user.id).eq("course_id", courseId);
     }
+  };
 
+  // Handle video progress tracking
+  const handleVideoProgress = async (lessonId: string, percent: number) => {
+    if (!user) return;
+    // Save progress position periodically (every ~10%)
+    if (percent % 10 === 0 || percent >= 90) {
+      await supabase.from("lesson_progress").upsert(
+        { user_id: user.id, lesson_id: lessonId, last_position: percent, is_completed: percent >= 90, ...(percent >= 90 ? { completed_at: new Date().toISOString() } : {}) },
+        { onConflict: "user_id,lesson_id" }
+      ).then(() => {});
+    }
   };
 
 
@@ -603,13 +615,15 @@ const CourseDetail = () => {
             </form>
           )}
 
-          {activeVideo && (
-            <div className="mb-4 rounded-xl overflow-hidden border border-border bg-black aspect-video">
-              {activeVideo.includes("youtube.com") || activeVideo.includes("youtu.be") ? (
-                <iframe src={getEmbedUrl(activeVideo)!} className="w-full h-full" allowFullScreen title="Video" />
-              ) : (
-                <video src={activeVideo} controls className="w-full h-full" />
-              )}
+          {activeVideo && activeLessonId && (
+            <div className="mb-4">
+              <VideoPlayer
+                url={activeVideo}
+                lessonId={activeLessonId}
+                durationMinutes={lessons.find(l => l.id === activeLessonId)?.duration_minutes}
+                onProgress={handleVideoProgress}
+                onComplete={markLessonComplete}
+              />
             </div>
           )}
 
@@ -646,15 +660,7 @@ const CourseDetail = () => {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {lesson.duration_minutes && <span className="text-xs text-muted-foreground">{lesson.duration_minutes} min</span>}
-                      {!isCompleted && isEnrolled && role === "student" && (
-                        <Button
-                          size="sm" variant="ghost"
-                          className="h-7 text-xs text-primary"
-                          onClick={(e) => { e.stopPropagation(); markLessonComplete(lesson.id); }}
-                        >
-                          <CheckCircle className="w-3 h-3 mr-1" /> Done
-                        </Button>
-                      )}
+                      {isCompleted && <span className="text-xs text-primary font-medium">✅</span>}
                       {lesson.video_url ? <Video className="w-4 h-4 text-primary" /> : <FileText className="w-4 h-4 text-muted-foreground" />}
                       {canManage && (
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); deleteLesson(lesson.id); }}>
