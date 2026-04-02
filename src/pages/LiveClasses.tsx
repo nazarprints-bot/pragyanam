@@ -3,11 +3,61 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import LiveChatSidebar from "@/components/LiveChatSidebar";
-import { Video, Calendar, Clock, Users, Play, X, Trash2, Upload } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, X, Trash2, Maximize2, Minimize2, Hand, Mic, MicOff, Camera, CameraOff, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MAX_STUDENTS_PER_CLASS = 75;
+
+// Elapsed timer component
+const ElapsedTimer = ({ startTime }: { startTime: string }) => {
+  const [elapsed, setElapsed] = useState("");
+  useEffect(() => {
+    const update = () => {
+      const diff = Math.max(0, Math.floor((Date.now() - new Date(startTime).getTime()) / 1000));
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      setElapsed(h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`);
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [startTime]);
+  return <span className="font-mono text-xs tabular-nums">{elapsed}</span>;
+};
+
+// Countdown to class start
+const CountdownTimer = ({ scheduledAt }: { scheduledAt: string }) => {
+  const [text, setText] = useState("");
+  useEffect(() => {
+    const update = () => {
+      const diff = Math.max(0, Math.floor((new Date(scheduledAt).getTime() - Date.now()) / 1000));
+      if (diff <= 0) { setText("Starting soon"); return; }
+      const d = Math.floor(diff / 86400);
+      const h = Math.floor((diff % 86400) / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      if (d > 0) setText(`${d}d ${h}h`);
+      else if (h > 0) setText(`${h}h ${m}m`);
+      else setText(`${m}m`);
+    };
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, [scheduledAt]);
+  return <span className="text-xs font-semibold text-primary">{text}</span>;
+};
+
+// Participant join notification toast
+const ParticipantToast = ({ name, action }: { name: string; action: "joined" | "left" }) => (
+  <div className="flex items-center gap-2">
+    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${action === "joined" ? "bg-emerald-500" : "bg-muted-foreground"}`}>
+      {name?.charAt(0)?.toUpperCase() || "?"}
+    </div>
+    <span className="text-sm"><b>{name}</b> {action === "joined" ? "joined" : "left"}</span>
+  </div>
+);
 
 const LiveClasses = () => {
   const { user, role, profile } = useAuth();
@@ -16,24 +66,18 @@ const LiveClasses = () => {
   const [loading, setLoading] = useState(true);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(true);
 
   const fetchClasses = async () => {
     const { data, error } = await supabase
-      .from("live_classes")
-      .select("*")
-      .order("scheduled_at", { ascending: true });
-
-    if (error) {
-      toast.error("Failed to load classes: " + error.message);
-    } else {
+      .from("live_classes").select("*").order("scheduled_at", { ascending: true });
+    if (error) { toast.error("Failed to load classes: " + error.message); }
+    else {
       setClasses(data || []);
-      // Fetch teacher profiles for all unique teacher_ids
       const teacherIds = [...new Set((data || []).map((c: any) => c.teacher_id))];
       if (teacherIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, full_name, avatar_url")
-          .in("user_id", teacherIds);
+        const { data: profiles } = await supabase.from("profiles")
+          .select("user_id, full_name, avatar_url").in("user_id", teacherIds);
         if (profiles) {
           const map: Record<string, any> = {};
           profiles.forEach((p: any) => { map[p.user_id] = p; });
@@ -46,33 +90,23 @@ const LiveClasses = () => {
 
   useEffect(() => {
     fetchClasses();
-    const channel = supabase
-      .channel("live_classes_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "live_classes" }, () => {
-        fetchClasses();
-      })
+    const channel = supabase.channel("live_classes_changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "live_classes" }, () => fetchClasses())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-
-
-
   const handleStartClass = async (classItem: any) => {
-    const { error } = await supabase
-      .from("live_classes")
-      .update({ status: "live" } as any)
-      .eq("id", classItem.id)
-      .eq("teacher_id", user?.id || "");
+    const { error } = await supabase.from("live_classes")
+      .update({ status: "live" } as any).eq("id", classItem.id).eq("teacher_id", user?.id || "");
     if (error) { toast.error("Failed to start class: " + error.message); return; }
-    toast.success("Class started");
+    toast.success("🔴 Class is now LIVE!");
     await fetchClasses();
     setActiveRoom(classItem.room_id);
     setActiveClassId(classItem.id);
   };
 
   const handleJoinClass = async (classItem: any) => {
-    // Check student limit
     if (!isTeacherOrAdmin && classItem.current_students >= (classItem.max_students || MAX_STUDENTS_PER_CLASS)) {
       toast.error(`Class is full (${classItem.max_students || MAX_STUDENTS_PER_CLASS} students max)`);
       return;
@@ -90,7 +124,7 @@ const LiveClasses = () => {
   const handleEndClass = async (classItem: any) => {
     const { error } = await supabase.from("live_classes").delete()
       .eq("id", classItem.id).eq("teacher_id", user?.id || "");
-    if (error) { toast.error("Failed to end class: " + error.message); return; }
+    if (error) { toast.error("Failed: " + error.message); return; }
     destroyJitsi();
     setActiveRoom(null);
     setActiveClassId(null);
@@ -101,7 +135,7 @@ const LiveClasses = () => {
   const handleDeleteClass = async (classItem: any) => {
     const { error } = await supabase.from("live_classes").delete()
       .eq("id", classItem.id).eq("teacher_id", user?.id || "");
-    if (error) { toast.error("Failed to delete class: " + error.message); return; }
+    if (error) { toast.error("Failed: " + error.message); return; }
     toast.success("Class cancelled");
     await fetchClasses();
   };
@@ -130,11 +164,12 @@ const LiveClasses = () => {
       const teacherToolbar = [
         'microphone', 'camera', 'toggle-camera', 'desktop', 'fullscreen',
         'fodeviceselection', 'hangup', 'chat', 'raisehand',
-        'tileview', 'settings', 'videoquality',
+        'tileview', 'settings', 'videoquality', 'recording',
+        'participants-pane', 'noisesuppression',
       ];
       const studentToolbar = [
         'microphone', 'camera', 'toggle-camera', 'raisehand', 'chat',
-        'tileview', 'fullscreen', 'videoquality',
+        'tileview', 'fullscreen', 'videoquality', 'select-background',
       ];
       const options: any = {
         roomName,
@@ -150,12 +185,12 @@ const LiveClasses = () => {
           requireDisplayName: false, enableWelcomePage: false, disableDeepLinking: true,
           disableModeratorIndicator: !isTeacherOrAdmin,
           hideConferenceSubject: true,
-          hideConferenceTimer: !isTeacherOrAdmin,
+          hideConferenceTimer: false,
           notifications: isTeacherOrAdmin ? undefined : [],
           toolbarButtons: isTeacherOrAdmin ? teacherToolbar : studentToolbar,
           disableRemoteMute: !isTeacherOrAdmin,
           remoteVideoMenu: { disabled: !isTeacherOrAdmin },
-          // HD Quality: 1080p @ 30fps for teacher, 720p receive for students
+          // HD Quality: 1080p @ 30fps
           resolution: isTeacherOrAdmin ? 1080 : 720,
           constraints: {
             video: {
@@ -165,15 +200,12 @@ const LiveClasses = () => {
             },
           },
           enableLayerSuspension: true,
-          // Show more participants for better experience
-          channelLastN: isTeacherOrAdmin ? 8 : 6,
+          channelLastN: isTeacherOrAdmin ? 10 : 6,
           p2p: { enabled: false },
           disableAudioLevels: true,
           enableNoisyMicDetection: false,
-          // Prefer H.264 for better quality/compatibility
           preferH264: true,
           disableH264: false,
-          // Quality settings
           maxFullResolutionParticipants: 2,
           videoQuality: {
             disabledCodec: '',
@@ -185,39 +217,70 @@ const LiveClasses = () => {
               ssHigh: 2500000,
             },
           },
-          // Adaptive last-n for better performance
           adaptiveLastN: true,
           startVideoMuted: !isTeacherOrAdmin ? 10 : undefined,
+          // Better experience
+          enableClosePage: false,
+          enableInsecureRoomNameWarning: false,
+          enableNoAudioDetection: true,
+          enableNoiseSuppression: true,
+          disableSelfView: false,
+          disableSelfViewSettings: false,
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false, SHOW_WATERMARK_FOR_GUESTS: false,
-          TOOLBAR_ALWAYS_VISIBLE: isTeacherOrAdmin,
-          DISABLE_JOIN_LEAVE_NOTIFICATIONS: !isTeacherOrAdmin,
-          FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? 120 : 90,
+          TOOLBAR_ALWAYS_VISIBLE: true,
+          DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
+          FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? 140 : 100,
           HIDE_INVITE_MORE_HEADER: true,
           DEFAULT_BACKGROUND: '#0a0a0a',
-          OPTIMAL_BROWSERS: ['chrome', 'chromium', 'edge'],
+          OPTIMAL_BROWSERS: ['chrome', 'chromium', 'edge', 'safari'],
           VIDEO_QUALITY_LABEL_DISABLED: false,
           MOBILE_APP_PROMO: false,
           DISABLE_RINGING: true,
+          TOOLBAR_TIMEOUT: 4000,
+          DEFAULT_REMOTE_DISPLAY_NAME: 'Student',
+          GENERATE_ROOMNAMES_ON_WELCOME_PAGE: false,
+          RECENT_LIST_ENABLED: false,
         },
       };
       jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("meet.jit.si", options);
 
-      // Track participant count in real-time
+      // Track participant count + show join/leave toasts for teacher
       const updateCount = () => {
         const count = jitsiApiRef.current?.getNumberOfParticipants?.() || 0;
         if (activeClassId) {
           supabase.from("live_classes")
             .update({ current_students: count } as any)
-            .eq("id", activeClassId)
-            .then(() => {});
+            .eq("id", activeClassId).then(() => {});
         }
       };
-      jitsiApiRef.current.addEventListener('participantJoined', updateCount);
-      jitsiApiRef.current.addEventListener('participantLeft', updateCount);
+
+      jitsiApiRef.current.addEventListener('participantJoined', (e: any) => {
+        updateCount();
+        if (isTeacherOrAdmin) {
+          toast(<ParticipantToast name={e.displayName || "Student"} action="joined" />, { duration: 2000 });
+        }
+      });
+      jitsiApiRef.current.addEventListener('participantLeft', (e: any) => {
+        updateCount();
+        if (isTeacherOrAdmin) {
+          toast(<ParticipantToast name={e.displayName || "Student"} action="left" />, { duration: 2000 });
+        }
+      });
+
+      // Hand raise notification for teacher
+      if (isTeacherOrAdmin) {
+        jitsiApiRef.current.addEventListener('raiseHandUpdated', (e: any) => {
+          if (e.handRaised) {
+            toast(`✋ ${e.participantId ? 'A student' : 'Someone'} raised their hand!`, { duration: 4000 });
+          }
+        });
+      }
+
       setTimeout(updateCount, 3000);
     };
+
     if ((window as any).JitsiMeetExternalAPI) {
       loadAndInit();
     } else {
@@ -230,8 +293,7 @@ const LiveClasses = () => {
     return () => destroyJitsi();
   }, [activeRoom, activeClassId, isTeacherOrAdmin, profile, user, destroyJitsi]);
 
-  // ═══════════════ ACTIVE CLASS VIEW ═══════════════
-  // Fullscreen toggle for mobile
+  // Fullscreen
   const [isFullscreen, setIsFullscreen] = useState(false);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -239,7 +301,6 @@ const LiveClasses = () => {
     try {
       if (!document.fullscreenElement) {
         await videoWrapperRef.current?.requestFullscreen();
-        // Lock to landscape on mobile for better viewing
         try { await (screen.orientation as any)?.lock?.('landscape'); } catch {}
         setIsFullscreen(true);
       } else {
@@ -256,83 +317,124 @@ const LiveClasses = () => {
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
+  // ═══════════════ ACTIVE CLASS VIEW ═══════════════
   if (activeRoom && activeClassId) {
     const activeClass = classes.find((c) => c.id === activeClassId);
     const teacher = teacherProfiles[activeClass?.teacher_id];
+    const studentCount = activeClass?.current_students || 0;
+    const maxStudents = activeClass?.max_students || 75;
+    const fillPercent = Math.min(100, Math.round((studentCount / maxStudents) * 100));
+
     return (
       <DashboardLayout>
         <div className="flex flex-col h-[calc(100vh-64px)]">
+          {/* Top control bar */}
+          {!isFullscreen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="px-3 sm:px-4 py-2 bg-card/95 backdrop-blur-md border-b border-border flex items-center justify-between gap-2 z-10"
+            >
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                {/* Live indicator */}
+                <div className="flex items-center gap-1.5 bg-destructive/10 border border-destructive/20 text-destructive px-2 py-1 rounded-full">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive" />
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Live</span>
+                </div>
+                <h1 className="text-sm sm:text-base font-bold text-foreground truncate max-w-[140px] sm:max-w-none">
+                  {activeClass?.title || "Live Class"}
+                </h1>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                {/* Elapsed timer */}
+                {activeClass?.updated_at && (
+                  <div className="hidden sm:flex items-center gap-1 text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                    <Clock className="w-3 h-3" />
+                    <ElapsedTimer startTime={activeClass.updated_at} />
+                  </div>
+                )}
+                {/* Student count with progress bar */}
+                <div className="flex items-center gap-1.5 bg-muted px-2 py-1 rounded-full">
+                  <Users className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs font-medium text-foreground">{studentCount}</span>
+                  <span className="text-[10px] text-muted-foreground">/{maxStudents}</span>
+                  <div className="hidden sm:block w-12 h-1.5 bg-muted-foreground/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${fillPercent}%` }} />
+                  </div>
+                </div>
+                {/* Toggle chat */}
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowChat(!showChat)}
+                  title={showChat ? "Hide Chat" : "Show Chat"}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                </Button>
+                {isTeacherOrAdmin && activeClass?.teacher_id === user?.id && (
+                  <Button variant="destructive" size="sm" onClick={() => handleEndClass(activeClass)} className="text-xs h-8 gap-1">
+                    <X className="w-3 h-3" /> End
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" onClick={handleLeaveClass} className="text-xs h-8">Leave</Button>
+              </div>
+            </motion.div>
+          )}
+
           <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+            {/* Video area */}
             <div className="flex-1 flex flex-col min-w-0">
               <div ref={videoWrapperRef} className="relative w-full bg-black flex-1">
                 <div ref={jitsiContainerRef} className="absolute inset-0 w-full h-full" />
-                {/* Fullscreen button overlay */}
-                <button
-                  onClick={toggleFullscreen}
-                  className="absolute top-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white rounded-lg p-2 transition-colors backdrop-blur-sm"
-                  title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                {/* Fullscreen toggle */}
+                <button onClick={toggleFullscreen}
+                  className="absolute top-3 right-3 z-10 bg-black/50 hover:bg-black/70 text-white rounded-lg p-2 transition-all backdrop-blur-sm group"
                 >
-                  {isFullscreen ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                  )}
+                  {isFullscreen ? <Minimize2 className="w-5 h-5 group-hover:scale-110 transition-transform" /> : <Maximize2 className="w-5 h-5 group-hover:scale-110 transition-transform" />}
                 </button>
-                {/* HD quality badge */}
-                <div className="absolute top-3 left-3 z-10 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm">
-                  HD
+                {/* HD badge */}
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
+                  <span className="bg-emerald-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">HD</span>
+                  {activeClass?.updated_at && (
+                    <span className="sm:hidden bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5" />
+                      <ElapsedTimer startTime={activeClass.updated_at} />
+                    </span>
+                  )}
                 </div>
               </div>
-              {/* Info bar - hidden in fullscreen */}
-              {!isFullscreen && (
-                <div className="px-4 py-3 bg-card border-b border-border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="relative flex h-2.5 w-2.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive" />
-                        </span>
-                        <span className="text-xs font-bold text-destructive uppercase tracking-wide">Live</span>
-                      </div>
-                      <h1 className="text-base lg:text-lg font-bold text-foreground truncate">
-                        {activeClass?.title || "Live Class"}
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {activeClass?.current_students != null && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Users className="w-3 h-3" /> {activeClass.current_students}/{activeClass.max_students || 75}
-                        </span>
-                      )}
-                      {isTeacherOrAdmin && activeClass?.teacher_id === user?.id && (
-                        <Button variant="destructive" size="sm" onClick={() => handleEndClass(activeClass)} className="text-xs">
-                          <X className="w-3 h-3 mr-1" /> End
-                        </Button>
-                      )}
-                      <Button variant="outline" size="sm" onClick={handleLeaveClass} className="text-xs">Leave</Button>
-                    </div>
+
+              {/* Teacher info bar below video */}
+              {!isFullscreen && teacher && (
+                <div className="px-4 py-2.5 bg-card border-b border-border flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-white overflow-hidden ring-2 ring-primary/20">
+                    {teacher.avatar_url ? (
+                      <img src={teacher.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : teacher.full_name?.charAt(0)?.toUpperCase() || "T"}
                   </div>
-                  {teacher && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-[11px] font-bold text-white overflow-hidden">
-                        {teacher.avatar_url ? (
-                          <img src={teacher.avatar_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          teacher.full_name?.charAt(0)?.toUpperCase() || "T"
-                        )}
-                      </div>
-                      <span className="text-sm font-medium text-foreground">{teacher.full_name}</span>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{teacher.full_name}</p>
+                    <p className="text-[11px] text-muted-foreground">Teacher</p>
+                  </div>
                 </div>
               )}
             </div>
-            {!isFullscreen && (
-              <div className="h-[320px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-l border-border">
-                <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
-              </div>
-            )}
+
+            {/* Chat sidebar */}
+            <AnimatePresence>
+              {showChat && !isFullscreen && (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "auto", opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-[280px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-l border-border overflow-hidden"
+                >
+                  <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </DashboardLayout>
@@ -342,129 +444,183 @@ const LiveClasses = () => {
   // ═══════════════ CLASS LISTING ═══════════════
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
-              <Video className="w-6 h-6 text-navy dark:text-gold" /> Live Classes
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {isTeacherOrAdmin ? "Manage live classes from your courses" : "Join live classes with your teachers"}
-            </p>
-          </div>
+      <div className="space-y-6 pb-16 lg:pb-0">
+        <div>
+          <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
+            <Video className="w-6 h-6 text-primary" /> Live Classes
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {isTeacherOrAdmin ? "Manage and start your live classes" : "Join live interactive classes"}
+          </p>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
           <>
-            {/* Live Now */}
+            {/* ────── LIVE NOW ────── */}
             {liveClasses.length > 0 && (
               <div className="space-y-3">
-                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <span className="relative flex h-3 w-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive" />
                   </span>
-                  Live Now
-                </h2>
+                  <h2 className="text-lg font-bold text-foreground">Live Now</h2>
+                  <span className="text-xs bg-destructive/10 text-destructive font-semibold px-2 py-0.5 rounded-full">{liveClasses.length}</span>
+                </div>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {liveClasses.map((c) => {
+                  {liveClasses.map((c, i) => {
                     const teacher = teacherProfiles[c.teacher_id];
                     const isFull = (c.current_students || 0) >= (c.max_students || MAX_STUDENTS_PER_CLASS);
+                    const isOwner = isTeacherOrAdmin && c.teacher_id === user?.id;
                     return (
-                      <div key={c.id}
-                        className={`group bg-card rounded-xl overflow-hidden border shadow-lg hover:shadow-xl transition-all ${isFull && !isTeacherOrAdmin ? "opacity-60 border-border" : "border-destructive/20 hover:border-destructive/40 cursor-pointer"}`}
-                        onClick={() => !(isTeacherOrAdmin && c.teacher_id === user?.id) && !isFull && handleJoinClass(c)}
+                      <motion.div
+                        key={c.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className={`group relative bg-card rounded-2xl overflow-hidden border-2 shadow-lg hover:shadow-xl transition-all ${
+                          isFull && !isTeacherOrAdmin
+                            ? "opacity-60 border-border"
+                            : "border-destructive/30 hover:border-destructive/50 cursor-pointer"
+                        }`}
+                        onClick={() => !isOwner && !isFull && handleJoinClass(c)}
                       >
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-destructive/5 to-transparent pointer-events-none" />
                         {/* Thumbnail */}
-                        <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center overflow-hidden">
+                        <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/30 overflow-hidden">
                           {c.thumbnail_url ? (
-                            <img src={c.thumbnail_url} alt={c.title} className="w-full h-full object-cover" />
+                            <img src={c.thumbnail_url} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
-                            <Video className="w-12 h-12 text-muted-foreground/20" />
+                            <div className="w-full h-full bg-gradient-to-br from-destructive/10 to-primary/10 flex items-center justify-center">
+                              <Video className="w-14 h-14 text-muted-foreground/15" />
+                            </div>
                           )}
-                          <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-destructive text-white text-[10px] font-bold px-2 py-1 rounded">
+                          {/* Overlays */}
+                          <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-destructive text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
                             <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> LIVE
                           </div>
-                          <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                            <span className="bg-black/70 text-white text-[10px] px-2 py-0.5 rounded flex items-center gap-1">
+                          <div className="absolute top-3 right-3 bg-emerald-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">HD</div>
+                          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                            <span className="bg-black/70 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-lg flex items-center gap-1.5">
                               <Users className="w-3 h-3" /> {c.current_students || 0}/{c.max_students || 75}
                             </span>
-                            <span className="bg-black/70 text-white text-[10px] px-2 py-0.5 rounded">{c.duration_minutes} min</span>
+                            <span className="bg-black/70 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-lg flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {c.duration_minutes}min
+                            </span>
                           </div>
-                          {!isFull && (
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                              <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                          {/* Play hover */}
+                          {!isFull && !isOwner && (
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100">
+                                <Play className="w-8 h-8 text-white fill-white ml-1" />
+                              </div>
                             </div>
                           )}
                         </div>
-                        <div className="p-3">
-                          <h3 className="font-semibold text-foreground text-sm truncate">{c.title}</h3>
-                          {/* Teacher info */}
+                        <div className="p-4 relative">
+                          <h3 className="font-bold text-foreground text-base truncate">{c.title}</h3>
+                          {c.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{c.description}</p>}
                           {teacher && (
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary overflow-hidden">
+                            <div className="flex items-center gap-2 mt-2.5">
+                              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary overflow-hidden ring-1 ring-primary/10">
                                 {teacher.avatar_url ? (
                                   <img src={teacher.avatar_url} alt="" className="w-full h-full object-cover" />
                                 ) : teacher.full_name?.charAt(0)?.toUpperCase() || "T"}
                               </div>
-                              <span className="text-xs text-muted-foreground">{teacher.full_name}</span>
+                              <span className="text-xs font-medium text-muted-foreground">{teacher.full_name}</span>
                             </div>
                           )}
-                          {isTeacherOrAdmin && c.teacher_id === user?.id ? (
-                            <div className="flex gap-2 mt-2">
-                              <Button onClick={(e) => { e.stopPropagation(); handleJoinClass(c); }} className="flex-1 bg-destructive hover:bg-destructive/90 text-white" size="sm">
-                                <Play className="w-3 h-3 mr-1" /> Go Live
+                          {isOwner ? (
+                            <div className="flex gap-2 mt-3">
+                              <Button onClick={(e) => { e.stopPropagation(); handleJoinClass(c); }}
+                                className="flex-1 bg-destructive hover:bg-destructive/90 text-white" size="sm">
+                                <Monitor className="w-3.5 h-3.5 mr-1" /> Go Live
                               </Button>
-                              <Button variant="outline" onClick={(e) => { e.stopPropagation(); handleEndClass(c); }} size="sm">End</Button>
+                              <Button variant="outline" onClick={(e) => { e.stopPropagation(); handleEndClass(c); }} size="sm">
+                                <X className="w-3.5 h-3.5" />
+                              </Button>
                             </div>
                           ) : isFull ? (
-                            <p className="text-xs text-destructive mt-1 font-medium">Class is full</p>
+                            <p className="text-xs text-destructive mt-2 font-semibold">Class is full</p>
                           ) : (
-                            <p className="text-xs text-muted-foreground mt-1">Tap to join</p>
+                            <p className="text-[11px] text-primary mt-2 font-medium">Tap to join class →</p>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Upcoming */}
+            {/* ────── UPCOMING ────── */}
             <div className="space-y-3">
-              <h2 className="text-lg font-bold text-foreground">📅 Upcoming</h2>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4.5 h-4.5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground">Upcoming Classes</h2>
+                {upcomingClasses.length > 0 && (
+                  <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">{upcomingClasses.length}</span>
+                )}
+              </div>
               {upcomingClasses.length === 0 ? (
-                <div className="text-center py-12 bg-card rounded-2xl border border-border">
-                  <Calendar className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-sm text-muted-foreground">No upcoming classes</p>
+                <div className="text-center py-16 bg-card rounded-2xl border border-border">
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-muted flex items-center justify-center mb-4">
+                    <Calendar className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground mb-1">No Upcoming Classes</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {isTeacherOrAdmin ? "Schedule a class from your course page" : "Check back later for new classes"}
+                  </p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {upcomingClasses.map((c) => {
+                  {upcomingClasses.map((c, i) => {
                     const teacher = teacherProfiles[c.teacher_id];
+                    const isOwner = isTeacherOrAdmin && c.teacher_id === user?.id;
+                    const scheduledDate = new Date(c.scheduled_at);
+                    const isToday = new Date().toDateString() === scheduledDate.toDateString();
                     return (
-                      <div key={c.id} className="bg-card rounded-xl overflow-hidden border border-border hover:shadow-card hover:border-gold/20 transition-all">
+                      <motion.div
+                        key={c.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                        className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg hover:border-primary/30 transition-all group"
+                      >
                         {/* Thumbnail */}
-                        <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center overflow-hidden">
+                        <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/30 overflow-hidden">
                           {c.thumbnail_url ? (
-                            <img src={c.thumbnail_url} alt={c.title} className="w-full h-full object-cover" />
+                            <img src={c.thumbnail_url} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
-                            <Video className="w-10 h-10 text-muted-foreground/20" />
+                            <div className="w-full h-full bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
+                              <Video className="w-10 h-10 text-muted-foreground/15" />
+                            </div>
                           )}
-                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded">
-                            {c.duration_minutes} min
+                          {/* Date badge */}
+                          <div className={`absolute top-3 left-3 text-[10px] font-bold px-2 py-1 rounded-lg backdrop-blur-sm ${
+                            isToday ? "bg-primary text-primary-foreground" : "bg-black/60 text-white"
+                          }`}>
+                            {isToday ? "TODAY" : scheduledDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                          </div>
+                          {/* Countdown */}
+                          <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-lg">
+                            <CountdownTimer scheduledAt={c.scheduled_at} />
+                          </div>
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">
+                            {c.duration_minutes}min
                           </div>
                         </div>
-                        <div className="p-3">
-                          <h3 className="font-semibold text-foreground text-sm">{c.title}</h3>
+                        <div className="p-4">
+                          <h3 className="font-bold text-foreground text-sm">{c.title}</h3>
                           {c.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{c.description}</p>}
                           {teacher && (
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary overflow-hidden">
+                            <div className="flex items-center gap-2 mt-2">
+                              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary overflow-hidden">
                                 {teacher.avatar_url ? (
                                   <img src={teacher.avatar_url} alt="" className="w-full h-full object-cover" />
                                 ) : teacher.full_name?.charAt(0)?.toUpperCase() || "T"}
@@ -472,36 +628,47 @@ const LiveClasses = () => {
                               <span className="text-xs text-muted-foreground">{teacher.full_name}</span>
                             </div>
                           )}
-                          <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-2">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(c.scheduled_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                            </span>
+                          <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-2.5">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {new Date(c.scheduled_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                              {scheduledDate.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                             </span>
                             <span className="flex items-center gap-1">
                               <Users className="w-3 h-3" /> Max {c.max_students || 75}
                             </span>
                           </div>
-                          {isTeacherOrAdmin && c.teacher_id === user?.id && (
+                          {isOwner && (
                             <div className="flex gap-2 mt-3">
-                              <Button onClick={() => handleStartClass(c)} className="flex-1 gradient-navy text-white border-0 hover:opacity-90" size="sm">
-                                <Play className="w-3 h-3 mr-1" /> Start
+                              <Button onClick={() => handleStartClass(c)} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" size="sm">
+                                <Play className="w-3.5 h-3.5 mr-1" /> Start
                               </Button>
                               <Button variant="destructive" size="sm" onClick={() => handleDeleteClass(c)}>
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </Button>
                             </div>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
               )}
             </div>
+
+            {/* Empty state when nothing at all */}
+            {liveClasses.length === 0 && upcomingClasses.length === 0 && (
+              <div className="text-center py-20 bg-card rounded-2xl border border-border">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/5 flex items-center justify-center mb-4">
+                  <Video className="w-10 h-10 text-primary/30" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-1">No Live Classes</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  {isTeacherOrAdmin
+                    ? "Go to your course page and schedule a live class for your students."
+                    : "Your teachers haven't scheduled any live classes yet. Check back later!"}
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
