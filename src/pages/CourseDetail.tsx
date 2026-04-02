@@ -192,22 +192,22 @@ const CourseDetail = () => {
     load();
   }, [courseId, user]);
 
-  // Mark lesson as completed
+  // Mark lesson as completed - only called when video is actually watched (90%+)
   const markLessonComplete = async (lessonId: string) => {
     if (!user) return;
-    // Upsert lesson progress
+    if (lessonProgress[lessonId]) return; // Already completed
+    
     const { error } = await supabase.from("lesson_progress").upsert(
       { user_id: user.id, lesson_id: lessonId, is_completed: true, completed_at: new Date().toISOString() },
       { onConflict: "user_id,lesson_id" }
     );
     if (error) {
-      // Try insert if upsert fails
       await supabase.from("lesson_progress").insert({
         user_id: user.id, lesson_id: lessonId, is_completed: true, completed_at: new Date().toISOString(),
       });
     }
     setLessonProgress(prev => ({ ...prev, [lessonId]: true }));
-    toast.success("Lesson completed! ✓");
+    toast.success("Lesson completed! ✓ पाठ पूरा हुआ!");
 
     // Update enrollment progress
     const completedCount = Object.values({ ...lessonProgress, [lessonId]: true }).filter(Boolean).length;
@@ -218,7 +218,18 @@ const CourseDetail = () => {
         .update({ progress: pct })
         .eq("user_id", user.id).eq("course_id", courseId);
     }
+  };
 
+  // Handle video progress tracking
+  const handleVideoProgress = async (lessonId: string, percent: number) => {
+    if (!user) return;
+    // Save progress position periodically (every ~10%)
+    if (percent % 10 === 0 || percent >= 90) {
+      await supabase.from("lesson_progress").upsert(
+        { user_id: user.id, lesson_id: lessonId, last_position: percent, is_completed: percent >= 90, ...(percent >= 90 ? { completed_at: new Date().toISOString() } : {}) },
+        { onConflict: "user_id,lesson_id" }
+      ).then(() => {});
+    }
   };
 
 
