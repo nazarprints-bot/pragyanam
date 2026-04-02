@@ -291,6 +291,11 @@ const Auth = () => {
                 {isLogin ? t("auth.signUp") : t("auth.signIn")}
               </button>
             </p>
+            </>
+            )}
+                {isLogin ? t("auth.signUp") : t("auth.signIn")}
+              </button>
+            </p>
           </div>
         </motion.div>
       </div>
