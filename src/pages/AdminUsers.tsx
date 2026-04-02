@@ -20,7 +20,7 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabType>("all");
 
-  const isHindi = language === "hindi";
+  const isHindi = language === "hi";
 
   const fetchData = async () => {
     const [profRes, rolesRes] = await Promise.all([
