@@ -141,14 +141,14 @@ const Profile = () => {
     <DashboardLayout>
       <div className="max-w-2xl mx-auto pb-16 lg:pb-0">
         {/* Avatar Section */}
-        <div className="bg-card border border-border rounded-xl p-6 mb-6">
-          <div className="flex items-center gap-5">
-            <div className="relative group">
-              <div className="w-20 h-20 rounded-full bg-muted border-2 border-primary/30 overflow-hidden flex items-center justify-center">
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex items-center gap-4">
+            <div className="relative group shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted border-2 border-primary/30 overflow-hidden flex items-center justify-center">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-8 h-8 text-muted-foreground" />
+                  <User className="w-7 h-7 sm:w-8 sm:h-8 text-muted-foreground" />
                 )}
               </div>
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
@@ -158,20 +158,22 @@ const Profile = () => {
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
             </div>
-            <div>
-              <p className="text-[15px] font-semibold text-foreground">{profile?.full_name || "User"}</p>
-              <p className="text-[13px] text-muted-foreground">{user?.email}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-medium bg-primary/15 text-primary rounded-full">{roleLabel}</span>
-              {!profile?.is_verified && (role === "teacher" || (role === "student" && profile?.is_free_student)) && (
-                <span className="inline-block ml-1 mt-1 px-2 py-0.5 text-[11px] font-medium bg-destructive/15 text-destructive rounded-full">
-                  Pending Approval
-                </span>
-              )}
+            <div className="min-w-0">
+              <p className="text-sm sm:text-[15px] font-semibold text-foreground truncate">{profile?.full_name || "User"}</p>
+              <p className="text-xs sm:text-[13px] text-muted-foreground truncate">{user?.email}</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                <span className="inline-block px-2 py-0.5 text-[11px] font-medium bg-primary/15 text-primary rounded-full">{roleLabel}</span>
+                {!profile?.is_verified && (role === "teacher" || (role === "student" && profile?.is_free_student)) && (
+                  <span className="inline-block px-2 py-0.5 text-[11px] font-medium bg-destructive/15 text-destructive rounded-full">
+                    Pending Approval
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           <Button variant="destructive" onClick={handleSignOut} className="w-full h-10 text-[13px] font-semibold mt-4">
             <LogOut className="w-4 h-4 mr-2" /> Logout
           </Button>
-        </div>
         </div>
 
         {/* Tabs for student */}
