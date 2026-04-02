@@ -292,11 +292,14 @@ const Auth = () => {
               </button>
             </p>
             </>
-            )}
-                {isLogin ? t("auth.signUp") : t("auth.signIn")}
-              </button>
-            </p>
           </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default Auth;
         </motion.div>
       </div>
     </div>
