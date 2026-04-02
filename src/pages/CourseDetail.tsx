@@ -13,6 +13,7 @@ import {
   Award, ArrowRight,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import VideoPlayer from "@/components/VideoPlayer";
 
 const CourseDetail = () => {
   const { courseId } = useParams<{ courseId: string }>();
