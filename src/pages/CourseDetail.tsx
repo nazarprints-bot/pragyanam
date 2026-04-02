@@ -660,15 +660,7 @@ const CourseDetail = () => {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {lesson.duration_minutes && <span className="text-xs text-muted-foreground">{lesson.duration_minutes} min</span>}
-                      {!isCompleted && isEnrolled && role === "student" && (
-                        <Button
-                          size="sm" variant="ghost"
-                          className="h-7 text-xs text-primary"
-                          onClick={(e) => { e.stopPropagation(); markLessonComplete(lesson.id); }}
-                        >
-                          <CheckCircle className="w-3 h-3 mr-1" /> Done
-                        </Button>
-                      )}
+                      {isCompleted && <span className="text-xs text-primary font-medium">✅</span>}
                       {lesson.video_url ? <Video className="w-4 h-4 text-primary" /> : <FileText className="w-4 h-4 text-muted-foreground" />}
                       {canManage && (
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); deleteLesson(lesson.id); }}>
