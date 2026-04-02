@@ -77,26 +77,11 @@ const LiveClasses = () => {
       toast.error(`Class is full (${classItem.max_students || MAX_STUDENTS_PER_CLASS} students max)`);
       return;
     }
-    // Increment student count for non-teachers
-    if (!isTeacherOrAdmin) {
-      await supabase.from("live_classes")
-        .update({ current_students: (classItem.current_students || 0) + 1 } as any)
-        .eq("id", classItem.id);
-    }
     setActiveRoom(classItem.room_id);
     setActiveClassId(classItem.id);
   };
 
   const handleLeaveClass = async () => {
-    // Decrement student count
-    if (!isTeacherOrAdmin && activeClassId) {
-      const activeClass = classes.find((c) => c.id === activeClassId);
-      if (activeClass) {
-        await supabase.from("live_classes")
-          .update({ current_students: Math.max(0, (activeClass.current_students || 1) - 1) } as any)
-          .eq("id", activeClassId);
-      }
-    }
     destroyJitsi();
     setActiveRoom(null);
     setActiveClassId(null);
@@ -142,6 +127,12 @@ const LiveClasses = () => {
       destroyJitsi();
       const roomName = `pragyanam-live-${activeClassId}`;
       const displayName = profile?.full_name || user?.email || "User";
+      const teacherToolbar = [
+        'microphone', 'camera', 'toggle-camera', 'desktop', 'fullscreen',
+        'fodeviceselection', 'hangup', 'chat', 'raisehand',
+        'tileview', 'settings',
+      ];
+      const studentToolbar = ['microphone', 'camera', 'toggle-camera', 'raisehand', 'chat', 'tileview', 'fullscreen'];
       const options: any = {
         roomName,
         parentNode: jitsiContainerRef.current,
@@ -158,19 +149,44 @@ const LiveClasses = () => {
           hideConferenceSubject: true,
           hideConferenceTimer: !isTeacherOrAdmin,
           notifications: isTeacherOrAdmin ? undefined : [],
-          toolbarButtons: isTeacherOrAdmin ? undefined : [],
+          toolbarButtons: isTeacherOrAdmin ? teacherToolbar : studentToolbar,
           disableRemoteMute: !isTeacherOrAdmin,
           remoteVideoMenu: { disabled: !isTeacherOrAdmin },
+          // Performance: lower resolution to reduce lag
+          resolution: 480,
+          constraints: {
+            video: { height: { ideal: 480, max: 720 }, width: { ideal: 640, max: 1280 } },
+          },
+          enableLayerSuspension: true,
+          channelLastN: 4,
+          p2p: { enabled: false },
+          disableAudioLevels: true,
+          enableNoisyMicDetection: false,
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false, SHOW_WATERMARK_FOR_GUESTS: false,
           TOOLBAR_ALWAYS_VISIBLE: isTeacherOrAdmin,
           DISABLE_JOIN_LEAVE_NOTIFICATIONS: !isTeacherOrAdmin,
-          FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? undefined : 0,
+          FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? undefined : 80,
           HIDE_INVITE_MORE_HEADER: true,
         },
       };
       jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("meet.jit.si", options);
+
+      // Track participant count in real-time
+      const updateCount = () => {
+        const count = jitsiApiRef.current?.getNumberOfParticipants?.() || 0;
+        if (activeClassId) {
+          supabase.from("live_classes")
+            .update({ current_students: count } as any)
+            .eq("id", activeClassId)
+            .then(() => {});
+        }
+      };
+      jitsiApiRef.current.addEventListener('participantJoined', updateCount);
+      jitsiApiRef.current.addEventListener('participantLeft', updateCount);
+      // Set initial count after a short delay
+      setTimeout(updateCount, 3000);
     };
     if ((window as any).JitsiMeetExternalAPI) {
       loadAndInit();
