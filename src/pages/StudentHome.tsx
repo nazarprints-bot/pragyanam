@@ -5,18 +5,23 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
 import BottomNav from "@/components/BottomNav";
-import { Video, BookOpen, Play, Clock, GraduationCap, Shield, Swords, ChevronRight, Calendar } from "lucide-react";
+import { Video, BookOpen, Play, Clock, GraduationCap, Shield, Swords, ChevronRight, Calendar, Search, Brain, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const StudentHome = () => {
   const { user, profile } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [liveClasses, setLiveClasses] = useState<any[]>([]);
   const [upcomingClasses, setUpcomingClasses] = useState<any[]>([]);
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
   const [popularCourses, setPopularCourses] = useState<any[]>([]);
+  const [courseProgress, setCourseProgress] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+
+  const isHi = language === "hi";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,7 +38,31 @@ const StudentHome = () => {
         .sort((a: any, b: any) => (b.enrollments?.[0]?.count || 0) - (a.enrollments?.[0]?.count || 0))
         .slice(0, 6);
       setPopularCourses(sortedCourses);
-      setEnrolledCourses((enrollRes.data || []).map((e: any) => e.courses).filter(Boolean));
+      const enrolled = (enrollRes.data || []).map((e: any) => e.courses).filter(Boolean);
+      setEnrolledCourses(enrolled);
+
+      // Fetch progress for enrolled courses
+      if (user && enrolled.length > 0) {
+        const progressMap: Record<string, number> = {};
+        for (const course of enrolled) {
+          const { count: totalLessons } = await supabase
+            .from("lessons")
+            .select("id", { count: "exact", head: true })
+            .in("chapter_id",
+              (await supabase.from("chapters").select("id").in("subject_id",
+                (await supabase.from("subjects").select("id").eq("course_id", course.id)).data?.map((s: any) => s.id) || []
+              )).data?.map((c: any) => c.id) || []
+            );
+          const { count: completed } = await supabase
+            .from("lesson_progress")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .eq("is_completed", true);
+          progressMap[course.id] = totalLessons ? Math.round(((completed || 0) / totalLessons) * 100) : 0;
+        }
+        setCourseProgress(progressMap);
+      }
+
       setLoading(false);
     };
     fetchData();
@@ -47,6 +76,24 @@ const StudentHome = () => {
   };
 
   const academicClasses = ["6", "7", "8", "9", "10", "11", "12"];
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-4 sm:space-y-6 pb-20 lg:pb-0">
+          <Skeleton className="h-24 rounded-xl" />
+          <div className="grid grid-cols-2 gap-2.5">
+            {[1,2,3,4].map(i => <Skeleton key={i} className="h-36 rounded-xl" />)}
+          </div>
+          <Skeleton className="h-32 rounded-xl" />
+          <div className="grid grid-cols-4 gap-2">
+            {[1,2,3,4,5,6,7].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
+          </div>
+        </div>
+        <BottomNav />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -85,8 +132,8 @@ const StudentHome = () => {
           </section>
         )}
 
-        {/* Continue Learning */}
-        {enrolledCourses.length > 0 && (
+        {/* Continue Learning — with progress */}
+        {enrolledCourses.length > 0 ? (
           <section>
             <SectionHeader title={t("shome.continueLearning")} actionLabel={t("shome.viewAll")} onAction={() => navigate("/dashboard/courses")} />
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -106,15 +153,37 @@ const StudentHome = () => {
                     )}
                   </div>
                   <h3 className="font-semibold text-foreground text-[11px] sm:text-xs line-clamp-2">{course.title}</h3>
-                  <span className="text-[9px] sm:text-[10px] text-muted-foreground">{course.category}</span>
+                  <div className="mt-1.5">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[9px] text-muted-foreground">{courseProgress[course.id] || 0}%</span>
+                    </div>
+                    <Progress value={courseProgress[course.id] || 0} className="h-1.5" />
+                  </div>
                 </div>
               ))}
             </div>
           </section>
+        ) : (
+          /* Empty state for no enrolled courses */
+          <section className="bg-card rounded-xl sm:rounded-2xl border border-border p-6 sm:p-8 text-center">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
+              <BookOpen className="w-7 h-7 text-primary" />
+            </div>
+            <h3 className="font-bold text-foreground text-sm sm:text-base mb-1">
+              {isHi ? "अभी कोई कोर्स नहीं जुड़ा" : "No courses enrolled yet"}
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+              {isHi ? "लोकप्रिय कोर्सेज़ ब्राउज़ करें और सीखना शुरू करें!" : "Browse popular courses and start learning!"}
+            </p>
+            <Button onClick={() => navigate("/dashboard/courses")} className="gradient-navy text-white border-0 hover:opacity-90 text-xs sm:text-sm h-9 px-5">
+              <Search className="w-3.5 h-3.5 mr-1.5" />
+              {isHi ? "कोर्सेज़ ब्राउज़ करें" : "Browse Courses"}
+            </Button>
+          </section>
         )}
 
         {/* Upcoming Live Sessions */}
-        {upcomingClasses.length > 0 && (
+        {upcomingClasses.length > 0 ? (
           <section>
             <SectionHeader title={t("shome.upcomingLive")} actionLabel={t("shome.viewAll")} onAction={() => navigate("/dashboard/live-classes")} />
             <div className="space-y-2">
@@ -133,7 +202,29 @@ const StudentHome = () => {
               ))}
             </div>
           </section>
+        ) : (
+          <section className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Video className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">{isHi ? "कोई लाइव क्लास शेड्यूल नहीं" : "No live classes scheduled"}</p>
+              <p className="text-xs text-muted-foreground">{isHi ? "जल्द ही नई कक्षाएँ आएँगी!" : "New classes coming soon!"}</p>
+            </div>
+          </section>
         )}
+
+        {/* Quick Action Buttons */}
+        <section className="grid grid-cols-2 gap-2.5">
+          <button onClick={() => navigate("/dashboard/tests")} className="bg-card rounded-xl border border-border p-3 flex items-center gap-3 hover:border-primary/30 transition-all active:scale-[0.98]">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center"><Brain className="w-4.5 h-4.5 text-primary" /></div>
+            <span className="font-semibold text-foreground text-xs">{isHi ? "टेस्ट दें" : "Take Test"}</span>
+          </button>
+          <button onClick={() => navigate("/dashboard/doubts")} className="bg-card rounded-xl border border-border p-3 flex items-center gap-3 hover:border-primary/30 transition-all active:scale-[0.98]">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center"><MessageCircle className="w-4.5 h-4.5 text-primary" /></div>
+            <span className="font-semibold text-foreground text-xs">{isHi ? "डाउट पूछें" : "Ask Doubt"}</span>
+          </button>
+        </section>
 
         {/* Coaching Classes */}
         <section>
@@ -158,24 +249,9 @@ const StudentHome = () => {
         <section>
           <SectionHeader title={t("shome.competitivePrep")} actionLabel={t("shome.viewAll")} onAction={() => navigate("/dashboard/classes/competitive")} />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <CompetitiveCard
-              icon={<Swords className="w-5 h-5 text-amber-600" />}
-              title={t("shome.armyPrep")}
-              desc={t("shome.armyPrepDesc")}
-              onClick={() => navigate("/dashboard/classes/competitive/army")}
-            />
-            <CompetitiveCard
-              icon={<Shield className="w-5 h-5 text-blue-600" />}
-              title={t("shome.policePrep")}
-              desc={t("shome.policePrepDesc")}
-              onClick={() => navigate("/dashboard/classes/competitive/police")}
-            />
-            <CompetitiveCard
-              icon={<GraduationCap className="w-5 h-5 text-emerald-600" />}
-              title={t("shome.govtExam")}
-              desc={t("shome.govtExamDesc")}
-              onClick={() => navigate("/dashboard/classes/competitive/govt")}
-            />
+            <CompetitiveCard icon={<Swords className="w-5 h-5 text-amber-600" />} title={t("shome.armyPrep")} desc={t("shome.armyPrepDesc")} onClick={() => navigate("/dashboard/classes/competitive/army")} />
+            <CompetitiveCard icon={<Shield className="w-5 h-5 text-blue-600" />} title={t("shome.policePrep")} desc={t("shome.policePrepDesc")} onClick={() => navigate("/dashboard/classes/competitive/police")} />
+            <CompetitiveCard icon={<GraduationCap className="w-5 h-5 text-emerald-600" />} title={t("shome.govtExam")} desc={t("shome.govtExamDesc")} onClick={() => navigate("/dashboard/classes/competitive/govt")} />
           </div>
         </section>
 

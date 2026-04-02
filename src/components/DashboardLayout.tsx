@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
 import NotificationPanel from "@/components/NotificationPanel";
+import SearchBar from "@/components/SearchBar";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { role, profile, signOut } = useAuth();
@@ -131,7 +132,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <button className="lg:hidden p-2 -ml-1 text-foreground rounded-lg hover:bg-muted active:scale-95 transition-transform" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex-1" />
+            <div className="flex-1 flex justify-center px-2">
+              <SearchBar />
+            </div>
             <div className="flex items-center gap-0.5 sm:gap-1">
               <LanguageToggle />
               <ThemeToggle />

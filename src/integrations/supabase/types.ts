@@ -172,6 +172,7 @@ export type Database = {
           description: string
           id: string
           status: string | null
+          subject_tag: string | null
           title: string
           updated_at: string
           user_id: string
@@ -183,6 +184,7 @@ export type Database = {
           description: string
           id?: string
           status?: string | null
+          subject_tag?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -194,6 +196,7 @@ export type Database = {
           description?: string
           id?: string
           status?: string | null
+          subject_tag?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -483,6 +486,7 @@ export type Database = {
           is_free_student: boolean | null
           is_verified: boolean | null
           language: Database["public"]["Enums"]["app_language"]
+          onboarding_completed: boolean
           parent_phone: string | null
           phone: string | null
           school: string | null
@@ -501,6 +505,7 @@ export type Database = {
           is_free_student?: boolean | null
           is_verified?: boolean | null
           language?: Database["public"]["Enums"]["app_language"]
+          onboarding_completed?: boolean
           parent_phone?: string | null
           phone?: string | null
           school?: string | null
@@ -519,6 +524,7 @@ export type Database = {
           is_free_student?: boolean | null
           is_verified?: boolean | null
           language?: Database["public"]["Enums"]["app_language"]
+          onboarding_completed?: boolean
           parent_phone?: string | null
           phone?: string | null
           school?: string | null

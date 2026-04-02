@@ -3,45 +3,51 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
-import { BookOpen, Brain, MessageCircle, Users, Award, Plus, ArrowRight, Calendar } from "lucide-react";
+import { BookOpen, Brain, MessageCircle, Users, Award, Plus, ArrowRight, Calendar, Video, Eye, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
   const { user, role, profile } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ courses: 0, tests: 0, doubts: 0, students: 0 });
   const [myCourses, setMyCourses] = useState<any[]>([]);
   const [scheduledTests, setScheduledTests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const isHi = language === "hi";
 
   useEffect(() => {
     const fetchStats = async () => {
       if (!user) return;
 
       if (role === "teacher") {
-        const [coursesRes, testsRes, doubtsRes, myCoursesRes, schedRes] = await Promise.all([
+        const [coursesRes, testsRes, doubtsRes, myCoursesRes, schedRes, enrollCountRes] = await Promise.all([
           supabase.from("courses").select("id", { count: "exact", head: true }).eq("created_by", user.id),
           supabase.from("tests").select("id", { count: "exact", head: true }).eq("created_by", user.id),
           supabase.from("doubts").select("id", { count: "exact", head: true }).eq("status", "open"),
           supabase.from("courses").select("id, title, title_hi, thumbnail_url, is_published, category").eq("created_by", user.id).order("created_at", { ascending: false }).limit(6),
           supabase.from("tests").select("id, title, scheduled_at, course_id, courses(title)").eq("created_by", user.id).not("scheduled_at", "is", null).eq("is_published", false).order("scheduled_at").limit(5),
+          supabase.from("enrollments").select("id", { count: "exact", head: true }),
         ]);
         setStats({
           courses: coursesRes.count || 0,
           tests: testsRes.count || 0,
           doubts: doubtsRes.count || 0,
-          students: 0,
+          students: enrollCountRes.count || 0,
         });
         setMyCourses(myCoursesRes.data || []);
         setScheduledTests(schedRes.data || []);
       } else if (role === "admin") {
-        const [courses, tests, doubts] = await Promise.all([
+        const [courses, tests, doubts, usersCount] = await Promise.all([
           supabase.from("courses").select("id", { count: "exact", head: true }),
           supabase.from("tests").select("id", { count: "exact", head: true }),
           supabase.from("doubts").select("id", { count: "exact", head: true }),
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
         ]);
-        setStats({ courses: courses.count || 0, tests: tests.count || 0, doubts: doubts.count || 0, students: 0 });
+        setStats({ courses: courses.count || 0, tests: tests.count || 0, doubts: doubts.count || 0, students: usersCount.count || 0 });
       } else {
         const [courses, tests, doubts] = await Promise.all([
           supabase.from("enrollments").select("id", { count: "exact", head: true }).eq("user_id", user.id),
@@ -50,6 +56,7 @@ const Dashboard = () => {
         ]);
         setStats({ courses: courses.count || 0, tests: tests.count || 0, doubts: doubts.count || 0, students: 0 });
       }
+      setLoading(false);
     };
     fetchStats();
   }, [user, role]);
@@ -69,40 +76,46 @@ const Dashboard = () => {
           {/* Greeting */}
           <div className="gradient-navy rounded-2xl p-5 text-white">
             <h1 className="text-xl font-extrabold font-heading">{greeting()} 👋</h1>
-            <p className="text-white/60 text-sm mt-0.5">{profile?.full_name || "Teacher"}, here's your overview</p>
+            <p className="text-white/60 text-sm mt-0.5">{profile?.full_name || "Teacher"}, {isHi ? "यहाँ आपका सारांश है" : "here's your overview"}</p>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-card rounded-2xl p-4 border border-border text-center">
-              <BookOpen className="w-7 h-7 mx-auto text-primary mb-1" />
-              <p className="text-xl font-extrabold text-foreground">{stats.courses}</p>
-              <p className="text-xs text-muted-foreground">My Courses</p>
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[1,2,3,4].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
             </div>
-            <div className="bg-card rounded-2xl p-4 border border-border text-center">
-              <Brain className="w-7 h-7 mx-auto text-primary mb-1" />
-              <p className="text-xl font-extrabold text-foreground">{stats.tests}</p>
-              <p className="text-xs text-muted-foreground">Tests Created</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <StatCard icon={<BookOpen className="w-6 h-6 text-primary" />} value={stats.courses} label={isHi ? "मेरे कोर्सेज़" : "My Courses"} />
+              <StatCard icon={<Brain className="w-6 h-6 text-primary" />} value={stats.tests} label={isHi ? "बनाए गए टेस्ट" : "Tests Created"} />
+              <StatCard icon={<MessageCircle className="w-6 h-6 text-primary" />} value={stats.doubts} label={isHi ? "खुले डाउट" : "Open Doubts"} />
+              <StatCard icon={<Users className="w-6 h-6 text-primary" />} value={stats.students} label={isHi ? "कुल एनरोलमेंट" : "Total Enrollments"} />
             </div>
-            <div className="bg-card rounded-2xl p-4 border border-border text-center">
-              <MessageCircle className="w-7 h-7 mx-auto text-primary mb-1" />
-              <p className="text-xl font-extrabold text-foreground">{stats.doubts}</p>
-              <p className="text-xs text-muted-foreground">Open Doubts</p>
-            </div>
-          </div>
+          )}
 
           {/* My Courses */}
           <div className="bg-card rounded-2xl p-5 border border-border">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold font-heading text-foreground">My Courses / मेरे कोर्स</h2>
+              <h2 className="text-lg font-bold font-heading text-foreground">{isHi ? "मेरे कोर्स" : "My Courses"}</h2>
               <Button size="sm" onClick={() => navigate("/dashboard/upload")} className="bg-primary text-primary-foreground">
-                <Plus className="w-4 h-4 mr-1" /> New Course
+                <Plus className="w-4 h-4 mr-1" /> {isHi ? "नया कोर्स" : "New Course"}
               </Button>
             </div>
-            {myCourses.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">
-                No courses yet. Create your first course!
-              </p>
+            {loading ? (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {[1,2].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
+              </div>
+            ) : myCourses.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                  <BookOpen className="w-6 h-6 text-primary" />
+                </div>
+                <p className="text-sm font-semibold text-foreground mb-1">{isHi ? "अभी कोई कोर्स नहीं" : "No courses yet"}</p>
+                <p className="text-xs text-muted-foreground mb-3">{isHi ? "अपना पहला कोर्स बनाएँ!" : "Create your first course!"}</p>
+                <Button size="sm" onClick={() => navigate("/dashboard/upload")} className="bg-primary text-primary-foreground text-xs">
+                  <Plus className="w-3.5 h-3.5 mr-1" /> {isHi ? "कोर्स बनाएँ" : "Create Course"}
+                </Button>
+              </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-3">
                 {myCourses.map((course) => (
@@ -125,7 +138,7 @@ const Dashboard = () => {
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{course.category}</span>
                         <span className={`text-[10px] ${course.is_published ? "text-primary" : "text-muted-foreground"}`}>
-                          {course.is_published ? "Published" : "Draft"}
+                          {course.is_published ? (isHi ? "प्रकाशित" : "Published") : (isHi ? "ड्राफ्ट" : "Draft")}
                         </span>
                       </div>
                     </div>
@@ -140,7 +153,7 @@ const Dashboard = () => {
           {scheduledTests.length > 0 && (
             <div className="bg-card rounded-2xl p-5 border border-border">
               <h2 className="text-lg font-bold font-heading text-foreground mb-3 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" /> Scheduled Tests
+                <Calendar className="w-5 h-5 text-primary" /> {isHi ? "शेड्यूल्ड टेस्ट" : "Scheduled Tests"}
               </h2>
               <div className="space-y-2">
                 {scheduledTests.map((test: any) => (
@@ -154,18 +167,24 @@ const Dashboard = () => {
                         {new Date(test.scheduled_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
-                    <span className="text-xs text-muted-foreground">Upcoming</span>
+                    <span className="text-xs text-muted-foreground">{isHi ? "आने वाला" : "Upcoming"}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <QuickAction icon="📝" label="Create Test" onClick={() => navigate("/dashboard/manual-test")} />
-            <QuickAction icon="✨" label="AI Test" onClick={() => navigate("/dashboard/ai-test")} />
-            <QuickAction icon="💬" label="Answer Doubts" onClick={() => navigate("/dashboard/doubts")} />
+          {/* Quick Actions — Enhanced */}
+          <div>
+            <h2 className="text-base font-bold font-heading text-foreground mb-3">{t("dash.quickActions")}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <QuickAction icon="📝" label={isHi ? "टेस्ट बनाएँ" : "Create Test"} onClick={() => navigate("/dashboard/manual-test")} />
+              <QuickAction icon="✨" label={isHi ? "AI टेस्ट" : "AI Test"} onClick={() => navigate("/dashboard/ai-test")} />
+              <QuickAction icon="💬" label={isHi ? "डाउट का जवाब दें" : "Answer Doubts"} onClick={() => navigate("/dashboard/doubts")} />
+              <QuickAction icon="📤" label={isHi ? "कंटेंट अपलोड" : "Upload Content"} onClick={() => navigate("/dashboard/upload")} />
+              <QuickAction icon="👁️" label={isHi ? "रिस्पांस देखें" : "View Responses"} onClick={() => navigate("/dashboard/test-responses")} />
+              <QuickAction icon="📹" label={isHi ? "लाइव क्लास शेड्यूल" : "Schedule Live Class"} onClick={() => navigate("/dashboard/live-classes")} />
+            </div>
           </div>
         </div>
       </DashboardLayout>
@@ -174,9 +193,9 @@ const Dashboard = () => {
 
   // Admin Dashboard
   const adminStatCards = [
-    { icon: Users, label: t("dash.totalUsers"), value: "—", color: "bg-primary/10 text-primary" },
-    { icon: BookOpen, label: t("dash.totalCourses"), value: stats.courses, color: "bg-primary/10 text-primary" },
-    { icon: Brain, label: t("dash.totalTests"), value: stats.tests, color: "bg-primary/10 text-primary" },
+    { icon: Users, label: t("dash.totalUsers"), value: loading ? "—" : stats.students, color: "bg-primary/10 text-primary" },
+    { icon: BookOpen, label: t("dash.totalCourses"), value: loading ? "—" : stats.courses, color: "bg-primary/10 text-primary" },
+    { icon: Brain, label: t("dash.totalTests"), value: loading ? "—" : stats.tests, color: "bg-primary/10 text-primary" },
     { icon: Award, label: t("dash.revenue"), value: "₹0", color: "bg-primary/10 text-primary" },
   ];
 
@@ -189,15 +208,19 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          {adminStatCards.map((stat) => (
-            <div key={stat.label} className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-border">
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${stat.color} flex items-center justify-center mb-2 sm:mb-3`}>
-                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+          {loading ? (
+            [1,2,3,4].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)
+          ) : (
+            adminStatCards.map((stat) => (
+              <div key={stat.label} className="bg-card rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-border">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${stat.color} flex items-center justify-center mb-2 sm:mb-3`}>
+                  <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <p className="text-lg sm:text-2xl font-extrabold font-heading text-foreground">{stat.value}</p>
+                <p className="text-[11px] sm:text-sm text-muted-foreground">{stat.label}</p>
               </div>
-              <p className="text-lg sm:text-2xl font-extrabold font-heading text-foreground">{stat.value}</p>
-              <p className="text-[11px] sm:text-sm text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border">
@@ -213,6 +236,14 @@ const Dashboard = () => {
     </DashboardLayout>
   );
 };
+
+const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) => (
+  <div className="bg-card rounded-2xl p-4 border border-border text-center">
+    <div className="mx-auto mb-1">{icon}</div>
+    <p className="text-xl font-extrabold text-foreground">{value}</p>
+    <p className="text-xs text-muted-foreground">{label}</p>
+  </div>
+);
 
 const QuickAction = ({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) => (
   <button onClick={onClick} className="flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-xl border border-border hover:border-primary/40 transition-all text-center w-full active:scale-[0.97]">
