@@ -87,7 +87,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </button>
           </div>
 
-          <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto overscroll-contain">
+          <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto overscroll-contain min-h-0">
             {links.map((link) => {
               const isActive = location.pathname === link.to;
               return (
