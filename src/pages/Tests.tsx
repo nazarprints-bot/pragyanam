@@ -15,8 +15,6 @@ interface Question {
   option_b: string;
   option_c: string;
   option_d: string;
-  correct_option: string;
-  answer_text: string | null;
   marks: number;
   sort_order: number;
 }
@@ -62,7 +60,7 @@ const Tests = () => {
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
 
   const handleStartTest = async (test: any) => {
-    const { data, error } = await supabase.from("test_questions").select("*").eq("test_id", test.id).order("sort_order", { ascending: true });
+    const { data, error } = await supabase.rpc("get_test_questions_safe", { _test_id: test.id });
     if (error || !data || data.length === 0) { toast.error("No questions found for this test"); return; }
     setQuestions(data as Question[]);
     setActiveTest(test);
@@ -79,23 +77,19 @@ const Tests = () => {
   const handleSubmit = async () => {
     if (submitting) return;
     setSubmitting(true);
-    let score = 0;
-    let totalMarks = 0;
-    questions.forEach((q) => {
-      const marks = q.marks || 1;
-      totalMarks += marks;
-      if (q.question_type === "mcq" || !q.question_type) {
-        if (answers[q.id] === q.correct_option) score += marks;
-      }
-    });
-    const percentage = totalMarks > 0 ? (score / totalMarks) * 100 : 0;
     const timeTaken = (activeTest.duration_minutes || 30) * 60 - timeLeft;
-    const { error } = await supabase.from("test_attempts").insert({
-      user_id: user!.id, test_id: activeTest.id, answers, score, total_marks: totalMarks,
-      percentage, time_taken_seconds: timeTaken, submitted_at: new Date().toISOString(),
+    const { data, error } = await supabase.rpc("grade_and_submit_test", {
+      _test_id: activeTest.id,
+      _answers: answers,
+      _time_taken_seconds: timeTaken,
     });
     if (error) { toast.error("Failed to submit: " + error.message); }
-    else { setResult({ score, total: totalMarks, percentage }); toast.success("Test submitted!"); await fetchTests(); }
+    else {
+      const res = data as any;
+      setResult({ score: res.score, total: res.total, percentage: res.percentage });
+      toast.success("Test submitted!");
+      await fetchTests();
+    }
     setSubmitting(false);
   };
 
