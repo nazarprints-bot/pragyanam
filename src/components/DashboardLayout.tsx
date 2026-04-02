@@ -7,6 +7,7 @@ import {
   MessageCircle, BarChart3, Users, Settings, LogOut, Menu, X,
   Upload, Video, Sparkles, UserCircle, PenTool, Eye, Bell, CreditCard
 } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
