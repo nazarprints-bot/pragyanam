@@ -185,22 +185,27 @@ const AdminTeachers = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setSelectedTeacher(teacher)} className="flex-1 h-8 text-xs">
+                  <Button size="sm" variant="outline" onClick={() => setSelectedTeacher(teacher)} className="h-8 text-xs">
                     <Eye className="w-3.5 h-3.5 mr-1" /> {isHi ? "विवरण" : "Details"}
                   </Button>
                   {!teacher.is_disabled && !teacher.is_verified && (
                     <Button size="sm" onClick={() => handleVerify(teacher.user_id, true)} className="flex-1 h-8 text-xs bg-emerald-500 hover:bg-emerald-600 text-white">
-                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "स्वीकृत" : "Approve"}
+                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "स्वीकृत करें" : "Approve"}
                     </Button>
                   )}
                   {!teacher.is_disabled && teacher.is_verified && (
-                    <Button size="sm" variant="outline" onClick={() => handleDisable(teacher.user_id, true)} className="flex-1 h-8 text-xs text-destructive border-destructive/30 hover:bg-destructive/10">
-                      <Ban className="w-3.5 h-3.5 mr-1" /> {isHi ? "अक्षम" : "Disable"}
+                    <Button size="sm" variant="outline" onClick={() => handleVerify(teacher.user_id, false)} className="flex-1 h-8 text-xs text-amber-600 border-amber-500/30 hover:bg-amber-500/10">
+                      <XCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "स्वीकृति हटाएँ" : "Revoke"}
+                    </Button>
+                  )}
+                  {!teacher.is_disabled && (
+                    <Button size="sm" variant="outline" onClick={() => handleDisable(teacher.user_id, true)} className="h-8 text-xs text-destructive border-destructive/30 hover:bg-destructive/10">
+                      <Ban className="w-3.5 h-3.5" />
                     </Button>
                   )}
                   {teacher.is_disabled && (
                     <Button size="sm" onClick={() => handleDisable(teacher.user_id, false)} className="flex-1 h-8 text-xs bg-emerald-500 hover:bg-emerald-600 text-white">
-                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "सक्रिय" : "Enable"}
+                      <CheckCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "सक्रिय करें" : "Enable"}
                     </Button>
                   )}
                 </div>
