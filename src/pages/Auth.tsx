@@ -210,6 +210,7 @@ const Auth = () => {
                     </>
                   )}
 
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label className="text-[13px] text-foreground">{t("auth.state")} *</Label>
                       <Select value={formData.state} onValueChange={(v) => setFormData({ ...formData, state: v, district: "" })}>
