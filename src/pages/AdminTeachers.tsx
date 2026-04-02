@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Search, CheckCircle, XCircle, GraduationCap, Phone, MapPin, School, Eye, Calendar, Ban, UserX, Shield, BookOpen, Clock, Award, Users } from "lucide-react";
+import { Search, CheckCircle, XCircle, GraduationCap, Phone, MapPin, School, Eye, Calendar, Ban, UserX, Shield, BookOpen, Clock, Award, Users, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
