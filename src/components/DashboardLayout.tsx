@@ -79,9 +79,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="flex flex-col h-screen">
           <div className="px-4 py-4 border-b border-white/10 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gold flex items-center justify-center animate-glow-pulse">
-                <GraduationCap className="w-4.5 h-4.5 text-navy-dark" />
-              </div>
+              <img src={logo} alt="Pragyanam Classes" className="w-9 h-9 rounded-full object-cover" />
               <span className="text-[15px] font-bold text-white tracking-tight font-heading">Pragyanam</span>
             </Link>
             <button className="lg:hidden p-1.5 text-white/60 hover:text-white" onClick={() => setSidebarOpen(false)}>

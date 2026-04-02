@@ -32,10 +32,8 @@ const Navbar = () => {
     }`}>
       <div className="max-w-6xl mx-auto px-5">
         <div className="flex items-center justify-between h-16">
-          <a href="#home" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg gradient-navy flex items-center justify-center">
-              <GraduationCap className="w-4.5 h-4.5 text-primary-foreground" />
-            </div>
+          <a href="#home" className="flex items-center gap-2">
+            <img src={logo} alt="Pragyanam Classes" className="w-9 h-9 rounded-full object-cover" />
             <span className="text-[15px] font-bold text-foreground tracking-tight">Pragyanam</span>
           </a>
 
