@@ -22,12 +22,12 @@ const AcademicClasses = () => {
     const fetchData = async () => {
       setLoading(true);
       // Fetch courses for this class level
+      // Fetch all published courses for this class level (any category)
       const { data: courseData } = await supabase
         .from("courses")
         .select("*")
         .eq("is_published", true)
-        .eq("class_level", classLevel || "")
-        .eq("category", "school");
+        .eq("class_level", classLevel || "");
 
       const courseList = courseData || [];
       setCourses(courseList);
