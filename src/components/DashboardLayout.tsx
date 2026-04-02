@@ -100,7 +100,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             })}
           </nav>
 
-          <div className="p-3 border-t border-white/10 safe-area-bottom">
+          <div className="shrink-0 p-3 border-t border-white/10 safe-area-bottom">
             <div className="flex items-center gap-2.5 mb-2.5 px-1">
               <div className="w-9 h-9 rounded-full bg-gold/20 overflow-hidden flex items-center justify-center text-[13px] font-semibold text-gold">
                 {profile?.avatar_url ? (
