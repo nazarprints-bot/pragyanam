@@ -82,15 +82,6 @@ const LiveClasses = () => {
   };
 
   const handleLeaveClass = async () => {
-    // Decrement student count
-    if (!isTeacherOrAdmin && activeClassId) {
-      const activeClass = classes.find((c) => c.id === activeClassId);
-      if (activeClass) {
-        await supabase.from("live_classes")
-          .update({ current_students: Math.max(0, (activeClass.current_students || 1) - 1) } as any)
-          .eq("id", activeClassId);
-      }
-    }
     destroyJitsi();
     setActiveRoom(null);
     setActiveClassId(null);
