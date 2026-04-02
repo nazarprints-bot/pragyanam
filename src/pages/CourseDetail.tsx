@@ -615,13 +615,15 @@ const CourseDetail = () => {
             </form>
           )}
 
-          {activeVideo && (
-            <div className="mb-4 rounded-xl overflow-hidden border border-border bg-black aspect-video">
-              {activeVideo.includes("youtube.com") || activeVideo.includes("youtu.be") ? (
-                <iframe src={getEmbedUrl(activeVideo)!} className="w-full h-full" allowFullScreen title="Video" />
-              ) : (
-                <video src={activeVideo} controls className="w-full h-full" />
-              )}
+          {activeVideo && activeLessonId && (
+            <div className="mb-4">
+              <VideoPlayer
+                url={activeVideo}
+                lessonId={activeLessonId}
+                durationMinutes={lessons.find(l => l.id === activeLessonId)?.duration_minutes}
+                onProgress={handleVideoProgress}
+                onComplete={markLessonComplete}
+              />
             </div>
           )}
 
