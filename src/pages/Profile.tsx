@@ -168,10 +168,11 @@ const Profile = () => {
                 </span>
               )}
           </div>
+            </div>
+          </div>
           <Button variant="destructive" onClick={handleSignOut} className="w-full h-10 text-[13px] font-semibold mt-4">
             <LogOut className="w-4 h-4 mr-2" /> Logout
           </Button>
-        </div>
         </div>
 
         {/* Tabs for student */}
