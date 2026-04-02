@@ -23,8 +23,9 @@ const INDIAN_STATES = [
 ];
 
 const Profile = () => {
-  const { user, profile, role, refetchProfile } = useAuth();
+  const { user, profile, role, signOut, refetchProfile } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
