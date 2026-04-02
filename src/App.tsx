@@ -38,6 +38,8 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Certificates = lazy(() => import("./pages/Certificates"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const AdminTeachers = lazy(() => import("./pages/AdminTeachers"));
+const AdminStudents = lazy(() => import("./pages/AdminStudents"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,6 +106,8 @@ const App = () => (
 
               {/* Admin Routes */}
               <Route path="/dashboard/users" element={<ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>} />
+              <Route path="/dashboard/teachers-manage" element={<ProtectedRoute allowedRoles={["admin"]}><AdminTeachers /></ProtectedRoute>} />
+              <Route path="/dashboard/students-manage" element={<ProtectedRoute allowedRoles={["admin"]}><AdminStudents /></ProtectedRoute>} />
               <Route path="/dashboard/all-courses" element={<ProtectedRoute allowedRoles={["admin"]}><StudentCourses /></ProtectedRoute>} />
               <Route path="/dashboard/analytics" element={<ProtectedRoute allowedRoles={["admin"]}><AdminAnalytics /></ProtectedRoute>} />
               <Route path="/dashboard/settings" element={<ProtectedRoute allowedRoles={["admin"]}><Dashboard /></ProtectedRoute>} />

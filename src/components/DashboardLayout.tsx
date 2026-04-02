@@ -15,7 +15,8 @@ import SearchBar from "@/components/SearchBar";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { role, profile, signOut } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isHi = language === "hi";
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -47,15 +48,16 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const adminLinks = [
     { to: "/dashboard", icon: LayoutDashboard, label: t("sidebar.dashboard") },
-    { to: "/dashboard/users", icon: Users, label: t("sidebar.users") },
+    { to: "/dashboard/teachers-manage", icon: GraduationCap, label: isHi ? "शिक्षक" : "Teachers" },
+    { to: "/dashboard/students-manage", icon: Users, label: isHi ? "छात्र" : "Students" },
     { to: "/dashboard/all-courses", icon: BookOpen, label: t("sidebar.courses") },
     { to: "/dashboard/live-classes", icon: Video, label: t("sidebar.liveClasses") },
     { to: "/dashboard/ai-test", icon: Sparkles, label: "AI Test" },
     { to: "/dashboard/manual-test", icon: PenTool, label: "Manual Test" },
     { to: "/dashboard/tests", icon: Brain, label: t("sidebar.tests") },
-    { to: "/dashboard/test-responses", icon: Eye, label: "Responses" },
+    { to: "/dashboard/test-responses", icon: Eye, label: isHi ? "रिस्पांस" : "Responses" },
     { to: "/dashboard/analytics", icon: BarChart3, label: t("sidebar.analytics") },
-    { to: "/dashboard/notifications", icon: Bell, label: "Notifications" },
+    { to: "/dashboard/notifications", icon: Bell, label: isHi ? "सूचनाएँ" : "Notifications" },
     { to: "/dashboard/settings", icon: Settings, label: t("sidebar.settings") },
   ];
 
