@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
 import NotificationPanel from "@/components/NotificationPanel";
+import SearchBar from "@/components/SearchBar";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { role, profile, signOut } = useAuth();
