@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Search, CheckCircle, XCircle, GraduationCap, Mail, Phone, MapPin, School } from "lucide-react";
+import { Search, CheckCircle, XCircle, GraduationCap, Phone, MapPin, School, Eye, Calendar, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 
 const AdminTeachers = () => {
@@ -15,21 +16,35 @@ const AdminTeachers = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("all");
+  const [selectedTeacher, setSelectedTeacher] = useState<any | null>(null);
 
   const fetchTeachers = async () => {
-    // Get all teacher role user_ids
     const { data: teacherRoles } = await supabase.from("user_roles").select("user_id").eq("role", "teacher");
     const teacherIds = (teacherRoles || []).map((r: any) => r.user_id);
     if (teacherIds.length === 0) { setTeachers([]); setLoading(false); return; }
 
     const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", teacherIds);
 
-    // Get course counts per teacher
     const { data: courses } = await supabase.from("courses").select("created_by").in("created_by", teacherIds);
     const courseCounts: Record<string, number> = {};
     (courses || []).forEach((c: any) => { courseCounts[c.created_by] = (courseCounts[c.created_by] || 0) + 1; });
 
-    const enriched = (profiles || []).map((p: any) => ({ ...p, courseCount: courseCounts[p.user_id] || 0 }));
+    // Get live class counts
+    const { data: liveClasses } = await supabase.from("live_classes").select("teacher_id").in("teacher_id", teacherIds);
+    const liveCounts: Record<string, number> = {};
+    (liveClasses || []).forEach((l: any) => { liveCounts[l.teacher_id] = (liveCounts[l.teacher_id] || 0) + 1; });
+
+    // Get test counts
+    const { data: tests } = await supabase.from("tests").select("created_by").in("created_by", teacherIds);
+    const testCounts: Record<string, number> = {};
+    (tests || []).forEach((t: any) => { if (t.created_by) testCounts[t.created_by] = (testCounts[t.created_by] || 0) + 1; });
+
+    const enriched = (profiles || []).map((p: any) => ({
+      ...p,
+      courseCount: courseCounts[p.user_id] || 0,
+      liveClassCount: liveCounts[p.user_id] || 0,
+      testCount: testCounts[p.user_id] || 0,
+    }));
     setTeachers(enriched);
     setLoading(false);
   };
@@ -41,6 +56,9 @@ const AdminTeachers = () => {
     if (error) { toast.error(error.message); return; }
     toast.success(verified ? (isHi ? "शिक्षक स्वीकृत!" : "Teacher approved!") : (isHi ? "स्वीकृति हटाई" : "Approval revoked"));
     fetchTeachers();
+    if (selectedTeacher?.user_id === userId) {
+      setSelectedTeacher((prev: any) => prev ? { ...prev, is_verified: verified } : null);
+    }
   };
 
   let filtered = teachers.filter(
@@ -147,6 +165,10 @@ const AdminTeachers = () => {
                 </div>
 
                 <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setSelectedTeacher(teacher)}
+                    className="flex-1 h-8 text-xs">
+                    <Eye className="w-3.5 h-3.5 mr-1" /> {isHi ? "विवरण देखें" : "View Details"}
+                  </Button>
                   {!teacher.is_verified ? (
                     <Button size="sm" onClick={() => handleVerify(teacher.user_id, true)}
                       className="flex-1 h-8 text-xs bg-emerald-500 hover:bg-emerald-600 text-white">
@@ -154,7 +176,7 @@ const AdminTeachers = () => {
                     </Button>
                   ) : (
                     <Button size="sm" variant="outline" onClick={() => handleVerify(teacher.user_id, false)}
-                      className="flex-1 h-8 text-xs text-muted-foreground">
+                      className="flex-1 h-8 text-xs text-destructive border-destructive/30 hover:bg-destructive/10">
                       <XCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "हटाएँ" : "Revoke"}
                     </Button>
                   )}
@@ -164,6 +186,101 @@ const AdminTeachers = () => {
           </div>
         )}
       </div>
+
+      {/* Teacher Detail Sheet */}
+      <Sheet open={!!selectedTeacher} onOpenChange={(open) => !open && setSelectedTeacher(null)}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="text-lg">{isHi ? "शिक्षक विवरण" : "Teacher Details"}</SheetTitle>
+          </SheetHeader>
+          {selectedTeacher && (
+            <div className="mt-6 space-y-5">
+              {/* Avatar & Name */}
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-xl font-bold text-primary shrink-0 overflow-hidden">
+                  {selectedTeacher.avatar_url ? (
+                    <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${selectedTeacher.avatar_url}`} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    selectedTeacher.full_name?.charAt(0)?.toUpperCase() || "T"
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">{selectedTeacher.full_name || "—"}</h3>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    selectedTeacher.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                  }`}>
+                    {selectedTeacher.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Bio */}
+              {selectedTeacher.bio && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground mb-1">{isHi ? "परिचय" : "Bio"}</p>
+                  <p className="text-sm text-foreground">{selectedTeacher.bio}</p>
+                </div>
+              )}
+
+              {/* Info Grid */}
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-muted-foreground">{isHi ? "संपर्क जानकारी" : "Contact Info"}</p>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {[
+                    { icon: Phone, label: isHi ? "फ़ोन" : "Phone", value: selectedTeacher.phone },
+                    { icon: School, label: isHi ? "स्कूल" : "School", value: selectedTeacher.school },
+                    { icon: MapPin, label: isHi ? "जिला" : "District", value: selectedTeacher.district },
+                    { icon: MapPin, label: isHi ? "राज्य" : "State", value: selectedTeacher.state },
+                    { icon: Calendar, label: isHi ? "शामिल हुए" : "Joined", value: selectedTeacher.created_at ? new Date(selectedTeacher.created_at).toLocaleDateString("en-IN") : null },
+                  ].filter(item => item.value).map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5 p-2.5 bg-muted/50 rounded-lg">
+                      <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">{item.label}</p>
+                        <p className="text-xs font-medium text-foreground">{item.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">{isHi ? "गतिविधि" : "Activity"}</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <p className="text-lg font-bold text-foreground">{selectedTeacher.courseCount}</p>
+                    <p className="text-[10px] text-muted-foreground">{isHi ? "कोर्स" : "Courses"}</p>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <p className="text-lg font-bold text-foreground">{selectedTeacher.liveClassCount}</p>
+                    <p className="text-[10px] text-muted-foreground">{isHi ? "लाइव क्लास" : "Live Classes"}</p>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <p className="text-lg font-bold text-foreground">{selectedTeacher.testCount}</p>
+                    <p className="text-[10px] text-muted-foreground">{isHi ? "टेस्ट" : "Tests"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-2">
+                {!selectedTeacher.is_verified ? (
+                  <Button onClick={() => handleVerify(selectedTeacher.user_id, true)}
+                    className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
+                    <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve"}
+                  </Button>
+                ) : (
+                  <Button variant="outline" onClick={() => handleVerify(selectedTeacher.user_id, false)}
+                    className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10">
+                    <XCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृति हटाएँ" : "Revoke Approval"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </DashboardLayout>
   );
 };
