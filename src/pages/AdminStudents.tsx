@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Search, CheckCircle, XCircle, Users, Phone, MapPin, School, Eye, Calendar, BookOpen } from "lucide-react";
+import { Search, CheckCircle, XCircle, Users, Phone, MapPin, School, Eye, Calendar, BookOpen, Ban, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
-type FilterType = "all" | "free" | "paid" | "pending" | "approved";
+type FilterType = "all" | "free" | "paid" | "pending" | "approved" | "disabled";
 
 const AdminStudents = () => {
   const { language } = useLanguage();
@@ -64,18 +65,40 @@ const AdminStudents = () => {
     }
   };
 
+  const handleDisable = async (userId: string, disable: boolean) => {
+    const { error } = await supabase.from("profiles").update({ is_disabled: disable }).eq("user_id", userId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(disable ? (isHi ? "खाता अक्षम किया!" : "Account disabled!") : (isHi ? "खाता सक्रिय किया!" : "Account enabled!"));
+    fetchStudents();
+    if (selectedStudent?.user_id === userId) {
+      setSelectedStudent((prev: any) => prev ? { ...prev, is_disabled: disable } : null);
+    }
+  };
+
+  const handleMakeTeacher = async (userId: string) => {
+    const { error: deleteErr } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "student");
+    if (deleteErr) { toast.error(deleteErr.message); return; }
+    const { error: insertErr } = await supabase.from("user_roles").insert({ user_id: userId, role: "teacher" });
+    if (insertErr) { toast.error(insertErr.message); return; }
+    toast.success(isHi ? "भूमिका बदली: अब शिक्षक है" : "Role changed: now a teacher");
+    setSelectedStudent(null);
+    fetchStudents();
+  };
+
   let filtered = students.filter(
     (p) => p.full_name?.toLowerCase().includes(search.toLowerCase()) || p.phone?.includes(search) || p.school?.toLowerCase().includes(search.toLowerCase())
   );
   if (filter === "free") filtered = filtered.filter((p) => p.is_free_student);
   if (filter === "paid") filtered = filtered.filter((p) => !p.is_free_student);
-  if (filter === "pending") filtered = filtered.filter((p) => !p.is_verified);
-  if (filter === "approved") filtered = filtered.filter((p) => p.is_verified);
+  if (filter === "pending") filtered = filtered.filter((p) => !p.is_verified && !p.is_disabled);
+  if (filter === "approved") filtered = filtered.filter((p) => p.is_verified && !p.is_disabled);
+  if (filter === "disabled") filtered = filtered.filter((p) => p.is_disabled);
 
   const freeCount = students.filter((p) => p.is_free_student).length;
   const paidCount = students.filter((p) => !p.is_free_student).length;
-  const pendingCount = students.filter((p) => !p.is_verified).length;
-  const approvedCount = students.filter((p) => p.is_verified).length;
+  const pendingCount = students.filter((p) => !p.is_verified && !p.is_disabled).length;
+  const approvedCount = students.filter((p) => p.is_verified && !p.is_disabled).length;
+  const disabledCount = students.filter((p) => p.is_disabled).length;
 
   return (
     <DashboardLayout>
@@ -96,17 +119,18 @@ const AdminStudents = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-5 gap-2 sm:gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
           {[
             { key: "all" as FilterType, count: students.length, label: isHi ? "कुल" : "Total", color: "text-foreground" },
             { key: "approved" as FilterType, count: approvedCount, label: isHi ? "स्वीकृत" : "Approved", color: "text-emerald-500" },
             { key: "pending" as FilterType, count: pendingCount, label: isHi ? "लंबित" : "Pending", color: "text-amber-500" },
             { key: "paid" as FilterType, count: paidCount, label: isHi ? "पेड" : "Paid", color: "text-primary" },
-            { key: "free" as FilterType, count: freeCount, label: isHi ? "मुफ़्त" : "Free", color: "text-destructive" },
+            { key: "free" as FilterType, count: freeCount, label: isHi ? "मुफ़्त" : "Free", color: "text-amber-500" },
+            { key: "disabled" as FilterType, count: disabledCount, label: isHi ? "अक्षम" : "Disabled", color: "text-destructive" },
           ].map((s) => (
-            <div key={s.key} className="bg-card rounded-xl p-2.5 sm:p-4 border border-border text-center cursor-pointer" onClick={() => setFilter(s.key)}>
-              <p className={`text-lg sm:text-2xl font-extrabold ${s.color}`}>{s.count}</p>
-              <p className="text-[9px] sm:text-sm text-muted-foreground">{s.label}</p>
+            <div key={s.key} className="bg-card rounded-xl p-2.5 sm:p-3 border border-border text-center cursor-pointer" onClick={() => setFilter(s.key)}>
+              <p className={`text-lg sm:text-xl font-extrabold ${s.color}`}>{s.count}</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground">{s.label}</p>
             </div>
           ))}
         </div>
@@ -119,6 +143,7 @@ const AdminStudents = () => {
             { key: "pending" as FilterType, label: `${isHi ? "लंबित" : "Pending"}${pendingCount > 0 ? ` (${pendingCount})` : ""}` },
             { key: "paid" as FilterType, label: isHi ? "पेड" : "Paid" },
             { key: "free" as FilterType, label: isHi ? "मुफ़्त" : "Free" },
+            { key: "disabled" as FilterType, label: isHi ? "अक्षम" : "Disabled" },
           ]).map((f) => (
             <button key={f.key} onClick={() => setFilter(f.key)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${filter === f.key ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
@@ -140,19 +165,23 @@ const AdminStudents = () => {
             {/* Mobile view */}
             <div className="sm:hidden space-y-2.5">
               {filtered.map((student) => (
-                <div key={student.id} className="bg-card rounded-xl p-3 border border-border">
+                <div key={student.id} className={`bg-card rounded-xl p-3 border ${student.is_disabled ? "border-destructive/30 opacity-60" : "border-border"}`}>
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                       {student.full_name?.charAt(0)?.toUpperCase() || "S"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-foreground truncate">{student.full_name || "—"}</p>
-                      <div className="flex items-center gap-1.5 mt-0.5">
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         {student.class_level && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{isHi ? "कक्षा" : "Class"} {student.class_level}</span>}
+                        {student.is_disabled ? (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">{isHi ? "अक्षम" : "Disabled"}</span>
+                        ) : (
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${student.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"}`}>
+                            {student.is_verified ? (isHi ? "स्वीकृत" : "✓") : (isHi ? "लंबित" : "⏳")}
+                          </span>
+                        )}
                         {student.is_free_student && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600">{isHi ? "मुफ़्त" : "Free"}</span>}
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${student.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"}`}>
-                          {student.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -166,13 +195,9 @@ const AdminStudents = () => {
                       <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={() => setSelectedStudent(student)}>
                         <Eye className="w-3 h-3" />
                       </Button>
-                      {!student.is_verified ? (
+                      {!student.is_disabled && !student.is_verified && (
                         <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-emerald-500" onClick={() => handleVerify(student.user_id, true)}>
                           <CheckCircle className="w-3 h-3" />
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-destructive" onClick={() => handleVerify(student.user_id, false)}>
-                          <XCircle className="w-3 h-3" />
                         </Button>
                       )}
                     </div>
@@ -199,7 +224,7 @@ const AdminStudents = () => {
                   </thead>
                   <tbody>
                     {filtered.map((student) => (
-                      <tr key={student.id} className="border-b border-border hover:bg-muted/30">
+                      <tr key={student.id} className={`border-b border-border hover:bg-muted/30 ${student.is_disabled ? "opacity-50" : ""}`}>
                         <td className="p-3">
                           <div className="flex items-center gap-2.5">
                             <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
@@ -217,12 +242,16 @@ const AdminStudents = () => {
                         <td className="p-3 text-xs text-center text-foreground font-medium">{student.testCount}</td>
                         <td className="p-3 text-xs text-center text-foreground font-medium">{student.avgScore != null ? `${student.avgScore}%` : "—"}</td>
                         <td className="p-3">
-                          <div className="flex gap-1">
-                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-                              student.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                            }`}>
-                              {student.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
-                            </span>
+                          <div className="flex gap-1 flex-wrap">
+                            {student.is_disabled ? (
+                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">{isHi ? "अक्षम" : "Disabled"}</span>
+                            ) : (
+                              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                                student.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                              }`}>
+                                {student.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
+                              </span>
+                            )}
                             {student.is_free_student && (
                               <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
                                 {isHi ? "मुफ़्त" : "Free"}
@@ -235,13 +264,19 @@ const AdminStudents = () => {
                             <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => setSelectedStudent(student)}>
                               <Eye className="w-3.5 h-3.5" />
                             </Button>
-                            {!student.is_verified ? (
+                            {!student.is_disabled && !student.is_verified && (
                               <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-500" onClick={() => handleVerify(student.user_id, true)}>
                                 <CheckCircle className="w-3.5 h-3.5" />
                               </Button>
-                            ) : (
-                              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-destructive" onClick={() => handleVerify(student.user_id, false)}>
-                                <XCircle className="w-3.5 h-3.5" />
+                            )}
+                            {!student.is_disabled && student.is_verified && (
+                              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-destructive" onClick={() => handleDisable(student.user_id, true)}>
+                                <Ban className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                            {student.is_disabled && (
+                              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-500" onClick={() => handleDisable(student.user_id, false)}>
+                                <CheckCircle className="w-3.5 h-3.5" />
                               </Button>
                             )}
                           </div>
@@ -275,16 +310,18 @@ const AdminStudents = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-foreground">{selectedStudent.full_name || "—"}</h3>
-                  <div className="flex gap-1.5 mt-1">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      selectedStudent.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                    }`}>
-                      {selectedStudent.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
-                    </span>
-                    {selectedStudent.is_free_student && (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                        {isHi ? "मुफ़्त" : "Free"}
+                  <div className="flex gap-1.5 mt-1 flex-wrap">
+                    {selectedStudent.is_disabled ? (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">{isHi ? "अक्षम" : "Disabled"}</span>
+                    ) : (
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        selectedStudent.is_verified ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                      }`}>
+                        {selectedStudent.is_verified ? (isHi ? "स्वीकृत" : "Approved") : (isHi ? "लंबित" : "Pending")}
                       </span>
+                    )}
+                    {selectedStudent.is_free_student && (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">{isHi ? "मुफ़्त" : "Free"}</span>
                     )}
                   </div>
                 </div>
@@ -334,18 +371,59 @@ const AdminStudents = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                {!selectedStudent.is_verified ? (
-                  <Button onClick={() => handleVerify(selectedStudent.user_id, true)}
-                    className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
-                    <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve"}
-                  </Button>
-                ) : (
-                  <Button variant="outline" onClick={() => handleVerify(selectedStudent.user_id, false)}
-                    className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10">
-                    <XCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृति हटाएँ" : "Revoke Approval"}
-                  </Button>
+              <div className="space-y-2 pt-2">
+                {/* Approve / Revoke */}
+                {!selectedStudent.is_disabled && (
+                  <div className="flex gap-2">
+                    {!selectedStudent.is_verified ? (
+                      <Button onClick={() => handleVerify(selectedStudent.user_id, true)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
+                        <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve"}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => handleVerify(selectedStudent.user_id, false)} className="flex-1 text-amber-600 border-amber-500/30 hover:bg-amber-500/10">
+                        <XCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृति हटाएँ" : "Revoke Approval"}
+                      </Button>
+                    )}
+                  </div>
                 )}
+
+                {/* Disable / Enable */}
+                <div className="flex gap-2">
+                  {!selectedStudent.is_disabled ? (
+                    <Button variant="outline" onClick={() => handleDisable(selectedStudent.user_id, true)} className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10">
+                      <Ban className="w-4 h-4 mr-1.5" /> {isHi ? "खाता अक्षम करें" : "Disable Account"}
+                    </Button>
+                  ) : (
+                    <Button onClick={() => handleDisable(selectedStudent.user_id, false)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
+                      <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "खाता सक्रिय करें" : "Enable Account"}
+                    </Button>
+                  )}
+                </div>
+
+                {/* Make teacher */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      <Shield className="w-4 h-4 mr-1.5" /> {isHi ? "शिक्षक बनाएँ" : "Make Teacher"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{isHi ? "क्या आप सुनिश्चित हैं?" : "Are you sure?"}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {isHi
+                          ? `${selectedStudent.full_name} को छात्र से शिक्षक बना दिया जाएगा।`
+                          : `${selectedStudent.full_name} will be changed from Student to Teacher.`}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{isHi ? "रद्द करें" : "Cancel"}</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleMakeTeacher(selectedStudent.user_id)}>
+                        {isHi ? "हाँ, बदलें" : "Yes, Change Role"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           )}

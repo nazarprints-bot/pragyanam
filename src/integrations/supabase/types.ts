@@ -483,6 +483,7 @@ export type Database = {
           district: string | null
           full_name: string
           id: string
+          is_disabled: boolean | null
           is_free_student: boolean | null
           is_verified: boolean | null
           language: Database["public"]["Enums"]["app_language"]
@@ -502,6 +503,7 @@ export type Database = {
           district?: string | null
           full_name?: string
           id?: string
+          is_disabled?: boolean | null
           is_free_student?: boolean | null
           is_verified?: boolean | null
           language?: Database["public"]["Enums"]["app_language"]
@@ -521,6 +523,7 @@ export type Database = {
           district?: string | null
           full_name?: string
           id?: string
+          is_disabled?: boolean | null
           is_free_student?: boolean | null
           is_verified?: boolean | null
           language?: Database["public"]["Enums"]["app_language"]
