@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Search, CheckCircle, XCircle, GraduationCap, Phone, MapPin, School, Eye, Calendar, Ban, UserX, Shield, BookOpen, Clock, Award, Users } from "lucide-react";
+import { Search, CheckCircle, XCircle, GraduationCap, Phone, MapPin, School, Eye, Calendar, Ban, UserX, Shield, BookOpen, Clock, Award, Users, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -105,6 +105,16 @@ const AdminTeachers = () => {
     const { error: insertErr } = await supabase.from("user_roles").insert({ user_id: userId, role: "student" });
     if (insertErr) { toast.error(insertErr.message); return; }
     toast.success(isHi ? "शिक्षक भूमिका हटाई, अब छात्र है" : "Teacher role removed, now a student");
+    setSelectedTeacher(null);
+    fetchTeachers();
+  };
+
+  const handleDelete = async (userId: string) => {
+    const { error: roleErr } = await supabase.from("user_roles").delete().eq("user_id", userId);
+    if (roleErr) { toast.error(roleErr.message); return; }
+    const { error: profErr } = await supabase.from("profiles").delete().eq("user_id", userId);
+    if (profErr) { toast.error(profErr.message); return; }
+    toast.success(isHi ? "उपयोगकर्ता हटाया गया" : "User deleted");
     setSelectedTeacher(null);
     fetchTeachers();
   };
@@ -421,6 +431,30 @@ const AdminTeachers = () => {
                         <AlertDialogCancel>{isHi ? "रद्द करें" : "Cancel"}</AlertDialogCancel>
                         <AlertDialogAction onClick={() => handleRemoveRole(selectedTeacher.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                           {isHi ? "हाँ, हटाएँ" : "Yes, Remove"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10">
+                        <Trash2 className="w-4 h-4 mr-1.5" /> {isHi ? "खाता हटाएँ (डिलीट)" : "Delete Account"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{isHi ? "क्या आप सुनिश्चित हैं?" : "Are you sure?"}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {isHi
+                            ? `${selectedTeacher.full_name} का खाता स्थायी रूप से हटा दिया जाएगा। यह वापस नहीं किया जा सकता।`
+                            : `${selectedTeacher.full_name}'s account will be permanently deleted. This cannot be undone.`}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{isHi ? "रद्द करें" : "Cancel"}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(selectedTeacher.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          {isHi ? "हाँ, हटाएँ" : "Yes, Delete"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

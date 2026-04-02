@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { GraduationCap, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import PlanSelection from "@/components/PlanSelection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,8 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPlanSelection, setShowPlanSelection] = useState(false);
+  const [signedUpUserId, setSignedUpUserId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "", password: "", fullName: "",
     role: "student" as "student" | "teacher",
@@ -37,6 +40,30 @@ const Auth = () => {
   });
 
   const isStudent = formData.role === "student";
+
+  const handlePlanSelect = async (plan: "paid" | "free") => {
+    if (!signedUpUserId) return;
+    setLoading(true);
+    try {
+      const now = new Date();
+      const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      await supabase.from("profiles").update({
+        subscription_plan: plan,
+        is_free_student: plan === "free",
+        trial_starts_at: plan === "paid" ? now.toISOString() : null,
+        trial_ends_at: plan === "paid" ? trialEnd.toISOString() : null,
+        is_verified: plan === "paid" ? true : false,
+      }).eq("user_id", signedUpUserId);
+
+      if (plan === "paid") {
+        toast.success("🎉 7-day free trial started! Enjoy full access.");
+      } else {
+        toast.success("Request sent! Admin will approve your free access.");
+      }
+      navigate("/dashboard");
+    } catch (error: any) { toast.error(error.message); }
+    finally { setLoading(false); }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +117,14 @@ const Auth = () => {
             qualification: !isStudent ? formData.qualification : null,
             subjects_taught: !isStudent ? formData.subjectsTaught : null,
           }).eq("user_id", user.id);
+
+          // Students see plan selection; teachers go directly
+          if (isStudent) {
+            setSignedUpUserId(user.id);
+            setShowPlanSelection(true);
+            setLoading(false);
+            return;
+          }
         }
 
         toast.success(t("auth.accountCreated"));
@@ -132,6 +167,10 @@ const Auth = () => {
               <span className="text-[15px] font-semibold text-foreground tracking-tight">Pragyanam</span>
             </div>
 
+            {showPlanSelection ? (
+              <PlanSelection onSelect={handlePlanSelect} loading={loading} />
+            ) : (
+            <>
             <h2 className="text-xl font-bold text-foreground tracking-tight mb-1">
               {isLogin ? t("auth.welcomeBack") : t("auth.createAccount")}
             </h2>
@@ -252,6 +291,8 @@ const Auth = () => {
                 {isLogin ? t("auth.signUp") : t("auth.signIn")}
               </button>
             </p>
+            </>
+            )}
           </div>
         </motion.div>
       </div>
