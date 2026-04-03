@@ -175,15 +175,15 @@ const LiveClasses = () => {
           destroyJitsi();
           const roomName = `pragyanam-live-${activeClassId}`;
           const displayName = profile?.full_name || user?.email || "User";
+          // Teacher = presenter/broadcaster, Students = viewers (livestream feel)
           const teacherToolbar = [
             'microphone', 'camera', 'toggle-camera', 'desktop', 'fullscreen',
-            'fodeviceselection', 'hangup', 'chat', 'raisehand',
+            'fodeviceselection', 'hangup', 'raisehand',
             'tileview', 'settings', 'videoquality', 'recording',
-            'participants-pane', 'noisesuppression',
+            'participants-pane', 'noisesuppression', 'whiteboard',
           ];
           const studentToolbar = [
-            'microphone', 'camera', 'toggle-camera', 'raisehand', 'chat',
-            'tileview', 'fullscreen', 'videoquality', 'select-background',
+            'raisehand', 'fullscreen', 'tileview',
           ];
           const options: any = {
             roomName,
@@ -192,65 +192,105 @@ const LiveClasses = () => {
             height: "100%",
             userInfo: { displayName },
             configOverwrite: {
+              // Instant join — no lobby, no prejoin
               prejoinConfig: { enabled: false },
-              startWithAudioMuted: !isTeacherOrAdmin,
-              startWithVideoMuted: !isTeacherOrAdmin,
               enableLobby: false, enableLobbyChat: false, hideLobbyButton: true,
               requireDisplayName: false, enableWelcomePage: false, disableDeepLinking: true,
-              disableModeratorIndicator: !isTeacherOrAdmin,
-              hideConferenceSubject: true,
-              hideConferenceTimer: false,
-              notifications: isTeacherOrAdmin ? undefined : [],
-              toolbarButtons: isTeacherOrAdmin ? teacherToolbar : studentToolbar,
-              disableRemoteMute: !isTeacherOrAdmin,
-              remoteVideoMenu: { disabled: !isTeacherOrAdmin },
-              resolution: isTeacherOrAdmin ? 1080 : 720,
-              constraints: {
-                video: {
-                  height: { ideal: isTeacherOrAdmin ? 1080 : 720, max: 1080, min: 360 },
-                  width: { ideal: isTeacherOrAdmin ? 1920 : 1280, max: 1920 },
-                  frameRate: { ideal: 30, max: 30, min: 15 },
-                },
-              },
-              enableLayerSuspension: true,
-              channelLastN: isTeacherOrAdmin ? 10 : 6,
-              p2p: { enabled: false },
-              disableAudioLevels: true,
-              enableNoisyMicDetection: false,
-              preferH264: true,
-              disableH264: false,
-              maxFullResolutionParticipants: 2,
-              videoQuality: {
-                disabledCodec: '',
-                preferredCodec: 'H264',
-                maxBitratesVideo: {
-                  low: 200000, standard: 500000, high: 2500000, ssHigh: 2500000,
-                },
-              },
-              adaptiveLastN: true,
-              startVideoMuted: !isTeacherOrAdmin ? 10 : undefined,
               enableClosePage: false,
               enableInsecureRoomNameWarning: false,
+
+              // Teacher = unmuted, Students = muted (livestream style)
+              startWithAudioMuted: !isTeacherOrAdmin,
+              startWithVideoMuted: !isTeacherOrAdmin,
+              // Auto-mute students' video after teacher joins (saves bandwidth)
+              startVideoMuted: !isTeacherOrAdmin ? 0 : undefined,
+              startAudioMuted: !isTeacherOrAdmin ? 0 : undefined,
+
+              // Students can't unmute themselves — teacher controls
+              disableRemoteMute: !isTeacherOrAdmin,
+              remoteVideoMenu: { disabled: !isTeacherOrAdmin },
+              disableModeratorIndicator: !isTeacherOrAdmin,
+
+              // Hide meeting-like UI for students
+              hideConferenceSubject: true,
+              hideConferenceTimer: !isTeacherOrAdmin,
+              notifications: isTeacherOrAdmin ? undefined : [],
+              toolbarButtons: isTeacherOrAdmin ? teacherToolbar : studentToolbar,
+
+              // HIGH QUALITY video — teacher broadcasts in HD
+              resolution: 1080,
+              constraints: {
+                video: {
+                  height: { ideal: 1080, max: 1080, min: 480 },
+                  width: { ideal: 1920, max: 1920 },
+                  frameRate: { ideal: 30, max: 30, min: 24 },
+                },
+              },
+              videoQuality: {
+                disabledCodec: '',
+                preferredCodec: 'VP9',
+                maxBitratesVideo: {
+                  low: 300000,
+                  standard: 1000000,
+                  high: 3500000,
+                  ssHigh: 3500000,
+                },
+              },
+
+              // Performance — focus bandwidth on teacher's video
+              enableLayerSuspension: true,
+              channelLastN: isTeacherOrAdmin ? 25 : 1, // Students only see teacher
+              p2p: { enabled: false },
+              maxFullResolutionParticipants: 1,
+              adaptiveLastN: true,
+
+              // Audio quality
+              disableAudioLevels: !isTeacherOrAdmin,
+              enableNoisyMicDetection: isTeacherOrAdmin,
               enableNoAudioDetection: true,
               enableNoiseSuppression: true,
-              disableSelfView: false,
-              disableSelfViewSettings: false,
+              stereo: false,
+              disableAP: false,
+
+              // Filmstrip — students don't need to see other students
+              filmstrip: {
+                disableStageFilmstrip: !isTeacherOrAdmin,
+                maxSnippetHeight: isTeacherOrAdmin ? 120 : 0,
+              },
+
+              // Disable self-view for students (they're watching, not presenting)
+              disableSelfView: !isTeacherOrAdmin,
+              disableSelfViewSettings: !isTeacherOrAdmin,
+
+              // Follow-me: teacher's view controls what students see
+              followMe: { enabled: isTeacherOrAdmin },
             },
             interfaceConfigOverwrite: {
               SHOW_JITSI_WATERMARK: false, SHOW_WATERMARK_FOR_GUESTS: false,
-              TOOLBAR_ALWAYS_VISIBLE: true,
-              DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
-              FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? 140 : 100,
+              TOOLBAR_ALWAYS_VISIBLE: isTeacherOrAdmin,
+              TOOLBAR_TIMEOUT: isTeacherOrAdmin ? 8000 : 3000,
+              DISABLE_JOIN_LEAVE_NOTIFICATIONS: !isTeacherOrAdmin,
+              // Students see teacher fullscreen — no filmstrip
+              FILM_STRIP_MAX_HEIGHT: isTeacherOrAdmin ? 120 : 0,
+              VERTICAL_FILMSTRIP: false,
               HIDE_INVITE_MORE_HEADER: true,
-              DEFAULT_BACKGROUND: '#0a0a0a',
+              DEFAULT_BACKGROUND: '#000000',
               OPTIMAL_BROWSERS: ['chrome', 'chromium', 'edge', 'safari'],
-              VIDEO_QUALITY_LABEL_DISABLED: false,
+              VIDEO_QUALITY_LABEL_DISABLED: !isTeacherOrAdmin,
               MOBILE_APP_PROMO: false,
               DISABLE_RINGING: true,
-              TOOLBAR_TIMEOUT: 4000,
               DEFAULT_REMOTE_DISPLAY_NAME: 'Student',
               GENERATE_ROOMNAMES_ON_WELCOME_PAGE: false,
               RECENT_LIST_ENABLED: false,
+              // Hide distracting UI for students
+              DISABLE_FOCUS_INDICATOR: true,
+              DISABLE_DOMINANT_SPEAKER_INDICATOR: !isTeacherOrAdmin,
+              DISABLE_TRANSCRIPTION_SUBTITLES: true,
+              DISABLE_VIDEO_BACKGROUND: !isTeacherOrAdmin,
+              INITIAL_TOOLBAR_TIMEOUT: isTeacherOrAdmin ? 8000 : 2000,
+              SETTINGS_SECTIONS: isTeacherOrAdmin
+                ? ['devices', 'language', 'moderator', 'profile', 'calendar', 'notifications']
+                : [],
             },
           };
           jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("meet.jit.si", options);
