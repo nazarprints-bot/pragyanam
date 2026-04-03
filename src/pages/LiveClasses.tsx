@@ -415,6 +415,26 @@ const LiveClasses = () => {
             <div className="flex-1 flex flex-col min-w-0 min-h-0">
               <div ref={videoWrapperRef} className="relative w-full bg-black flex-1 min-h-[300px] lg:min-h-0">
                 <div ref={jitsiContainerRef} className="absolute inset-0 w-full h-full" style={{ minHeight: '280px' }} />
+                {/* Loading / Error overlay */}
+                {(jitsiLoading || jitsiError) && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 text-white">
+                    {jitsiLoading && !jitsiError && (
+                      <>
+                        <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mb-3" />
+                        <p className="text-sm">Connecting to class...</p>
+                      </>
+                    )}
+                    {jitsiError && (
+                      <>
+                        <X className="w-10 h-10 text-destructive mb-3" />
+                        <p className="text-sm text-center px-4">{jitsiError}</p>
+                        <Button variant="outline" size="sm" className="mt-3" onClick={() => { setJitsiError(null); handleLeaveClass(); }}>
+                          Go Back
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
                 {/* Fullscreen toggle */}
                 <button onClick={toggleFullscreen}
                   className="absolute top-3 right-3 z-10 bg-black/50 hover:bg-black/70 text-white rounded-lg p-2 transition-all backdrop-blur-sm group"
