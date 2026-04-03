@@ -483,7 +483,9 @@ const LiveClasses = () => {
                 </button>
                 {/* HD badge */}
                 <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
-                  <span className="bg-emerald-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">HD</span>
+                  <span className="bg-emerald-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                    {isTeacherOrAdmin ? 'HD BROADCASTING' : 'HD LIVE'}
+                  </span>
                   {activeClass?.updated_at && (
                     <span className="sm:hidden bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm flex items-center gap-1">
                       <Clock className="w-2.5 h-2.5" />
