@@ -382,11 +382,11 @@ const LiveClasses = () => {
             </motion.div>
           )}
 
-          <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+          <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
             {/* Video area */}
-            <div className="flex-1 flex flex-col min-w-0">
-              <div ref={videoWrapperRef} className="relative w-full bg-black flex-1">
-                <div ref={jitsiContainerRef} className="absolute inset-0 w-full h-full" />
+            <div className="flex-1 flex flex-col min-w-0 min-h-0">
+              <div ref={videoWrapperRef} className="relative w-full bg-black flex-1 min-h-[300px] lg:min-h-0">
+                <div ref={jitsiContainerRef} className="absolute inset-0 w-full h-full" style={{ minHeight: '280px' }} />
                 {/* Fullscreen toggle */}
                 <button onClick={toggleFullscreen}
                   className="absolute top-3 right-3 z-10 bg-black/50 hover:bg-black/70 text-white rounded-lg p-2 transition-all backdrop-blur-sm group"
