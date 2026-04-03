@@ -477,7 +477,7 @@ const LiveClasses = () => {
                   animate={{ width: "auto", opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="h-[280px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-l border-border overflow-hidden"
+                  className="h-[200px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-t lg:border-t-0 border-l-0 lg:border-l border-border overflow-hidden"
                 >
                   <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
                 </motion.div>
