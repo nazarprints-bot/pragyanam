@@ -325,29 +325,29 @@ const AdminTeachers = () => {
                 </motion.div>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-5">
                 {/* Bio */}
-                {selectedTeacher.bio && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "परिचय" : "About"}</p>
-                    <p className="text-sm text-foreground leading-relaxed bg-muted/30 rounded-xl p-3">{selectedTeacher.bio}</p>
-                  </motion.div>
-                )}
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "परिचय" : "About"}</p>
+                  <p className={`text-sm leading-relaxed bg-muted/30 rounded-xl p-3 ${selectedTeacher.bio ? "text-foreground" : "text-muted-foreground italic"}`}>
+                    {selectedTeacher.bio || (isHi ? "कोई परिचय नहीं जोड़ा" : "No bio added")}
+                  </p>
+                </div>
 
                 {/* Qualification & Experience */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "शिक्षा और अनुभव" : "Education & Experience"}</p>
                   <div className="grid grid-cols-1 gap-2">
-                    <DetailRow icon={Award} label={isHi ? "योग्यता" : "Qualification"} value={selectedTeacher.qualification || (isHi ? "अपडेट नहीं किया" : "Not updated")} />
-                    <DetailRow icon={Clock} label={isHi ? "अनुभव" : "Experience"} value={selectedTeacher.experience_years ? `${selectedTeacher.experience_years} ${isHi ? "वर्ष" : "years"}` : (isHi ? "अपडेट नहीं किया" : "Not updated")} />
-                    <DetailRow icon={BookOpen} label={isHi ? "विषय" : "Subjects Taught"} value={selectedTeacher.subjects_taught || (isHi ? "अपडेट नहीं किया" : "Not updated")} />
+                    <DetailRow icon={Award} label={isHi ? "योग्यता" : "Qualification"} value={selectedTeacher.qualification} />
+                    <DetailRow icon={Clock} label={isHi ? "अनुभव" : "Experience"} value={selectedTeacher.experience_years ? `${selectedTeacher.experience_years} ${isHi ? "वर्ष" : "years"}` : null} />
+                    <DetailRow icon={BookOpen} label={isHi ? "विषय" : "Subjects Taught"} value={selectedTeacher.subjects_taught} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Contact Info */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "संपर्क और स्थान" : "Contact & Location"}</p>
                   <div className="grid grid-cols-1 gap-2">
                     <DetailRow icon={Phone} label={isHi ? "फ़ोन नंबर" : "Phone Number"} value={selectedTeacher.phone} />
@@ -356,40 +356,39 @@ const AdminTeachers = () => {
                     <DetailRow icon={MapPin} label={isHi ? "राज्य" : "State"} value={selectedTeacher.state} />
                     <DetailRow icon={Calendar} label={isHi ? "शामिल हुए" : "Joined"} value={selectedTeacher.created_at ? new Date(selectedTeacher.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : null} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Activity Stats */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{isHi ? "गतिविधि सारांश" : "Activity Summary"}</p>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {[
                       { val: selectedTeacher.courseCount, label: isHi ? "कोर्स बनाए" : "Courses Created", icon: BookOpen, color: "text-primary" },
                       { val: selectedTeacher.studentCount, label: isHi ? "कुल छात्र" : "Total Students", icon: Users, color: "text-emerald-500" },
                       { val: selectedTeacher.liveClassCount, label: isHi ? "लाइव क्लासेज" : "Live Classes", icon: Clock, color: "text-amber-500" },
                       { val: selectedTeacher.testCount, label: isHi ? "टेस्ट बनाए" : "Tests Created", icon: Award, color: "text-primary" },
-                    ].map((s, i) => (
-                      <motion.div key={s.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.05 }}
-                        className="text-center p-3 bg-muted/40 rounded-xl hover:bg-muted/60 transition-colors">
-                        <s.icon className={`w-5 h-5 mx-auto mb-1.5 ${s.color}`} />
-                        <p className="text-xl font-bold text-foreground">{s.val}</p>
-                        <p className="text-[10px] text-muted-foreground">{s.label}</p>
-                      </motion.div>
+                    ].map((s) => (
+                      <div key={s.label} className="text-center p-2.5 bg-muted/40 rounded-xl">
+                        <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
+                        <p className="text-lg font-bold text-foreground">{s.val}</p>
+                        <p className="text-[9px] text-muted-foreground">{s.label}</p>
+                      </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Actions */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="space-y-2">
+                <div className="space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "कार्रवाई" : "Actions"}</p>
 
                   {!selectedTeacher.is_disabled && (
                     <div className="flex gap-2">
                       {!selectedTeacher.is_verified ? (
-                        <Button onClick={() => handleVerify(selectedTeacher.user_id, true)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-[1.02] transition-transform">
+                        <Button onClick={() => handleVerify(selectedTeacher.user_id, true)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white">
                           <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve Teacher"}
                         </Button>
                       ) : (
@@ -459,7 +458,7 @@ const AdminTeachers = () => {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </motion.div>
+                </div>
               </div>
             </div>
           )}
