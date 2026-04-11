@@ -167,6 +167,9 @@ const translations: Record<string, Record<Language, string>> = {
   "auth.districtPlaceholder": { en: "Enter district", hi: "ज़िला लिखें" },
   "auth.fillAllFields": { en: "Please fill all required fields", hi: "कृपया सभी आवश्यक फ़ील्ड भरें" },
   "auth.accountCreated": { en: "Account created! Please verify your email.", hi: "खाता बन गया! कृपया अपना ईमेल वेरिफ़ाई करें।" },
+  "auth.iAgree": { en: "I agree to the", hi: "मैं सहमत हूँ" },
+  "auth.terms": { en: "Terms & Conditions", hi: "नियम और शर्तें" },
+  "auth.privacy": { en: "Privacy Policy", hi: "गोपनीयता नीति" },
 
   // Dashboard
   "dash.goodMorning": { en: "Good Morning", hi: "सुप्रभात" },
