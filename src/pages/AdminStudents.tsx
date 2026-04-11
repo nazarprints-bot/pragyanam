@@ -131,17 +131,17 @@ const AdminStudents = () => {
   const disabledCount = students.filter((p) => p.is_disabled).length;
 
   const DetailRow = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null | undefined }) => {
-    if (!value) return null;
+    const displayValue = value || (isHi ? "अपडेट नहीं किया" : "Not updated");
     return (
-      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted/60 transition-colors">
-        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-primary" />
+      <div className="flex items-center gap-3 p-2.5 bg-muted/40 rounded-xl">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="w-3.5 h-3.5 text-primary" />
         </div>
         <div className="min-w-0">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-          <p className="text-sm font-medium text-foreground truncate">{value}</p>
+          <p className={`text-sm font-medium truncate ${value ? "text-foreground" : "text-muted-foreground italic"}`}>{displayValue}</p>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
@@ -330,32 +330,44 @@ const AdminStudents = () => {
                 </motion.div>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-5">
+                {/* Subscription Info */}
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "सदस्यता" : "Subscription"}</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <DetailRow icon={Award} label={isHi ? "प्लान" : "Plan"} value={selectedStudent.is_free_student ? (isHi ? "मुफ़्त" : "Free") : (isHi ? "पेड" : "Paid")} />
+                    <DetailRow icon={Calendar} label={isHi ? "ट्रायल शुरू" : "Trial Start"} value={selectedStudent.trial_starts_at ? new Date(selectedStudent.trial_starts_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null} />
+                    <DetailRow icon={Calendar} label={isHi ? "ट्रायल समाप्त" : "Trial End"} value={selectedStudent.trial_ends_at ? new Date(selectedStudent.trial_ends_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null} />
+                  </div>
+                </div>
+
+                <Separator />
+
                 {/* Academic Info */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "शैक्षणिक जानकारी" : "Academic Info"}</p>
                   <div className="grid grid-cols-1 gap-2">
-                    <DetailRow icon={GraduationCap} label={isHi ? "कक्षा" : "Class Level"} value={selectedStudent.class_level ? `${isHi ? "कक्षा" : "Class"} ${selectedStudent.class_level}` : (isHi ? "अपडेट नहीं किया" : "Not updated")} />
-                    <DetailRow icon={BookOpen} label={isHi ? "बोर्ड" : "Board"} value={selectedStudent.board || (isHi ? "अपडेट नहीं किया" : "Not updated")} />
+                    <DetailRow icon={GraduationCap} label={isHi ? "कक्षा" : "Class Level"} value={selectedStudent.class_level ? `${isHi ? "कक्षा" : "Class"} ${selectedStudent.class_level}` : null} />
+                    <DetailRow icon={BookOpen} label={isHi ? "बोर्ड" : "Board"} value={selectedStudent.board} />
                     <DetailRow icon={Award} label={isHi ? "भाषा" : "Preferred Language"} value={selectedStudent.language === "hindi" ? "हिंदी" : "English"} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Contact Info */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "संपर्क जानकारी" : "Contact Info"}</p>
                   <div className="grid grid-cols-1 gap-2">
                     <DetailRow icon={Phone} label={isHi ? "फ़ोन नंबर" : "Phone Number"} value={selectedStudent.phone} />
                     <DetailRow icon={Phone} label={isHi ? "अभिभावक फ़ोन" : "Parent's Phone"} value={selectedStudent.parent_phone} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* School & Location */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "स्कूल और स्थान" : "School & Location"}</p>
                   <div className="grid grid-cols-1 gap-2">
                     <DetailRow icon={School} label={isHi ? "स्कूल का नाम" : "School Name"} value={selectedStudent.school} />
@@ -363,34 +375,33 @@ const AdminStudents = () => {
                     <DetailRow icon={MapPin} label={isHi ? "राज्य" : "State"} value={selectedStudent.state} />
                     <DetailRow icon={Calendar} label={isHi ? "शामिल हुए" : "Joined"} value={selectedStudent.created_at ? new Date(selectedStudent.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : null} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Activity Stats */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{isHi ? "गतिविधि सारांश" : "Activity Summary"}</p>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {[
                       { val: selectedStudent.enrollCount, label: isHi ? "कोर्स एनरोल" : "Enrolled Courses", icon: BookOpen, color: "text-primary" },
                       { val: selectedStudent.testCount, label: isHi ? "टेस्ट दिए" : "Tests Taken", icon: Award, color: "text-amber-500" },
                       { val: selectedStudent.avgScore != null ? `${selectedStudent.avgScore}%` : "—", label: isHi ? "औसत स्कोर" : "Avg Score", icon: GraduationCap, color: "text-emerald-500" },
                       { val: selectedStudent.doubtCount, label: isHi ? "डाउट पूछे" : "Doubts Asked", icon: Users, color: "text-primary" },
-                    ].map((s, i) => (
-                      <motion.div key={s.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.05 }}
-                        className="text-center p-3 bg-muted/40 rounded-xl hover:bg-muted/60 transition-colors">
-                        <s.icon className={`w-5 h-5 mx-auto mb-1.5 ${s.color}`} />
-                        <p className="text-xl font-bold text-foreground">{s.val}</p>
-                        <p className="text-[10px] text-muted-foreground">{s.label}</p>
-                      </motion.div>
+                    ].map((s) => (
+                      <div key={s.label} className="text-center p-2.5 bg-muted/40 rounded-xl">
+                        <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
+                        <p className="text-lg font-bold text-foreground">{s.val}</p>
+                        <p className="text-[9px] text-muted-foreground">{s.label}</p>
+                      </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Actions */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="space-y-2">
+                <div className="space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "कार्रवाई" : "Actions"}</p>
 
                   {!selectedStudent.is_disabled && selectedStudent.is_free_student && (
@@ -466,7 +477,7 @@ const AdminStudents = () => {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </motion.div>
+                </div>
               </div>
             </div>
           )}
