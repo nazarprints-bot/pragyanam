@@ -602,7 +602,7 @@ const CourseDetail = () => {
         )}
 
         {/* Live Classes */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
               <Video className="w-5 h-5 text-destructive" /> {isHi ? "लाइव क्लास" : "Live Classes"}
@@ -666,7 +666,7 @@ const CourseDetail = () => {
         </div>
 
         {/* =========== SUBJECT → CHAPTER → LESSON HIERARCHY =========== */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2 mb-4">
             <BookOpen className="w-5 h-5 text-primary" /> {isHi ? "पाठ्यक्रम" : "Syllabus"} ({totalLessons} {isHi ? "पाठ" : "lessons"})
           </h2>
@@ -770,7 +770,7 @@ const CourseDetail = () => {
 
         {/* Course Tests */}
         {courseTests.length > 0 && (
-          <div className="bg-card rounded-2xl p-6 border border-border">
+          <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
             <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
               📝 {isHi ? "कोर्स टेस्ट" : "Course Tests"}
             </h2>
@@ -791,7 +791,7 @@ const CourseDetail = () => {
         )}
 
         {/* Course-Level Doubt Forum */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground mb-3 flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" /> {isHi ? "कोर्स डाउट फोरम" : "Course Doubt Forum"}
           </h2>
@@ -802,7 +802,7 @@ const CourseDetail = () => {
 
         {/* Enrolled Students - Teacher Only */}
         {canManage && (
-          <div className="bg-card rounded-2xl p-6 border border-border">
+          <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
             <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" /> {isHi ? "नामांकित छात्र" : "Enrolled Students"} ({enrolledStudents.length})
             </h2>
