@@ -131,17 +131,17 @@ const AdminTeachers = () => {
   const disabledCount = teachers.filter((p) => p.is_disabled).length;
 
   const DetailRow = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null | undefined }) => {
-    if (!value) return null;
+    const displayValue = value || (isHi ? "अपडेट नहीं किया" : "Not updated");
     return (
-      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted/60 transition-colors">
-        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-primary" />
+      <div className="flex items-center gap-3 p-2.5 bg-muted/40 rounded-xl">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="w-3.5 h-3.5 text-primary" />
         </div>
         <div className="min-w-0">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
-          <p className="text-sm font-medium text-foreground truncate">{value}</p>
+          <p className={`text-sm font-medium truncate ${value ? "text-foreground" : "text-muted-foreground italic"}`}>{displayValue}</p>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
