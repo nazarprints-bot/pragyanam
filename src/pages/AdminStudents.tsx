@@ -330,32 +330,44 @@ const AdminStudents = () => {
                 </motion.div>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-5">
+                {/* Subscription Info */}
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "सदस्यता" : "Subscription"}</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <DetailRow icon={Award} label={isHi ? "प्लान" : "Plan"} value={selectedStudent.is_free_student ? (isHi ? "मुफ़्त" : "Free") : (isHi ? "पेड" : "Paid")} />
+                    <DetailRow icon={Calendar} label={isHi ? "ट्रायल शुरू" : "Trial Start"} value={selectedStudent.trial_starts_at ? new Date(selectedStudent.trial_starts_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null} />
+                    <DetailRow icon={Calendar} label={isHi ? "ट्रायल समाप्त" : "Trial End"} value={selectedStudent.trial_ends_at ? new Date(selectedStudent.trial_ends_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null} />
+                  </div>
+                </div>
+
+                <Separator />
+
                 {/* Academic Info */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "शैक्षणिक जानकारी" : "Academic Info"}</p>
                   <div className="grid grid-cols-1 gap-2">
-                    <DetailRow icon={GraduationCap} label={isHi ? "कक्षा" : "Class Level"} value={selectedStudent.class_level ? `${isHi ? "कक्षा" : "Class"} ${selectedStudent.class_level}` : (isHi ? "अपडेट नहीं किया" : "Not updated")} />
-                    <DetailRow icon={BookOpen} label={isHi ? "बोर्ड" : "Board"} value={selectedStudent.board || (isHi ? "अपडेट नहीं किया" : "Not updated")} />
+                    <DetailRow icon={GraduationCap} label={isHi ? "कक्षा" : "Class Level"} value={selectedStudent.class_level ? `${isHi ? "कक्षा" : "Class"} ${selectedStudent.class_level}` : null} />
+                    <DetailRow icon={BookOpen} label={isHi ? "बोर्ड" : "Board"} value={selectedStudent.board} />
                     <DetailRow icon={Award} label={isHi ? "भाषा" : "Preferred Language"} value={selectedStudent.language === "hindi" ? "हिंदी" : "English"} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Contact Info */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "संपर्क जानकारी" : "Contact Info"}</p>
                   <div className="grid grid-cols-1 gap-2">
                     <DetailRow icon={Phone} label={isHi ? "फ़ोन नंबर" : "Phone Number"} value={selectedStudent.phone} />
                     <DetailRow icon={Phone} label={isHi ? "अभिभावक फ़ोन" : "Parent's Phone"} value={selectedStudent.parent_phone} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* School & Location */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "स्कूल और स्थान" : "School & Location"}</p>
                   <div className="grid grid-cols-1 gap-2">
                     <DetailRow icon={School} label={isHi ? "स्कूल का नाम" : "School Name"} value={selectedStudent.school} />
@@ -363,7 +375,7 @@ const AdminStudents = () => {
                     <DetailRow icon={MapPin} label={isHi ? "राज्य" : "State"} value={selectedStudent.state} />
                     <DetailRow icon={Calendar} label={isHi ? "शामिल हुए" : "Joined"} value={selectedStudent.created_at ? new Date(selectedStudent.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : null} />
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
