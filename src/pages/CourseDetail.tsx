@@ -537,7 +537,7 @@ const CourseDetail = () => {
 
         {/* Course Header */}
         <div className="bg-card rounded-2xl border border-border overflow-hidden">
-          <div className="relative h-48 sm:h-56">
+          <div className="relative h-36 sm:h-56">
             {course.thumbnail_url ? (
               <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
             ) : (
@@ -546,12 +546,12 @@ const CourseDetail = () => {
               </div>
             )}
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">{course.category}</span>
               {course.class_level && <span className="text-xs text-muted-foreground">Class {course.class_level}</span>}
             </div>
-            <h1 className="text-2xl font-extrabold font-heading text-foreground">{course.title}</h1>
+            <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-foreground">{course.title}</h1>
             {course.title_hi && <p className="text-primary font-medium">{course.title_hi}</p>}
             {course.description && <p className="text-sm text-muted-foreground mt-2">{course.description}</p>}
             {teacher && (
