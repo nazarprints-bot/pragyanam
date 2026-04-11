@@ -405,9 +405,22 @@ const CourseDetail = () => {
             </div>
           )}
 
+          {/* Video Download */}
+          {activeLesson.video_url && !activeLesson.video_url.includes("youtube") && !activeLesson.video_url.includes("youtu.be") && (
+            <div className="bg-card rounded-2xl p-4 sm:p-5 border border-border">
+              <h3 className="font-bold text-foreground text-sm flex items-center gap-2 mb-3">
+                <Download className="w-4 h-4 text-primary" /> {isHi ? "वीडियो डाउनलोड करें" : "Download Video"}
+              </h3>
+              <a href={activeLesson.video_url} download target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary font-medium text-sm hover:bg-primary/20 transition-colors">
+                <Download className="w-4 h-4" /> {isHi ? "वीडियो डाउनलोड" : "Download Video"}
+              </a>
+            </div>
+          )}
+
           {/* Downloadable Notes */}
           {activeLesson.pdf_url && (
-            <div className="bg-card rounded-2xl p-5 border border-border">
+            <div className="bg-card rounded-2xl p-4 sm:p-5 border border-border">
               <h3 className="font-bold text-foreground text-sm flex items-center gap-2 mb-3">
                 <FileText className="w-4 h-4 text-primary" /> {isHi ? "डाउनलोड करें नोट्स" : "Downloadable Notes"}
               </h3>
