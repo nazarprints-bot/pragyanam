@@ -477,7 +477,7 @@ const AdminStudents = () => {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </motion.div>
+                </div>
               </div>
             </div>
           )}
