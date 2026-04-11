@@ -296,8 +296,8 @@ const AdminUsers = () => {
                   </table>
                 </div>
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </div>
+
         )}
       </div>
     </DashboardLayout>
