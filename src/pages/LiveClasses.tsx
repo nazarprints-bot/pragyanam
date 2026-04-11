@@ -536,8 +536,8 @@ const LiveClasses = () => {
     <DashboardLayout>
       <div className="space-y-6 pb-16 lg:pb-0">
         <div>
-          <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
-            <Video className="w-6 h-6 text-primary" /> Live Classes
+          <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
+            <Video className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Live Classes
           </h1>
           <p className="text-sm text-muted-foreground">
             {isTeacherOrAdmin ? "Manage and start your live classes" : "Join live interactive classes"}

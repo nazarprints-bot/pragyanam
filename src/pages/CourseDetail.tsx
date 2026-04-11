@@ -746,10 +746,11 @@ const CourseDetail = () => {
                                         </p>
                                         {lesson.title_hi && <p className="text-xs text-primary/70 truncate">{lesson.title_hi}</p>}
                                       </div>
-                                      <div className="flex items-center gap-1.5 shrink-0">
+                                      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                                         {lesson.duration_minutes && <span className="text-[10px] text-muted-foreground">{lesson.duration_minutes}m</span>}
-                                        {lesson.video_url && <Video className="w-3.5 h-3.5 text-primary" />}
-                                        {lesson.pdf_url && <FileText className="w-3.5 h-3.5 text-primary" />}
+                                        {lesson.video_url && <Video className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />}
+                                        {lesson.pdf_url && <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />}
+                                        {(lesson.video_url || lesson.pdf_url) && <Download className="w-3 h-3 text-muted-foreground" />}
                                       </div>
                                     </button>
                                   );
