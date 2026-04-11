@@ -1,4 +1,5 @@
 import { GraduationCap } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FooterSection = () => {
@@ -30,7 +31,8 @@ const FooterSection = () => {
             <ul className="space-y-2 sm:space-y-2.5 text-[11px] sm:text-[13px] text-primary-foreground/60">
               <li><a href="#" className="hover:text-primary-foreground transition-colors">{t("footer.helpCenter")}</a></li>
               <li><a href="#" className="hover:text-primary-foreground transition-colors">{t("footer.contact")}</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">{t("footer.privacy")}</a></li>
+              <li><Link to="/privacy" className="hover:text-primary-foreground transition-colors">{t("footer.privacy")}</Link></li>
+              <li><Link to="/terms" className="hover:text-primary-foreground transition-colors">{isHi ? "नियम और शर्तें" : "Terms & Conditions"}</Link></li>
             </ul>
           </div>
         </div>

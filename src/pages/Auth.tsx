@@ -6,6 +6,7 @@ import PlanSelection from "@/components/PlanSelection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ const Auth = () => {
   const { t } = useLanguage();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPlanSelection, setShowPlanSelection] = useState(false);
   const [signedUpUserId, setSignedUpUserId] = useState<string | null>(null);
@@ -280,7 +282,23 @@ const Auth = () => {
                   </button>
                 </div>
               </div>
-              <Button type="submit" disabled={loading} className="w-full h-9 text-[13px] font-medium gradient-navy text-white hover:opacity-90">
+              {!isLogin && (
+                <div className="flex items-start gap-2 mt-1">
+                  <Checkbox
+                    id="terms"
+                    checked={agreedToTerms}
+                    onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="terms" className="text-[11px] text-muted-foreground leading-tight cursor-pointer">
+                    {t("auth.iAgree") || "I agree to the"}{" "}
+                    <Link to="/terms" target="_blank" className="text-gold-warm underline">{t("auth.terms") || "Terms & Conditions"}</Link>
+                    {" & "}
+                    <Link to="/privacy" target="_blank" className="text-gold-warm underline">{t("auth.privacy") || "Privacy Policy"}</Link>
+                  </label>
+                </div>
+              )}
+              <Button type="submit" disabled={loading || (!isLogin && !agreedToTerms)} className="w-full h-9 text-[13px] font-medium gradient-navy text-white hover:opacity-90">
                 {loading ? t("auth.pleaseWait") : isLogin ? t("auth.signIn") : t("auth.createAccount")}
               </Button>
             </form>

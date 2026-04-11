@@ -41,6 +41,8 @@ const Onboarding = lazy(() => import("./pages/Onboarding"));
 const AdminTeachers = lazy(() => import("./pages/AdminTeachers"));
 const AdminStudents = lazy(() => import("./pages/AdminStudents"));
 const PaymentHistory = lazy(() => import("./pages/PaymentHistory"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,6 +76,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsAndConditions /></Suspense>} />
+              <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPolicy /></Suspense>} />
 
               {/* Student Dashboard */}
               <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
