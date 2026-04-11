@@ -5,7 +5,7 @@ import { Search, Users, GraduationCap, Shield, CheckCircle, XCircle, Ban, Eye, U
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -169,8 +169,7 @@ const AdminUsers = () => {
             <div className="animate-spin w-7 h-7 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <AnimatePresence mode="wait">
-            <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+          <div key={tab}>
               {/* Mobile card view */}
               <div className="sm:hidden space-y-2.5">
                 {filtered.length === 0 && (
@@ -297,8 +296,8 @@ const AdminUsers = () => {
                   </table>
                 </div>
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </div>
+
         )}
       </div>
     </DashboardLayout>

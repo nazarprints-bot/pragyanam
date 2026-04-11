@@ -405,9 +405,22 @@ const CourseDetail = () => {
             </div>
           )}
 
+          {/* Video Download */}
+          {activeLesson.video_url && !activeLesson.video_url.includes("youtube") && !activeLesson.video_url.includes("youtu.be") && (
+            <div className="bg-card rounded-2xl p-4 sm:p-5 border border-border">
+              <h3 className="font-bold text-foreground text-sm flex items-center gap-2 mb-3">
+                <Download className="w-4 h-4 text-primary" /> {isHi ? "वीडियो डाउनलोड करें" : "Download Video"}
+              </h3>
+              <a href={activeLesson.video_url} download target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary font-medium text-sm hover:bg-primary/20 transition-colors">
+                <Download className="w-4 h-4" /> {isHi ? "वीडियो डाउनलोड" : "Download Video"}
+              </a>
+            </div>
+          )}
+
           {/* Downloadable Notes */}
           {activeLesson.pdf_url && (
-            <div className="bg-card rounded-2xl p-5 border border-border">
+            <div className="bg-card rounded-2xl p-4 sm:p-5 border border-border">
               <h3 className="font-bold text-foreground text-sm flex items-center gap-2 mb-3">
                 <FileText className="w-4 h-4 text-primary" /> {isHi ? "डाउनलोड करें नोट्स" : "Downloadable Notes"}
               </h3>
@@ -524,7 +537,7 @@ const CourseDetail = () => {
 
         {/* Course Header */}
         <div className="bg-card rounded-2xl border border-border overflow-hidden">
-          <div className="relative h-48 sm:h-56">
+          <div className="relative h-36 sm:h-56">
             {course.thumbnail_url ? (
               <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
             ) : (
@@ -533,12 +546,12 @@ const CourseDetail = () => {
               </div>
             )}
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">{course.category}</span>
               {course.class_level && <span className="text-xs text-muted-foreground">Class {course.class_level}</span>}
             </div>
-            <h1 className="text-2xl font-extrabold font-heading text-foreground">{course.title}</h1>
+            <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-foreground">{course.title}</h1>
             {course.title_hi && <p className="text-primary font-medium">{course.title_hi}</p>}
             {course.description && <p className="text-sm text-muted-foreground mt-2">{course.description}</p>}
             {teacher && (
@@ -589,7 +602,7 @@ const CourseDetail = () => {
         )}
 
         {/* Live Classes */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2">
               <Video className="w-5 h-5 text-destructive" /> {isHi ? "लाइव क्लास" : "Live Classes"}
@@ -653,7 +666,7 @@ const CourseDetail = () => {
         </div>
 
         {/* =========== SUBJECT → CHAPTER → LESSON HIERARCHY =========== */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground flex items-center gap-2 mb-4">
             <BookOpen className="w-5 h-5 text-primary" /> {isHi ? "पाठ्यक्रम" : "Syllabus"} ({totalLessons} {isHi ? "पाठ" : "lessons"})
           </h2>
@@ -733,10 +746,11 @@ const CourseDetail = () => {
                                         </p>
                                         {lesson.title_hi && <p className="text-xs text-primary/70 truncate">{lesson.title_hi}</p>}
                                       </div>
-                                      <div className="flex items-center gap-1.5 shrink-0">
+                                      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                                         {lesson.duration_minutes && <span className="text-[10px] text-muted-foreground">{lesson.duration_minutes}m</span>}
-                                        {lesson.video_url && <Video className="w-3.5 h-3.5 text-primary" />}
-                                        {lesson.pdf_url && <FileText className="w-3.5 h-3.5 text-primary" />}
+                                        {lesson.video_url && <Video className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />}
+                                        {lesson.pdf_url && <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />}
+                                        {(lesson.video_url || lesson.pdf_url) && <Download className="w-3 h-3 text-muted-foreground" />}
                                       </div>
                                     </button>
                                   );
@@ -756,7 +770,7 @@ const CourseDetail = () => {
 
         {/* Course Tests */}
         {courseTests.length > 0 && (
-          <div className="bg-card rounded-2xl p-6 border border-border">
+          <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
             <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
               📝 {isHi ? "कोर्स टेस्ट" : "Course Tests"}
             </h2>
@@ -777,7 +791,7 @@ const CourseDetail = () => {
         )}
 
         {/* Course-Level Doubt Forum */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
+        <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
           <h2 className="text-lg font-bold font-heading text-foreground mb-3 flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" /> {isHi ? "कोर्स डाउट फोरम" : "Course Doubt Forum"}
           </h2>
@@ -788,7 +802,7 @@ const CourseDetail = () => {
 
         {/* Enrolled Students - Teacher Only */}
         {canManage && (
-          <div className="bg-card rounded-2xl p-6 border border-border">
+          <div className="bg-card rounded-2xl p-4 sm:p-6 border border-border">
             <h2 className="text-lg font-bold font-heading text-foreground mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" /> {isHi ? "नामांकित छात्र" : "Enrolled Students"} ({enrolledStudents.length})
             </h2>

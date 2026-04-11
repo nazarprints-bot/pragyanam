@@ -536,8 +536,8 @@ const LiveClasses = () => {
     <DashboardLayout>
       <div className="space-y-6 pb-16 lg:pb-0">
         <div>
-          <h1 className="text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
-            <Video className="w-6 h-6 text-primary" /> Live Classes
+          <h1 className="text-lg sm:text-2xl font-extrabold font-heading text-foreground flex items-center gap-2">
+            <Video className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Live Classes
           </h1>
           <p className="text-sm text-muted-foreground">
             {isTeacherOrAdmin ? "Manage and start your live classes" : "Join live interactive classes"}
@@ -658,12 +658,12 @@ const LiveClasses = () => {
                 )}
               </div>
               {upcomingClasses.length === 0 ? (
-                <div className="text-center py-16 bg-card rounded-2xl border border-border">
-                  <div className="w-16 h-16 mx-auto rounded-2xl bg-muted flex items-center justify-center mb-4">
-                    <Calendar className="w-8 h-8 text-muted-foreground" />
+                <div className="text-center py-10 sm:py-16 bg-card rounded-2xl border border-border">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-xl sm:rounded-2xl bg-muted flex items-center justify-center mb-3 sm:mb-4">
+                    <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-base font-bold text-foreground mb-1">No Upcoming Classes</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="text-sm sm:text-base font-bold text-foreground mb-1">No Upcoming Classes</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground px-4">
                     {isTeacherOrAdmin ? "Schedule a class from your course page" : "Check back later for new classes"}
                   </p>
                 </div>
@@ -747,12 +747,12 @@ const LiveClasses = () => {
 
             {/* Empty state when nothing at all */}
             {liveClasses.length === 0 && upcomingClasses.length === 0 && (
-              <div className="text-center py-20 bg-card rounded-2xl border border-border">
-                <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/5 flex items-center justify-center mb-4">
-                  <Video className="w-10 h-10 text-primary/30" />
+              <div className="text-center py-12 sm:py-20 bg-card rounded-2xl border border-border">
+                <div className="w-14 h-14 sm:w-20 sm:h-20 mx-auto rounded-xl sm:rounded-2xl bg-primary/5 flex items-center justify-center mb-3 sm:mb-4">
+                  <Video className="w-7 h-7 sm:w-10 sm:h-10 text-primary/30" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground mb-1">No Live Classes</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">No Live Classes</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto px-4">
                   {isTeacherOrAdmin
                     ? "Go to your course page and schedule a live class for your students."
                     : "Your teachers haven't scheduled any live classes yet. Check back later!"}
