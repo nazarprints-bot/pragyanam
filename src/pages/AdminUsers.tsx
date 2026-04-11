@@ -169,8 +169,7 @@ const AdminUsers = () => {
             <div className="animate-spin w-7 h-7 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
-          <AnimatePresence mode="wait">
-            <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+          <div key={tab}>
               {/* Mobile card view */}
               <div className="sm:hidden space-y-2.5">
                 {filtered.length === 0 && (
