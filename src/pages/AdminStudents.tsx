@@ -380,29 +380,28 @@ const AdminStudents = () => {
                 <Separator />
 
                 {/* Activity Stats */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
+                <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{isHi ? "गतिविधि सारांश" : "Activity Summary"}</p>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {[
                       { val: selectedStudent.enrollCount, label: isHi ? "कोर्स एनरोल" : "Enrolled Courses", icon: BookOpen, color: "text-primary" },
                       { val: selectedStudent.testCount, label: isHi ? "टेस्ट दिए" : "Tests Taken", icon: Award, color: "text-amber-500" },
                       { val: selectedStudent.avgScore != null ? `${selectedStudent.avgScore}%` : "—", label: isHi ? "औसत स्कोर" : "Avg Score", icon: GraduationCap, color: "text-emerald-500" },
                       { val: selectedStudent.doubtCount, label: isHi ? "डाउट पूछे" : "Doubts Asked", icon: Users, color: "text-primary" },
-                    ].map((s, i) => (
-                      <motion.div key={s.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.05 }}
-                        className="text-center p-3 bg-muted/40 rounded-xl hover:bg-muted/60 transition-colors">
-                        <s.icon className={`w-5 h-5 mx-auto mb-1.5 ${s.color}`} />
-                        <p className="text-xl font-bold text-foreground">{s.val}</p>
-                        <p className="text-[10px] text-muted-foreground">{s.label}</p>
-                      </motion.div>
+                    ].map((s) => (
+                      <div key={s.label} className="text-center p-2.5 bg-muted/40 rounded-xl">
+                        <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
+                        <p className="text-lg font-bold text-foreground">{s.val}</p>
+                        <p className="text-[9px] text-muted-foreground">{s.label}</p>
+                      </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
 
                 <Separator />
 
                 {/* Actions */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="space-y-2">
+                <div className="space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "कार्रवाई" : "Actions"}</p>
 
                   {!selectedStudent.is_disabled && selectedStudent.is_free_student && (
