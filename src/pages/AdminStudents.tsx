@@ -268,12 +268,12 @@ const AdminStudents = () => {
                     <Button size="sm" variant="outline" onClick={() => setSelectedStudent(student)} className="h-8 text-xs hover:scale-105 transition-transform">
                       <Eye className="w-3.5 h-3.5 mr-1" /> {isHi ? "विवरण" : "Details"}
                     </Button>
-                    {!student.is_disabled && !student.is_verified && (
+                    {!student.is_disabled && student.is_free_student && !student.is_verified && (
                       <Button size="sm" onClick={() => handleVerify(student.user_id, true)} className="flex-1 h-8 text-xs bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 transition-transform">
                         <CheckCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "स्वीकृत" : "Approve"}
                       </Button>
                     )}
-                    {!student.is_disabled && student.is_verified && (
+                    {!student.is_disabled && student.is_free_student && student.is_verified && (
                       <Button size="sm" variant="outline" onClick={() => handleVerify(student.user_id, false)} className="flex-1 h-8 text-xs text-amber-600 border-amber-500/30 hover:bg-amber-500/10 hover:scale-105 transition-transform">
                         <XCircle className="w-3.5 h-3.5 mr-1" /> {isHi ? "रिवोक" : "Revoke"}
                       </Button>
@@ -393,11 +393,11 @@ const AdminStudents = () => {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{isHi ? "कार्रवाई" : "Actions"}</p>
 
-                  {!selectedStudent.is_disabled && (
+                  {!selectedStudent.is_disabled && selectedStudent.is_free_student && (
                     <div className="flex gap-2">
                       {!selectedStudent.is_verified ? (
                         <Button onClick={() => handleVerify(selectedStudent.user_id, true)} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-[1.02] transition-transform">
-                          <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve Student"}
+                          <CheckCircle className="w-4 h-4 mr-1.5" /> {isHi ? "स्वीकृत करें" : "Approve Free Student"}
                         </Button>
                       ) : (
                         <Button variant="outline" onClick={() => handleVerify(selectedStudent.user_id, false)} className="flex-1 text-amber-600 border-amber-500/30 hover:bg-amber-500/10">
