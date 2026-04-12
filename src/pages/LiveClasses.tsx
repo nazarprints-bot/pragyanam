@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-const MAX_STUDENTS_PER_CLASS = 75;
+const MAX_STUDENTS_PER_CLASS = 100;
 
 // Elapsed timer component
 const ElapsedTimer = ({ startTime }: { startTime: string }) => {

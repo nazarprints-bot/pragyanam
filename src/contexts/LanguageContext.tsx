@@ -170,6 +170,10 @@ const translations: Record<string, Record<Language, string>> = {
   "auth.iAgree": { en: "I agree to the", hi: "मैं सहमत हूँ" },
   "auth.terms": { en: "Terms & Conditions", hi: "नियम और शर्तें" },
   "auth.privacy": { en: "Privacy Policy", hi: "गोपनीयता नीति" },
+  "auth.qualification": { en: "Qualification / Degree", hi: "योग्यता / डिग्री" },
+  "auth.selectQualification": { en: "Select qualification", hi: "योग्यता चुनें" },
+  "auth.subjectsTaught": { en: "Subjects You Teach", hi: "आप कौन से विषय पढ़ाते हैं" },
+  "auth.subjectsPlaceholder": { en: "e.g. Math, Science, Hindi", hi: "जैसे गणित, विज्ञान, हिंदी" },
 
   // Dashboard
   "dash.goodMorning": { en: "Good Morning", hi: "सुप्रभात" },
