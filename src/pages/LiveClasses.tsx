@@ -394,7 +394,7 @@ const LiveClasses = () => {
     const activeClass = classes.find((c) => c.id === activeClassId);
     const teacher = teacherProfiles[activeClass?.teacher_id];
     const studentCount = activeClass?.current_students || 0;
-    const maxStudents = activeClass?.max_students || 75;
+    const maxStudents = activeClass?.max_students || 100;
     const fillPercent = Math.min(100, Math.round((studentCount / maxStudents) * 100));
 
     return (
@@ -601,7 +601,7 @@ const LiveClasses = () => {
                           <div className="absolute top-3 right-3 bg-emerald-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">HD</div>
                           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
                             <span className="bg-black/70 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-lg flex items-center gap-1.5">
-                              <Users className="w-3 h-3" /> {c.current_students || 0}/{c.max_students || 75}
+                              <Users className="w-3 h-3" /> {c.current_students || 0}/{c.max_students || 100}
                             </span>
                             <span className="bg-black/70 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-lg flex items-center gap-1">
                               <Clock className="w-3 h-3" /> {c.duration_minutes}min
@@ -728,7 +728,7 @@ const LiveClasses = () => {
                               {scheduledDate.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                             </span>
                             <span className="flex items-center gap-1">
-                              <Users className="w-3 h-3" /> Max {c.max_students || 75}
+                              <Users className="w-3 h-3" /> Max {c.max_students || 100}
                             </span>
                           </div>
                           {isOwner && (
