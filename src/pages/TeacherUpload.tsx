@@ -51,6 +51,8 @@ const TeacherUpload = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [savingLesson, setSavingLesson] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingFile, setUploadingFile] = useState<string | null>(null); // 'video' | 'pdf' | null
 
   // ===== Course CRUD =====
   const handleCreateCourse = async (e: React.FormEvent) => {
