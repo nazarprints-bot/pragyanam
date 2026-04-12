@@ -230,9 +230,9 @@ const Auth = () => {
                   {!isStudent && (
                     <>
                       <div>
-                        <Label className="text-[13px] text-foreground">{t("auth.qualification") || "Qualification / Degree"} *</Label>
+                        <Label className="text-[13px] text-foreground">{t("auth.qualification")} *</Label>
                         <Select value={formData.qualification} onValueChange={(v) => setFormData({ ...formData, qualification: v })}>
-                          <SelectTrigger className="mt-1.5 h-9 text-[13px]"><SelectValue placeholder={t("auth.selectQualification") || "Select qualification"} /></SelectTrigger>
+                          <SelectTrigger className="mt-1.5 h-9 text-[13px]"><SelectValue placeholder={t("auth.selectQualification")} /></SelectTrigger>
                           <SelectContent>
                             {["B.Ed", "M.Ed", "B.A", "M.A", "B.Sc", "M.Sc", "B.Tech", "M.Tech", "PhD", "D.El.Ed", "Other"].map((q) => (
                               <SelectItem key={q} value={q}>{q}</SelectItem>
@@ -241,11 +241,11 @@ const Auth = () => {
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-[13px] text-foreground">{t("auth.subjectsTaught") || "Subjects You Teach"} *</Label>
-                        <Input required value={formData.subjectsTaught} onChange={(e) => setFormData({ ...formData, subjectsTaught: e.target.value })} placeholder={t("auth.subjectsPlaceholder") || "e.g. Math, Science, Hindi"} className="mt-1.5 h-9 text-[13px]" />
+                        <Label className="text-[13px] text-foreground">{t("auth.subjectsTaught")} *</Label>
+                        <Input required value={formData.subjectsTaught} onChange={(e) => setFormData({ ...formData, subjectsTaught: e.target.value })} placeholder={t("auth.subjectsPlaceholder")} className="mt-1.5 h-9 text-[13px]" />
                       </div>
                       <div>
-                        <Label className="text-[13px] text-foreground">{t("auth.school") || "School / Institution"}</Label>
+                        <Label className="text-[13px] text-foreground">{t("auth.school")}</Label>
                         <Input value={formData.school} onChange={(e) => setFormData({ ...formData, school: e.target.value })} placeholder={t("auth.schoolPlaceholder")} className="mt-1.5 h-9 text-[13px]" />
                       </div>
                     </>
