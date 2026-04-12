@@ -168,6 +168,31 @@ const TeacherUpload = () => {
   };
 
   // Add Lesson (with video + PDF + content)
+  // Upload helper with progress tracking via XHR
+  const uploadWithProgress = (bucket: string, path: string, file: File, label: string): Promise<string | null> => {
+    return new Promise((resolve, reject) => {
+      setUploadingFile(label);
+      setUploadProgress(0);
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/${bucket}/${path}`;
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Authorization", `Bearer ${(supabase as any).auth.session?.()?.access_token || ""}`);
+      xhr.setRequestHeader("apikey", import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+      xhr.setRequestHeader("x-upsert", "true");
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => {
+        setUploadingFile(null);
+        setUploadProgress(0);
+        if (xhr.status >= 200 && xhr.status < 300) resolve(path);
+        else reject(new Error(`Upload failed: ${xhr.status}`));
+      };
+      xhr.onerror = () => { setUploadingFile(null); setUploadProgress(0); reject(new Error("Upload failed")); };
+      xhr.send(file);
+    });
+  };
+
   const handleAddLesson = async (chapterId: string) => {
     if (!lessonForm.title.trim()) return;
     setSavingLesson(true);
@@ -175,24 +200,34 @@ const TeacherUpload = () => {
     let finalVideoUrl = lessonForm.video_url || null;
     let finalPdfUrl: string | null = null;
 
-    // Upload video file
+    // Upload video file with progress
     if (videoFile && managingCourse) {
       const ext = videoFile.name.split(".").pop();
       const path = `${managingCourse.id}/${Date.now()}-video.${ext}`;
-      const { error: upErr } = await supabase.storage.from("lesson-files").upload(path, videoFile);
-      if (upErr) { toast.error("Video upload failed"); setSavingLesson(false); return; }
-      const { data: urlData } = await supabase.storage.from("lesson-files").createSignedUrl(path, 60 * 60 * 24 * 365);
-      finalVideoUrl = urlData?.signedUrl || null;
+      try {
+        await uploadWithProgress("lesson-files", path, videoFile, "video");
+        const { data: urlData } = await supabase.storage.from("lesson-files").createSignedUrl(path, 60 * 60 * 24 * 365);
+        finalVideoUrl = urlData?.signedUrl || null;
+      } catch {
+        toast.error(isHi ? "वीडियो अपलोड विफल" : "Video upload failed");
+        setSavingLesson(false);
+        return;
+      }
     }
 
-    // Upload PDF file
+    // Upload PDF file with progress
     if (pdfFile && managingCourse) {
       const ext = pdfFile.name.split(".").pop();
       const path = `${managingCourse.id}/${Date.now()}-notes.${ext}`;
-      const { error: upErr } = await supabase.storage.from("lesson-files").upload(path, pdfFile);
-      if (upErr) { toast.error("PDF upload failed"); setSavingLesson(false); return; }
-      const { data: urlData } = await supabase.storage.from("lesson-files").createSignedUrl(path, 60 * 60 * 24 * 365);
-      finalPdfUrl = urlData?.signedUrl || null;
+      try {
+        await uploadWithProgress("lesson-files", path, pdfFile, "pdf");
+        const { data: urlData } = await supabase.storage.from("lesson-files").createSignedUrl(path, 60 * 60 * 24 * 365);
+        finalPdfUrl = urlData?.signedUrl || null;
+      } catch {
+        toast.error(isHi ? "PDF अपलोड विफल" : "PDF upload failed");
+        setSavingLesson(false);
+        return;
+      }
     }
 
     const ch = subjects.flatMap(s => s.chapters).find(c => c.id === chapterId);
