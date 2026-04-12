@@ -7,8 +7,41 @@ import { Video, Calendar, Clock, Users, Play, X, Trash2, Maximize2, Minimize2, H
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MAX_STUDENTS_PER_CLASS = 100;
+let jitsiApiLoader: Promise<void> | null = null;
+
+const ensureJitsiApi = () => {
+  if ((window as any).JitsiMeetExternalAPI) return Promise.resolve();
+  if (jitsiApiLoader) return jitsiApiLoader;
+
+  jitsiApiLoader = new Promise<void>((resolve, reject) => {
+    const existingScript = document.querySelector('script[data-jitsi-external-api="true"]') as HTMLScriptElement | null;
+
+    const handleLoad = () => resolve();
+    const handleError = () => {
+      jitsiApiLoader = null;
+      reject(new Error("Failed to load Jitsi API"));
+    };
+
+    if (existingScript) {
+      existingScript.addEventListener("load", handleLoad, { once: true });
+      existingScript.addEventListener("error", handleError, { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://meet.jit.si/external_api.js";
+    script.async = true;
+    script.dataset.jitsiExternalApi = "true";
+    script.onload = handleLoad;
+    script.onerror = handleError;
+    document.head.appendChild(script);
+  });
+
+  return jitsiApiLoader;
+};
 
 // Elapsed timer component
 const ElapsedTimer = ({ startTime }: { startTime: string }) => {
@@ -61,12 +94,14 @@ const ParticipantToast = ({ name, action }: { name: string; action: "joined" | "
 
 const LiveClasses = () => {
   const { user, role, profile } = useAuth();
+  const isMobile = useIsMobile();
   const [classes, setClasses] = useState<any[]>([]);
   const [teacherProfiles, setTeacherProfiles] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(true);
+  const [joiningClassId, setJoiningClassId] = useState<string | null>(null);
 
   const fetchClasses = async () => {
     const { data, error } = await supabase
@@ -97,28 +132,64 @@ const LiveClasses = () => {
   }, []);
 
   const handleStartClass = async (classItem: any) => {
-    const { error } = await supabase.from("live_classes")
-      .update({ status: "live" } as any).eq("id", classItem.id).eq("teacher_id", user?.id || "");
-    if (error) { toast.error("Failed to start class: " + error.message); return; }
+    const { data, error } = await supabase.from("live_classes")
+      .update({
+        status: "live",
+        current_students: 0,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq("id", classItem.id)
+      .eq("teacher_id", user?.id || "")
+      .select("*")
+      .single();
+    if (error || !data) { toast.error("Failed to start class: " + (error?.message || "Unknown error")); return; }
     toast.success("🔴 Class is now LIVE!");
     await fetchClasses();
-    setActiveRoom(classItem.room_id);
-    setActiveClassId(classItem.id);
+    setActiveRoom(data.room_id);
+    setActiveClassId(data.id);
+    setShowChat(!isMobile);
   };
 
   const handleJoinClass = async (classItem: any) => {
-    if (!isTeacherOrAdmin && classItem.current_students >= (classItem.max_students || MAX_STUDENTS_PER_CLASS)) {
-      toast.error(`Class is full (${classItem.max_students || MAX_STUDENTS_PER_CLASS} students max)`);
+    if (joiningClassId) return;
+    setJoiningClassId(classItem.id);
+
+    const { data: freshClass, error } = await supabase
+      .from("live_classes")
+      .select("*")
+      .eq("id", classItem.id)
+      .single();
+
+    if (error || !freshClass) {
+      toast.error("Unable to open class right now.");
+      setJoiningClassId(null);
       return;
     }
-    setActiveRoom(classItem.room_id);
-    setActiveClassId(classItem.id);
+
+    if (!isTeacherOrAdmin && freshClass.status !== "live") {
+      toast.error("Class has not started yet.");
+      setJoiningClassId(null);
+      return;
+    }
+
+    if (!isTeacherOrAdmin && freshClass.current_students >= (freshClass.max_students || MAX_STUDENTS_PER_CLASS)) {
+      toast.error(`Class is full (${freshClass.max_students || MAX_STUDENTS_PER_CLASS} students max)`);
+      setJoiningClassId(null);
+      return;
+    }
+
+    setActiveRoom(freshClass.room_id);
+    setActiveClassId(freshClass.id);
+    setShowChat(!isMobile);
+    setJoiningClassId(null);
   };
 
   const handleLeaveClass = async () => {
     destroyJitsi();
     setActiveRoom(null);
     setActiveClassId(null);
+    setShowChat(!isMobile);
+    await fetchClasses();
   };
 
   const handleEndClass = async (classItem: any) => {
@@ -147,8 +218,18 @@ const LiveClasses = () => {
   // Jitsi External API
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const jitsiApiRef = useRef<any>(null);
+  const participantSyncRef = useRef<number | null>(null);
+  const activeClassRef = useRef<any>(null);
+
+  useEffect(() => {
+    activeClassRef.current = classes.find((item) => item.id === activeClassId) || null;
+  }, [classes, activeClassId]);
 
   const destroyJitsi = useCallback(() => {
+    if (participantSyncRef.current) {
+      window.clearInterval(participantSyncRef.current);
+      participantSyncRef.current = null;
+    }
     if (jitsiApiRef.current) {
       jitsiApiRef.current.dispose();
       jitsiApiRef.current = null;
@@ -173,8 +254,10 @@ const LiveClasses = () => {
       const loadAndInit = () => {
         try {
           destroyJitsi();
-          const roomName = `pragyanam-live-${activeClassId}`;
+          const roomName = activeRoom;
           const displayName = profile?.full_name || user?.email || "User";
+          const activeClass = activeClassRef.current;
+          const isHost = !!activeClass && !!user && (role === "admin" || activeClass.teacher_id === user.id);
           // Teacher = presenter/broadcaster, Students = viewers (livestream feel)
           const teacherToolbar = [
             'microphone', 'camera', 'toggle-camera', 'desktop', 'fullscreen',
@@ -182,9 +265,7 @@ const LiveClasses = () => {
             'tileview', 'settings', 'videoquality', 'recording',
             'participants-pane', 'noisesuppression', 'whiteboard',
           ];
-          const studentToolbar = [
-            'raisehand', 'fullscreen', 'tileview',
-          ];
+          const studentToolbar = ['fullscreen'];
           const options: any = {
             roomName,
             parentNode: jitsiContainerRef.current,
@@ -202,6 +283,8 @@ const LiveClasses = () => {
               enableAutomaticUrlCopy: false,
               doNotStoreRoom: true,
               disableInviteFunctions: true,
+              disableInitialGUM: !isTeacherOrAdmin,
+              startSilent: !isTeacherOrAdmin,
 
               // Teacher = unmuted, Students = muted (livestream style)
               startWithAudioMuted: !isTeacherOrAdmin,
@@ -301,18 +384,47 @@ const LiveClasses = () => {
           setJitsiLoading(false);
 
           // Track participant count
-          const updateCount = () => {
-            const count = jitsiApiRef.current?.getNumberOfParticipants?.() || 0;
-            if (activeClassId) {
-              supabase.from("live_classes")
-                .update({ current_students: count } as any)
-                .eq("id", activeClassId).then(() => {});
+          const updateCount = async () => {
+            const totalParticipants = jitsiApiRef.current?.getNumberOfParticipants?.() || 1;
+            const viewerCount = Math.max(0, totalParticipants - 1);
+
+            if (isHost && activeClassId) {
+              await supabase.from("live_classes")
+                .update({ current_students: viewerCount } as any)
+                .eq("id", activeClassId);
+            } else {
+              await fetchClasses();
             }
           };
 
-          jitsiApiRef.current.addEventListener('videoConferenceJoined', () => {
-            setJitsiLoading(false);
+          jitsiApiRef.current.addEventListener('videoConferenceJoined', async () => {
+            if (!isTeacherOrAdmin) {
+              try {
+                jitsiApiRef.current?.executeCommand?.('toggleAudio');
+              } catch {}
+              try {
+                jitsiApiRef.current?.executeCommand?.('toggleVideo');
+              } catch {}
+            }
+
+            await updateCount();
+            if (isHost && participantSyncRef.current === null) {
+              participantSyncRef.current = window.setInterval(() => {
+                updateCount();
+              }, 10000);
+            }
             console.log("Jitsi: conference joined successfully");
+            setJitsiLoading(false);
+          });
+
+          jitsiApiRef.current.addEventListener('videoConferenceLeft', async () => {
+            if (isHost && activeClassId) {
+              supabase.from("live_classes")
+                .update({ current_students: 0 } as any)
+                .eq("id", activeClassId)
+                .then(() => {});
+            }
+            setJitsiLoading(false);
           });
 
           jitsiApiRef.current.addEventListener('participantJoined', (e: any) => {
@@ -336,7 +448,9 @@ const LiveClasses = () => {
             });
           }
 
-          setTimeout(updateCount, 3000);
+          setTimeout(() => {
+            updateCount();
+          }, 1500);
         } catch (err: any) {
           console.error("Jitsi init error:", err);
           setJitsiError("Failed to load video. Please try again.");
@@ -344,26 +458,19 @@ const LiveClasses = () => {
         }
       };
 
-      if ((window as any).JitsiMeetExternalAPI) {
-        loadAndInit();
-      } else {
-        const script = document.createElement("script");
-        script.src = "https://meet.jit.si/external_api.js";
-        script.async = true;
-        script.onload = loadAndInit;
-        script.onerror = () => {
+      ensureJitsiApi()
+        .then(loadAndInit)
+        .catch(() => {
           setJitsiError("Failed to load video service. Check your internet connection.");
           setJitsiLoading(false);
-        };
-        document.head.appendChild(script);
-      }
+        });
     }, 100);
 
     return () => {
       clearTimeout(timer);
       destroyJitsi();
     };
-  }, [activeRoom, activeClassId, isTeacherOrAdmin, profile, user, destroyJitsi]);
+  }, [activeRoom, activeClassId, isTeacherOrAdmin, profile, user, destroyJitsi, role]);
 
   // Fullscreen
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -399,7 +506,7 @@ const LiveClasses = () => {
 
     return (
       <DashboardLayout>
-        <div className="flex flex-col h-[calc(100vh-64px)]">
+        <div className="-m-3 sm:-m-4 lg:-m-6 flex flex-col h-[calc(100vh-48px)] lg:h-[calc(100vh-64px)] bg-background">
           {/* Top control bar */}
           {!isFullscreen && (
             <motion.div
@@ -438,7 +545,7 @@ const LiveClasses = () => {
                   </div>
                 </div>
                 {/* Toggle chat */}
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowChat(!showChat)}
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowChat(!showChat)}
                   title={showChat ? "Hide Chat" : "Show Chat"}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -456,7 +563,7 @@ const LiveClasses = () => {
 
           <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
             {/* Video area */}
-            <div className="flex-1 flex flex-col min-w-0 min-h-0">
+              <div className="flex-1 flex flex-col min-w-0 min-h-0">
               <div ref={videoWrapperRef} className="relative w-full bg-black flex-1 min-h-[300px] lg:min-h-0">
                 <div ref={jitsiContainerRef} className="absolute inset-0 w-full h-full" style={{ minHeight: '280px' }} />
                 {/* Loading / Error overlay */}
@@ -519,11 +626,14 @@ const LiveClasses = () => {
             <AnimatePresence>
               {showChat && !isFullscreen && (
                 <motion.div
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: "auto", opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
+                  initial={isMobile ? { y: 24, opacity: 0 } : { width: 0, opacity: 0 }}
+                  animate={isMobile ? { y: 0, opacity: 1 } : { width: "auto", opacity: 1 }}
+                  exit={isMobile ? { y: 24, opacity: 0 } : { width: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="h-[200px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-t lg:border-t-0 border-l-0 lg:border-l border-border overflow-hidden"
+                  className={isMobile
+                    ? "absolute inset-x-0 bottom-0 z-20 h-[46vh] border-t border-border overflow-hidden bg-card shadow-2xl"
+                    : "h-[200px] lg:h-auto lg:w-[340px] xl:w-[380px] lg:min-w-[300px] flex-shrink-0 border-t lg:border-t-0 border-l-0 lg:border-l border-border overflow-hidden"
+                  }
                 >
                   <LiveChatSidebar classId={activeClassId} isTeacher={isTeacherOrAdmin} />
                 </motion.div>
@@ -631,9 +741,9 @@ const LiveClasses = () => {
                           )}
                           {isOwner ? (
                             <div className="flex gap-2 mt-3">
-                              <Button onClick={(e) => { e.stopPropagation(); handleJoinClass(c); }}
-                                className="flex-1 bg-destructive hover:bg-destructive/90 text-white" size="sm">
-                                <Monitor className="w-3.5 h-3.5 mr-1" /> Go Live
+                               <Button onClick={(e) => { e.stopPropagation(); handleJoinClass(c); }}
+                                 className="flex-1 bg-destructive hover:bg-destructive/90 text-white" size="sm">
+                                 <Monitor className="w-3.5 h-3.5 mr-1" /> Open Studio
                               </Button>
                               <Button variant="outline" onClick={(e) => { e.stopPropagation(); handleEndClass(c); }} size="sm">
                                 <X className="w-3.5 h-3.5" />
@@ -642,7 +752,7 @@ const LiveClasses = () => {
                           ) : isFull ? (
                             <p className="text-xs text-destructive mt-2 font-semibold">Class is full</p>
                           ) : (
-                            <p className="text-[11px] text-primary mt-2 font-medium">Tap to join class →</p>
+                             <p className="text-[11px] text-primary mt-2 font-medium">{joiningClassId === c.id ? "Joining class..." : "Tap to join class →"}</p>
                           )}
                         </div>
                       </motion.div>
