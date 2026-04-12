@@ -219,6 +219,11 @@ const LiveClasses = () => {
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const jitsiApiRef = useRef<any>(null);
   const participantSyncRef = useRef<number | null>(null);
+  const activeClassRef = useRef<any>(null);
+
+  useEffect(() => {
+    activeClassRef.current = classes.find((item) => item.id === activeClassId) || null;
+  }, [classes, activeClassId]);
 
   const destroyJitsi = useCallback(() => {
     if (participantSyncRef.current) {
@@ -251,7 +256,7 @@ const LiveClasses = () => {
           destroyJitsi();
           const roomName = activeRoom;
           const displayName = profile?.full_name || user?.email || "User";
-          const activeClass = classes.find((item) => item.id === activeClassId);
+          const activeClass = activeClassRef.current;
           const isHost = !!activeClass && !!user && (role === "admin" || activeClass.teacher_id === user.id);
           // Teacher = presenter/broadcaster, Students = viewers (livestream feel)
           const teacherToolbar = [
@@ -465,7 +470,7 @@ const LiveClasses = () => {
       clearTimeout(timer);
       destroyJitsi();
     };
-  }, [activeRoom, activeClassId, isTeacherOrAdmin, profile, user, destroyJitsi, classes, role]);
+  }, [activeRoom, activeClassId, isTeacherOrAdmin, profile, user, destroyJitsi, role]);
 
   // Fullscreen
   const [isFullscreen, setIsFullscreen] = useState(false);
