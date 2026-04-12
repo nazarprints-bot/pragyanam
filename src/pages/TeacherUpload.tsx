@@ -169,14 +169,16 @@ const TeacherUpload = () => {
 
   // Add Lesson (with video + PDF + content)
   // Upload helper with progress tracking via XHR
-  const uploadWithProgress = (bucket: string, path: string, file: File, label: string): Promise<string | null> => {
+  const uploadWithProgress = async (bucket: string, path: string, file: File, label: string): Promise<string | null> => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token || "";
     return new Promise((resolve, reject) => {
       setUploadingFile(label);
       setUploadProgress(0);
       const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/${bucket}/${path}`;
       const xhr = new XMLHttpRequest();
       xhr.open("POST", url, true);
-      xhr.setRequestHeader("Authorization", `Bearer ${(supabase as any).auth.session?.()?.access_token || ""}`);
+      xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
       xhr.setRequestHeader("apikey", import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
       xhr.setRequestHeader("x-upsert", "true");
       xhr.upload.onprogress = (e) => {
