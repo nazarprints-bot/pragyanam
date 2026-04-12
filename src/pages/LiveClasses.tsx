@@ -198,6 +198,10 @@ const LiveClasses = () => {
               requireDisplayName: false, enableWelcomePage: false, disableDeepLinking: true,
               enableClosePage: false,
               enableInsecureRoomNameWarning: false,
+              // Disable authentication prompts
+              enableAutomaticUrlCopy: false,
+              doNotStoreRoom: true,
+              disableInviteFunctions: true,
 
               // Teacher = unmuted, Students = muted (livestream style)
               startWithAudioMuted: !isTeacherOrAdmin,
