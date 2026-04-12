@@ -293,7 +293,7 @@ const LiveClasses = () => {
                 : [],
             },
           };
-          jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("8x8.vc", options);
+          jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("meet.jit.si", options);
           setJitsiLoading(false);
 
           // Track participant count
@@ -344,7 +344,7 @@ const LiveClasses = () => {
         loadAndInit();
       } else {
         const script = document.createElement("script");
-        script.src = "https://8x8.vc/external_api.js";
+        script.src = "https://meet.jit.si/external_api.js";
         script.async = true;
         script.onload = loadAndInit;
         script.onerror = () => {
