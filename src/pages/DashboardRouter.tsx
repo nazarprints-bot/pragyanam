@@ -12,7 +12,12 @@ const Loader = () => (
 );
 
 const DashboardRouter = () => {
-  const { role, profile } = useAuth();
+  const { role, profile, loading } = useAuth();
+
+  // Wait for role to be fully loaded to prevent wrong dashboard rendering
+  if (loading || !role) {
+    return <Loader />;
+  }
 
   // Show onboarding for students who haven't completed it
   if (role === "student" && profile && !(profile as any).onboarding_completed) {
