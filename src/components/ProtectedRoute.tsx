@@ -163,10 +163,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     }
   }
 
-  // Approval check — unverified teachers & free students see a pending screen
+  // Approval check — unverified teachers & FREE students only see a pending screen
+  // Paid students do NOT need approval — they get instant access with trial
   const needsApproval =
     (role === "teacher" && !profile?.is_verified) ||
-    (role === "student" && profile?.is_free_student && !profile?.is_verified);
+    (role === "student" && profile?.is_free_student === true && !profile?.is_verified);
 
   if (needsApproval) {
     const isTeacher = role === "teacher";
