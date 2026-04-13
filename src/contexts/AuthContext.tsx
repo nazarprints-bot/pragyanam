@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,23 +32,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const fetchingRef = useRef(false);
 
   const fetchUserData = async (userId: string) => {
-    const [profileRes, roleRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", userId).single(),
-      supabase.from("user_roles").select("role").eq("user_id", userId).single(),
-    ]);
-    if (profileRes.data) setProfile(profileRes.data);
-    if (roleRes.data) setRole(roleRes.data.role as UserRole);
+    // Prevent concurrent fetches that cause race conditions
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+    
+    try {
+      const [profileRes, roleRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", userId).single(),
+        supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+      ]);
+      
+      if (profileRes.data) setProfile(profileRes.data);
+      if (roleRes.data && roleRes.data.role) {
+        setRole(roleRes.data.role as UserRole);
+      }
+    } finally {
+      fetchingRef.current = false;
+    }
   };
 
   useEffect(() => {
+    let mounted = true;
+
+    // IMPORTANT: Set up listener BEFORE getSession to avoid race conditions
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
+        if (!mounted) return;
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          setTimeout(() => fetchUserData(session.user.id), 0);
+          // Use setTimeout to avoid blocking the auth state change callback
+          // but DON'T do any async Supabase calls directly in this callback
+          setTimeout(() => {
+            if (mounted) fetchUserData(session.user.id);
+          }, 0);
         } else {
           setRole(null);
           setProfile(null);
@@ -58,6 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -66,7 +87,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
@@ -78,7 +102,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refetchProfile = async () => {
-    if (user) await fetchUserData(user.id);
+    if (user) {
+      fetchingRef.current = false; // allow refetch
+      await fetchUserData(user.id);
+    }
   };
 
   return (
