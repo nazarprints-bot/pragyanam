@@ -820,9 +820,12 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           district: string | null
+          experience_years: number | null
           full_name: string | null
+          qualification: string | null
           school: string | null
           state: string | null
+          subjects_taught: string | null
           user_id: string | null
         }
         Relationships: []
