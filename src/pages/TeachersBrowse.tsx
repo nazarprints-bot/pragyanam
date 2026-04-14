@@ -27,7 +27,7 @@ const TeachersBrowse = () => {
       }
 
       const [profilesRes, coursesRes] = await Promise.all([
-        supabase.from("profiles").select("*").in("user_id", teacherIds),
+        supabase.from("teacher_profiles").select("*"),
         supabase.from("courses").select("created_by").eq("is_published", true).in("created_by", teacherIds),
       ]);
 
