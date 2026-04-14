@@ -42,12 +42,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const [profileRes, roleRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).single(),
-        supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
       ]);
       
       if (profileRes.data) setProfile(profileRes.data);
-      if (roleRes.data && roleRes.data.role) {
+      if (roleRes.data?.role) {
         setRole(roleRes.data.role as UserRole);
+      } else {
+        // Fallback to user_metadata role if no role row exists
+        const { data: { user: freshUser } } = await supabase.auth.getUser();
+        const metaRole = freshUser?.user_metadata?.role as UserRole;
+        setRole(metaRole || "student");
       }
     } finally {
       fetchingRef.current = false;
