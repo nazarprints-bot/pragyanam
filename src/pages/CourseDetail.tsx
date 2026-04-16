@@ -46,7 +46,7 @@ const CourseDetail = () => {
   const [liveClasses, setLiveClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeLesson, setActiveLesson] = useState<LessonData | null>(null);
-  const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  
   const [enrolledStudents, setEnrolledStudents] = useState<any[]>([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [courseTests, setCourseTests] = useState<any[]>([]);
@@ -354,28 +354,6 @@ const CourseDetail = () => {
     );
   }
 
-  if (activeRoom) {
-    return (
-      <DashboardLayout>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold font-heading text-foreground flex items-center gap-2">
-              <Video className="w-5 h-5 text-destructive animate-pulse" /> Live Class
-            </h1>
-            <Button variant="outline" onClick={() => setActiveRoom(null)}>{isHi ? "छोड़ें" : "Leave"}</Button>
-          </div>
-          <div className="rounded-2xl overflow-hidden border border-border" style={{ height: "calc(100vh - 200px)" }}>
-            <iframe
-              src={`https://meet.jit.si/pragyanam-${activeRoom}#config.prejoinConfig.enabled=false`}
-              allow="camera; microphone; fullscreen; display-capture"
-              className="w-full h-full" title="Live Class"
-            />
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   // =========== LESSON DETAIL VIEW ===========
   if (activeLesson) {
     const nextLesson = getNextLesson();
@@ -649,7 +627,11 @@ const CourseDetail = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {lc.status === "live" ? (
-                      <Button size="sm" className="gradient-saffron border-0 text-primary-foreground" onClick={() => setActiveRoom(lc.room_id)}>
+                      <Button
+                        size="sm"
+                        className="gradient-saffron border-0 text-primary-foreground"
+                        onClick={() => navigate(`/dashboard/live-classes?classId=${lc.id}&room=${lc.room_id}`)}
+                      >
                         <Play className="w-3 h-3 mr-1" /> Join
                       </Button>
                     ) : <span className="text-xs text-muted-foreground">Upcoming</span>}

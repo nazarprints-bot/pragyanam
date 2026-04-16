@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -88,6 +89,7 @@ const ParticipantToast = ({ name, action }: { name: string; action: "joined" | "
 
 const LiveClasses = () => {
   const { user, role, profile } = useAuth();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [classes, setClasses] = useState<any[]>([]);
   const [teacherProfiles, setTeacherProfiles] = useState<Record<string, any>>({});
@@ -126,6 +128,17 @@ const LiveClasses = () => {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
+
+  useEffect(() => {
+    const roomFromQuery = searchParams.get("room");
+    const classIdFromQuery = searchParams.get("classId");
+
+    if (roomFromQuery && classIdFromQuery) {
+      setActiveRoom((current) => current ?? roomFromQuery);
+      setActiveClassId((current) => current ?? classIdFromQuery);
+      setShowChat(!isMobile);
+    }
+  }, [searchParams, isMobile]);
 
   const handleStartClass = async (classItem: any) => {
     const { data, error } = await supabase.from("live_classes")
@@ -233,6 +246,15 @@ const LiveClasses = () => {
   // Only re-init Jitsi when activeRoom+activeClassId changes, NOT on other deps
   useEffect(() => {
     if (!activeRoom || !activeClassId) return;
+
+    const resolvedActiveClass = classes.find((item) => item.id === activeClassId) || null;
+
+    // Wait for class data so teacher/admin don't initialize into a broken waiting state
+    if (isTeacherOrAdmin && loading) return;
+    if (isTeacherOrAdmin && !resolvedActiveClass) {
+      setJitsiError("Unable to load this live class. Please go back and join again.");
+      return;
+    }
     
     // Prevent re-init if already initialized for the same room
     const initKey = `${activeRoom}-${activeClassId}`;
