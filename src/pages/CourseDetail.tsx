@@ -627,7 +627,11 @@ const CourseDetail = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {lc.status === "live" ? (
-                      <Button size="sm" className="gradient-saffron border-0 text-primary-foreground" onClick={() => setActiveRoom(lc.room_id)}>
+                      <Button
+                        size="sm"
+                        className="gradient-saffron border-0 text-primary-foreground"
+                        onClick={() => navigate(`/dashboard/live-classes?classId=${lc.id}&room=${lc.room_id}`)}
+                      >
                         <Play className="w-3 h-3 mr-1" /> Join
                       </Button>
                     ) : <span className="text-xs text-muted-foreground">Upcoming</span>}
