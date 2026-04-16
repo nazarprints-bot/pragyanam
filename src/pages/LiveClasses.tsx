@@ -89,6 +89,7 @@ const ParticipantToast = ({ name, action }: { name: string; action: "joined" | "
 
 const LiveClasses = () => {
   const { user, role, profile } = useAuth();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [classes, setClasses] = useState<any[]>([]);
   const [teacherProfiles, setTeacherProfiles] = useState<Record<string, any>>({});
