@@ -129,6 +129,17 @@ const LiveClasses = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  useEffect(() => {
+    const roomFromQuery = searchParams.get("room");
+    const classIdFromQuery = searchParams.get("classId");
+
+    if (roomFromQuery && classIdFromQuery) {
+      setActiveRoom((current) => current ?? roomFromQuery);
+      setActiveClassId((current) => current ?? classIdFromQuery);
+      setShowChat(!isMobile);
+    }
+  }, [searchParams, isMobile]);
+
   const handleStartClass = async (classItem: any) => {
     const { data, error } = await supabase.from("live_classes")
       .update({ status: "live", current_students: 0, updated_at: new Date().toISOString() } as any)
