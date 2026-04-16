@@ -557,7 +557,7 @@ const LiveClasses = () => {
           <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden relative">
             {/* Video area */}
             <div className="flex-1 flex flex-col min-w-0 min-h-0">
-              <div ref={videoWrapperRef} className="relative w-full bg-black flex-1 min-h-[240px] lg:min-h-0">
+              <div className="relative w-full bg-black flex-1 min-h-[240px] lg:min-h-0">
                 <div ref={jitsiContainerRef} className="absolute inset-0 w-full h-full" />
                 {(jitsiLoading || jitsiError) && (
                   <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 text-white">
