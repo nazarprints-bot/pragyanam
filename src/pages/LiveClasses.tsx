@@ -246,6 +246,15 @@ const LiveClasses = () => {
   // Only re-init Jitsi when activeRoom+activeClassId changes, NOT on other deps
   useEffect(() => {
     if (!activeRoom || !activeClassId) return;
+
+    const resolvedActiveClass = classes.find((item) => item.id === activeClassId) || null;
+
+    // Wait for class data so teacher/admin don't initialize into a broken waiting state
+    if (isTeacherOrAdmin && loading) return;
+    if (isTeacherOrAdmin && !resolvedActiveClass) {
+      setJitsiError("Unable to load this live class. Please go back and join again.");
+      return;
+    }
     
     // Prevent re-init if already initialized for the same room
     const initKey = `${activeRoom}-${activeClassId}`;
