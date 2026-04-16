@@ -272,8 +272,15 @@ const LiveClasses = () => {
             height: "100%",
             userInfo: { displayName },
             configOverwrite: {
+              // Use anonymous guest domain to AVOID login prompts
+              hosts: {
+                domain: 'meet.jit.si',
+                anonymousdomain: 'guest.meet.jit.si',
+                muc: 'conference.meet.jit.si',
+              },
               // Instant join — NO login, NO lobby, NO prejoin
               prejoinConfig: { enabled: false },
+              prejoinPageEnabled: false,
               enableLobby: false,
               enableLobbyChat: false,
               hideLobbyButton: true,
@@ -289,9 +296,11 @@ const LiveClasses = () => {
               doNotStoreRoom: true,
               disableInviteFunctions: true,
               hideLoginButton: true,
-              // Disable any external auth
               tokenAuthUrl: null,
               enableFeaturesBasedOnToken: false,
+              // Force anonymous mode
+              anonymousdomain: 'guest.meet.jit.si',
+              authentication: undefined,
 
               disableInitialGUM: !isHostOrTeacher,
               startSilent: !isHostOrTeacher,
@@ -369,13 +378,16 @@ const LiveClasses = () => {
               DISABLE_TRANSCRIPTION_SUBTITLES: true,
               DISABLE_VIDEO_BACKGROUND: !isHostOrTeacher,
               INITIAL_TOOLBAR_TIMEOUT: isHostOrTeacher ? 8000 : 2000,
-              // CRITICAL: Empty settings sections prevents login/auth popups
               SETTINGS_SECTIONS: isHostOrTeacher
                 ? ['devices', 'language', 'moderator', 'profile']
                 : [],
-              // Disable all login-related UI
               AUTHENTICATION_ENABLE: false,
               TOOLBAR_BUTTONS: isHostOrTeacher ? teacherToolbar : studentToolbar,
+              // Hide all login/auth UI elements
+              DISPLAY_WELCOME_FOOTER: false,
+              DISPLAY_WELCOME_PAGE_ADDITIONAL_CARD: false,
+              DISPLAY_WELCOME_PAGE_CONTENT: false,
+              DISPLAY_WELCOME_PAGE_TOOLBAR_ADDITIONAL_CONTENT: false,
             },
           };
 
