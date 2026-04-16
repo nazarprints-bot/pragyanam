@@ -46,7 +46,7 @@ const CourseDetail = () => {
   const [liveClasses, setLiveClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeLesson, setActiveLesson] = useState<LessonData | null>(null);
-  const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  
   const [enrolledStudents, setEnrolledStudents] = useState<any[]>([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [courseTests, setCourseTests] = useState<any[]>([]);
