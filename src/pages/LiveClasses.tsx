@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const MAX_STUDENTS_PER_CLASS = 100;
+const JITSI_DOMAIN = "meet.mayfirst.org";
 let jitsiApiLoader: Promise<void> | null = null;
 
 const ensureJitsiApi = () => {
@@ -30,7 +31,7 @@ const ensureJitsiApi = () => {
     }
 
     const script = document.createElement("script");
-    script.src = "https://meet.jit.si/external_api.js";
+    script.src = `https://${JITSI_DOMAIN}/external_api.js`;
     script.async = true;
     script.dataset.jitsiExternalApi = "true";
     script.onload = handleLoad;
@@ -98,6 +99,7 @@ const LiveClasses = () => {
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(true);
   const [joiningClassId, setJoiningClassId] = useState<string | null>(null);
+  const [participantCount, setParticipantCount] = useState(0);
 
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
 
@@ -188,8 +190,10 @@ const LiveClasses = () => {
 
   const handleLeaveClass = async () => {
     destroyJitsi();
+    cleanupPresence();
     setActiveRoom(null);
     setActiveClassId(null);
+    setParticipantCount(0);
     setShowChat(!isMobile);
     await fetchClasses();
   };
@@ -199,8 +203,10 @@ const LiveClasses = () => {
       .eq("id", classItem.id).eq("teacher_id", user?.id || "");
     if (error) { toast.error("Failed: " + error.message); return; }
     destroyJitsi();
+    cleanupPresence();
     setActiveRoom(null);
     setActiveClassId(null);
+    setParticipantCount(0);
     await fetchClasses();
     toast.success("Class ended & removed");
   };
@@ -219,8 +225,8 @@ const LiveClasses = () => {
   // Jitsi External API
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const jitsiApiRef = useRef<any>(null);
-  const participantSyncRef = useRef<number | null>(null);
   const activeClassRef = useRef<any>(null);
+  const presenceChannelRef = useRef<any>(null);
   // Track initialization to prevent re-init on fullscreen/orientation change
   const jitsiInitializedForRef = useRef<string | null>(null);
 
@@ -228,11 +234,80 @@ const LiveClasses = () => {
     activeClassRef.current = classes.find((item) => item.id === activeClassId) || null;
   }, [classes, activeClassId]);
 
-  const destroyJitsi = useCallback(() => {
-    if (participantSyncRef.current) {
-      window.clearInterval(participantSyncRef.current);
-      participantSyncRef.current = null;
+  useEffect(() => {
+    const currentClass = classes.find((item) => item.id === activeClassId) || null;
+    setParticipantCount(currentClass?.current_students || 0);
+  }, [classes, activeClassId]);
+
+  const syncParticipantPresence = useCallback(async () => {
+    const channel = presenceChannelRef.current;
+    if (!channel) return;
+
+    const presenceState = channel.presenceState?.() || {};
+    const uniqueUserIds = new Set<string>();
+
+    Object.values(presenceState).forEach((entries: any) => {
+      (entries || []).forEach((entry: any) => {
+        if (entry?.user_id) uniqueUserIds.add(entry.user_id);
+      });
+    });
+
+    const teacherId = activeClassRef.current?.teacher_id;
+    const viewers = teacherId
+      ? [...uniqueUserIds].filter((id) => id !== teacherId).length
+      : uniqueUserIds.size;
+
+    setParticipantCount(viewers);
+
+    if (activeClassId && user?.id && teacherId === user.id) {
+      await supabase.from("live_classes").update({ current_students: viewers } as any).eq("id", activeClassId);
     }
+  }, [activeClassId, user?.id]);
+
+  const cleanupPresence = useCallback(() => {
+    const channel = presenceChannelRef.current;
+    if (!channel) return;
+    try { channel.untrack?.(); } catch {}
+    supabase.removeChannel(channel);
+    presenceChannelRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    if (!activeClassId || !user) {
+      cleanupPresence();
+      return;
+    }
+
+    cleanupPresence();
+
+    const channel = supabase.channel(`live-class-presence-${activeClassId}`, {
+      config: { presence: { key: user.id } },
+    });
+
+    presenceChannelRef.current = channel;
+
+    channel
+      .on("presence", { event: "sync" }, () => { syncParticipantPresence(); })
+      .on("presence", { event: "join" }, () => { syncParticipantPresence(); })
+      .on("presence", { event: "leave" }, () => { syncParticipantPresence(); })
+      .subscribe(async (status: string) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({
+            user_id: user.id,
+            role,
+            class_id: activeClassId,
+            joined_at: new Date().toISOString(),
+          });
+          await syncParticipantPresence();
+        }
+      });
+
+    return () => {
+      cleanupPresence();
+    };
+  }, [activeClassId, user, role, cleanupPresence, syncParticipantPresence]);
+
+  const destroyJitsi = useCallback(() => {
     if (jitsiApiRef.current) {
       try { jitsiApiRef.current.dispose(); } catch {}
       jitsiApiRef.current = null;
@@ -294,12 +369,6 @@ const LiveClasses = () => {
             height: "100%",
             userInfo: { displayName },
             configOverwrite: {
-              // Use anonymous guest domain to AVOID login prompts
-              hosts: {
-                domain: 'meet.jit.si',
-                anonymousdomain: 'guest.meet.jit.si',
-                muc: 'conference.meet.jit.si',
-              },
               // Instant join — NO login, NO lobby, NO prejoin
               prejoinConfig: { enabled: false },
               prejoinPageEnabled: false,
@@ -318,18 +387,9 @@ const LiveClasses = () => {
               doNotStoreRoom: true,
               disableInviteFunctions: true,
               hideLoginButton: true,
-              tokenAuthUrl: null,
-              enableFeaturesBasedOnToken: false,
-              // Force anonymous mode
-              anonymousdomain: 'guest.meet.jit.si',
-              authentication: undefined,
-
               disableInitialGUM: !isHostOrTeacher,
-              startSilent: !isHostOrTeacher,
               startWithAudioMuted: !isHostOrTeacher,
               startWithVideoMuted: !isHostOrTeacher,
-              startVideoMuted: !isHostOrTeacher ? 0 : undefined,
-              startAudioMuted: !isHostOrTeacher ? 0 : undefined,
 
               disableRemoteMute: !isHostOrTeacher,
               remoteVideoMenu: { disabled: !isHostOrTeacher },
@@ -413,30 +473,12 @@ const LiveClasses = () => {
             },
           };
 
-          jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI("meet.jit.si", options);
+          jitsiApiRef.current = new (window as any).JitsiMeetExternalAPI(JITSI_DOMAIN, options);
           jitsiInitializedForRef.current = initKey;
           setJitsiLoading(false);
 
-          const updateCount = async () => {
-            const totalParticipants = jitsiApiRef.current?.getNumberOfParticipants?.() || 1;
-            const viewerCount = Math.max(0, totalParticipants - 1);
-
-            if (isHost && activeClassId) {
-              await supabase.from("live_classes")
-                .update({ current_students: viewerCount } as any)
-                .eq("id", activeClassId);
-            }
-          };
-
           jitsiApiRef.current.addEventListener('videoConferenceJoined', async () => {
-            if (!isHostOrTeacher) {
-              try { jitsiApiRef.current?.executeCommand?.('toggleAudio'); } catch {}
-              try { jitsiApiRef.current?.executeCommand?.('toggleVideo'); } catch {}
-            }
-            await updateCount();
-            if (isHost && participantSyncRef.current === null) {
-              participantSyncRef.current = window.setInterval(updateCount, 10000);
-            }
+            await syncParticipantPresence();
             setJitsiLoading(false);
           });
 
@@ -450,14 +492,20 @@ const LiveClasses = () => {
           });
 
           jitsiApiRef.current.addEventListener('participantJoined', (e: any) => {
-            updateCount();
-            if (isHostOrTeacher) {
+            syncParticipantPresence();
+            jitsiApiRef.current.addEventListener('audioMuteStatusChanged', (e: any) => {
+            if (isHost && e?.muted) {
+              toast.error('Teacher mic muted hai — studio ke mic button se unmute karo.');
+            }
+          });
+
+          if (isHostOrTeacher) {
               toast(<ParticipantToast name={e.displayName || "Student"} action="joined" />, { duration: 2000 });
             }
           });
 
           jitsiApiRef.current.addEventListener('participantLeft', (e: any) => {
-            updateCount();
+            syncParticipantPresence();
             if (isHostOrTeacher) {
               toast(<ParticipantToast name={e.displayName || "Student"} action="left" />, { duration: 2000 });
             }
@@ -471,7 +519,7 @@ const LiveClasses = () => {
             });
           }
 
-          setTimeout(updateCount, 1500);
+          setTimeout(() => { syncParticipantPresence(); }, 1500);
         } catch (err: any) {
           console.error("Jitsi init error:", err);
           setJitsiError("Failed to load video. Please try again.");
@@ -519,17 +567,37 @@ const LiveClasses = () => {
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
+  useEffect(() => {
+    const refreshEmbedLayout = () => {
+      window.setTimeout(() => {
+        const iframe = jitsiContainerRef.current?.querySelector("iframe") as HTMLIFrameElement | null;
+        if (iframe) {
+          iframe.style.width = "100%";
+          iframe.style.height = "100%";
+        }
+      }, 250);
+    };
+
+    window.addEventListener("orientationchange", refreshEmbedLayout);
+    window.addEventListener("resize", refreshEmbedLayout);
+
+    return () => {
+      window.removeEventListener("orientationchange", refreshEmbedLayout);
+      window.removeEventListener("resize", refreshEmbedLayout);
+    };
+  }, []);
+
   // ═══════════════ ACTIVE CLASS VIEW ═══════════════
   if (activeRoom && activeClassId) {
     const activeClass = classes.find((c) => c.id === activeClassId);
     const teacher = teacherProfiles[activeClass?.teacher_id];
-    const studentCount = activeClass?.current_students || 0;
+    const studentCount = participantCount;
     const maxStudents = activeClass?.max_students || 100;
     const fillPercent = Math.min(100, Math.round((studentCount / maxStudents) * 100));
 
     return (
       <DashboardLayout>
-        <div ref={videoWrapperRef} className={`${isFullscreen ? 'fixed inset-0 z-[9999]' : '-m-3 sm:-m-4 lg:-m-6'} flex flex-col h-[calc(100vh-48px)] lg:h-[calc(100vh-64px)] bg-black`}>
+        <div ref={videoWrapperRef} className={`${isFullscreen ? 'fixed inset-0 z-[9999]' : '-m-3 sm:-m-4 lg:-m-6'} flex flex-col h-[calc(100dvh-48px)] lg:h-[calc(100dvh-64px)] bg-black`}>
           {/* Top control bar */}
           {!isFullscreen && (
             <motion.div
